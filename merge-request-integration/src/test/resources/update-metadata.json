@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "version": "2019.3.0",
+    "changesUrl": "https://nhat-phan.github.io/updates/merge-request-integration/changes/2019.3.0.html",
+    "active": true
+  },
+  {
+    "id": 2,
+    "version": "2019.3.1",
+    "changesUrl": "https://nhat-phan.github.io/updates/merge-request-integration/changes/2019.3.1.html",
+    "active": false
+  }
+]

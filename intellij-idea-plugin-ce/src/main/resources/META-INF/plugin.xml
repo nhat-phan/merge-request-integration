@@ -1,0 +1,43 @@
+<idea-plugin>
+    <id>net.ntworld.nhat-phan.merge-request-integration-ce</id>
+    <name>Merge Request Integration CE - Code Review for GitLab</name>
+    <vendor email="nhat.phan@ntworld.net" url="https://merge-request-integration.ntworld.net/intellij-idea/">Nhat Phan</vendor>
+    <idea-version since-build="193.4697.65"/>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>Git4Idea</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceInterface="net.ntworld.mergeRequestIntegrationIde.service.ApplicationService"
+                            serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ApplicationServiceImpl"/>
+
+        <projectService serviceInterface="net.ntworld.mergeRequestIntegrationIde.service.ProjectService"
+                        serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ProjectServiceImpl"/>
+
+        <projectConfigurable id="merge-request-integration-ce"
+                             displayName="Merge Request Integration CE"
+                             instance="net.ntworld.mergeRequestIntegrationIdeCE.Configuration"/>
+        <projectConfigurable groupId="merge-request-integration-ce"
+                             id="merge-request-integration-gitlab"
+                             displayName="Gitlab"
+                             instance="net.ntworld.mergeRequestIntegrationIdeCE.GitlabConnectionsConfigurable"/>
+
+        <toolWindow id="Merge Request Integration CE"
+                    secondary="false"
+                    anchor="bottom"
+                    icon="/icons/comments.svg"
+                    canCloseContents="true"
+                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.ToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <action class="net.ntworld.mergeRequestIntegrationIdeCE.AddCommentEditorAction"
+                text="Add Comment"
+                description="Add comment to this line">
+            <keyboard-shortcut first-keystroke="alt C" keymap="$default"/>
+            <add-to-group group-id="Diff.EditorPopupMenu" relative-to-action="Annotate" anchor="after" />
+        </action>
+    </actions>
+</idea-plugin>
