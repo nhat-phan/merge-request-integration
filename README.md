@@ -46,7 +46,7 @@ all around the world, relocation to Munich is of course possible).
 
 If you love this plugin, please support me by:
 
-- Buy an Enterprise Edition, only 1$/month
+- Buy an [Enterprise Edition](https://plugins.jetbrains.com/plugin/13615-merge-request-integration-ee--code-review-for-gitlab/), only 1$/month
 - Buy me a beer via [Paypal](https://paypal.me/phanhoangnhat) or [Patreon](https://www.patreon.com/nhat/creators).
 
 Thanks in advance!

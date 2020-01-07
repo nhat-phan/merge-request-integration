@@ -45,9 +45,6 @@ open class ApplicationServiceBase : ApplicationService, ServiceBase() {
     }
 
     override fun isLegal(providerData: ProviderData): Boolean {
-        if (ENTERPRISE_EDITION_URL.isEmpty()) {
-            return true
-        }
         if (providerData.project.visibility == ProjectVisibility.PUBLIC) {
             return true
         }
