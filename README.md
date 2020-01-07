@@ -24,8 +24,8 @@ You need a personal api token. To get the token please follow these steps:
 
 ### License
 
-The plugin is an open source released under Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported license 
-(CC BY-NC-ND 3.0).
+The plugin is an open source released under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+license.
 
 It's totally free if you are using it for public repositories.
 

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val artifactGroup: String by project
-val artifactVersion: String by project
+val communityEditionVersion: String by project
 val intellijVersion: String by project
 val jvmTarget: String by project
 val foundationVersion: String by project
@@ -10,7 +10,7 @@ val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
 
 group = artifactGroup
-version = artifactVersion
+version = communityEditionVersion
 
 repositories {
     jcenter()
@@ -56,7 +56,7 @@ tasks {
     }
 
     named<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-        changeNotes(htmlFixer("./intellij-idea-plugin-ce/doc/release-notes.$artifactVersion.html"))
+        changeNotes(htmlFixer("./intellij-idea-plugin-ce/doc/release-notes.$communityEditionVersion.html"))
         pluginDescription(htmlFixer("./intellij-idea-plugin-ce/doc/description.html"))
     }
 }

@@ -1,7 +1,9 @@
 <idea-plugin>
     <id>net.ntworld.nhat-phan.merge-request-integration-ee</id>
-    <name>Merge Request Integration EE</name>
+    <name>Merge Request Integration EE - Code Review for GitLab</name>
     <vendor email="nhat.phan@ntworld.net" url="https://merge-request-integration.ntworld.net/intellij-idea/">Nhat Phan</vendor>
+    <version>2019.3.1</version>
+    <product-descriptor code="PMRINTEGEE" release-date="20200107" release-version="20193"/>
     <idea-version since-build="193.4697.65"/>
 
     <depends>com.intellij.modules.platform</depends>
@@ -33,11 +35,6 @@
     </extensions>
 
     <actions>
-        <action class="net.ntworld.mergeRequestIntegrationIdeEE.ShowCommentsEditorAction"
-                text="Show Comments"
-                description="Show all comments in this file">
-            <add-to-group group-id="Diff.EditorPopupMenu" relative-to-action="Annotate" anchor="after" />
-        </action>
         <action class="net.ntworld.mergeRequestIntegrationIdeEE.AddCommentEditorAction"
                 text="Add Comment"
                 description="Add comment to this line">
