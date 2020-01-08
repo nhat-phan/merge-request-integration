@@ -23,6 +23,6 @@ rootProject.name = "merge-request-integration-workspace"
 
 include("contracts")
 include("merge-request-integration")
-include("intellij-idea-plugin-core")
-include("intellij-idea-plugin-ce")
-include("intellij-idea-plugin-ee")
+include("merge-request-integration-core")
+include("merge-request-integration-ce")
+include("merge-request-integration-ee")

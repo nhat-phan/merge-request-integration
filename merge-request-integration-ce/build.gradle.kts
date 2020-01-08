@@ -26,7 +26,7 @@ dependencies {
     compile("com.atlassian.commonmark:commonmark:$commonmarkVersion")
 
     implementation(project(":contracts"))
-    implementation(project(":intellij-idea-plugin-core"))
+    implementation(project(":merge-request-integration-core"))
     implementation(project(":merge-request-integration"))
 }
 
@@ -56,8 +56,8 @@ tasks {
     }
 
     named<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-        changeNotes(htmlFixer("./intellij-idea-plugin-ce/doc/release-notes.$communityEditionVersion.html"))
-        pluginDescription(htmlFixer("./intellij-idea-plugin-ce/doc/description.html"))
+        changeNotes(htmlFixer("./merge-request-integration-ce/doc/release-notes.$communityEditionVersion.html"))
+        pluginDescription(htmlFixer("./merge-request-integration-ce/doc/description.html"))
     }
 }
 

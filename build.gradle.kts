@@ -24,17 +24,17 @@ subprojects {
         apply(plugin = "kotlinx-serialization")
     }
 
-    if (name == "intellij-idea-plugin-core") {
+    if (name == "merge-request-integration-core") {
         apply(plugin = "org.jetbrains.intellij")
         apply(plugin = "org.jetbrains.kotlin.jvm")
     }
 
-    if (name == "intellij-idea-plugin-ce") {
+    if (name == "merge-request-integration-ce") {
         apply(plugin = "org.jetbrains.intellij")
         apply(plugin = "org.jetbrains.kotlin.jvm")
     }
 
-    if (name == "intellij-idea-plugin-ee") {
+    if (name == "merge-request-integration-ee") {
         apply(plugin = "org.jetbrains.intellij")
         apply(plugin = "org.jetbrains.kotlin.jvm")
     }
