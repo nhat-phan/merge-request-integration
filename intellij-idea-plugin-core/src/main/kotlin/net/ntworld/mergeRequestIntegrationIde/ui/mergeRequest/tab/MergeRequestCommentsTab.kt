@@ -12,7 +12,6 @@ import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.comment.Commen
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.comment.CommentDetails
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.comment.CommentDetailsUI
 import javax.swing.JComponent
-import javax.swing.JPanel
 
 class MergeRequestCommentsTab(private val ideaProject: IdeaProject) : MergeRequestCommentsTabUI {
     override val dispatcher = EventDispatcher.create(MergeRequestCommentsTabUI.Listener::class.java)
@@ -24,7 +23,7 @@ class MergeRequestCommentsTab(private val ideaProject: IdeaProject) : MergeReque
     private val myCollection : CommentCollectionUI = CommentCollection(ideaProject)
     private val myCollectionEventListener = object: CommentCollectionUI.Listener {
         override fun commentUnselected() {
-            myDetails.hideComment()
+            myDetails.hide()
         }
 
         override fun commentSelected(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) {

@@ -60,6 +60,10 @@ class GitlabFuelClient private constructor(
         return executeRequest(Fuel.post(url, parameters))
     }
 
+    fun deleteJson(url: String, parameters: Parameters? = null): String {
+        return executeRequest(Fuel.delete(url, parameters))
+    }
+
     fun putJson(url: String, parameters: Parameters? = null): String {
         return executeRequest(Fuel.put(url, parameters))
     }

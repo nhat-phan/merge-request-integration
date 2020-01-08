@@ -9,9 +9,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.CommentEditorPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.CommentPanel
-import java.awt.BorderLayout
 import java.awt.Component
-import java.awt.event.ActionListener
 import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -42,6 +40,16 @@ class CommentDetails(private val ideaProject: IdeaProject) : CommentDetailsUI {
             dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest)
         }
     }
+    private val myCommentPanelListener = object : CommentPanel.Listener {
+        override fun onReplyButtonClick() {
+            dispatcher.multicaster.onReplyButtonClicked()
+        }
+
+        override fun onDestroyRequested(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) {
+            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest)
+            hide()
+        }
+    }
 
     init {
         myCommentPanelComponent.isVisible = false
@@ -51,14 +59,14 @@ class CommentDetails(private val ideaProject: IdeaProject) : CommentDetailsUI {
 
         myWrapper.layout = BoxLayout(myWrapper, BoxLayout.Y_AXIS)
         myWrapper.add(myCommentPanelComponent)
-
-        myCommentPanel.addReplyButtonActionListener(ActionListener {
-            dispatcher.multicaster.onReplyButtonClicked()
-        })
+        myCommentPanel.dispatcher.addListener(myCommentPanelListener)
     }
 
-    override fun hideComment() {
+    override fun hide() {
         myCommentPanelComponent.isVisible = false
+        myCommentEditorPanelComponentMap.values.forEach {
+            it.isVisible = false
+        }
     }
 
     override fun displayComment(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) {

@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.CommentApi
 import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabCreateDiffNoteCommand
 import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabCreateNoteCommand
+import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabDeleteNoteCommand
 import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabReplyNoteCommand
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRCommentsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRDiscussionsRequest
@@ -20,10 +21,6 @@ class GitlabCommentApi(
     private val infrastructure: Infrastructure,
     private val credentials: ApiCredentials
 ) : CommentApi {
-    override fun find(project: Project, mergeRequestId: String, commentId: String): Comment? {
-        TODO("not implemented")
-    }
-
     override fun getAll(project: Project, mergeRequestId: String): List<Comment> {
         val request = GitlabGetMRDiscussionsRequest(
             credentials = credentials,
@@ -162,6 +159,16 @@ class GitlabCommentApi(
             discussionId = repliedComment.parentId,
             noteId = repliedComment.id.toInt(),
             body = body
+        )
+        infrastructure.commandBus() process command
+    }
+
+    override fun delete(project: Project, mergeRequestId: String, comment: Comment) {
+        val command = GitlabDeleteNoteCommand(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            discussionId = comment.parentId,
+            noteId = comment.id.toInt()
         )
         infrastructure.commandBus() process command
     }

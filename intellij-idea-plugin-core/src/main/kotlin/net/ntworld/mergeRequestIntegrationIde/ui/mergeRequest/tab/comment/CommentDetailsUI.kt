@@ -11,7 +11,7 @@ import java.util.*
 interface CommentDetailsUI : Component {
     val dispatcher: EventDispatcher<Listener>
 
-    fun hideComment()
+    fun hide()
 
     fun displayComment(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment)
 
