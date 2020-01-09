@@ -51,3 +51,7 @@ If you love this plugin, please support me by:
 
 Thanks in advance!
 
+### Attribution
+
+- Icons by [Font Awesome](https://fontawesome.com/) is licensed under 
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)

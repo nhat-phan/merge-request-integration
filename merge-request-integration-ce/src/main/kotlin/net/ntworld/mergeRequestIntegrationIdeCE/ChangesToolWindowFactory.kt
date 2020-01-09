@@ -1,0 +1,5 @@
+package net.ntworld.mergeRequestIntegrationIdeCE
+
+import net.ntworld.mergeRequestIntegrationIde.ui.ChangesToolWindowFactoryBase
+
+class ChangesToolWindowFactory : ChangesToolWindowFactoryBase()

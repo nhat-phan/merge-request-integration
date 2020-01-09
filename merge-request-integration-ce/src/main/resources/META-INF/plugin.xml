@@ -29,7 +29,13 @@
                     anchor="bottom"
                     icon="/icons/comments.svg"
                     canCloseContents="true"
-                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.ToolWindowFactory"/>
+                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.MainToolWindowFactory"/>
+
+        <toolWindow id="Changes"
+                    secondary="true"
+                    anchor="left"
+                    icon="/icons/compress-alt.svg"
+                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.ChangesToolWindowFactory"/>
     </extensions>
 
     <actions>
