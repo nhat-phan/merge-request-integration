@@ -66,6 +66,7 @@ class MergeRequestCommentsTab(private val ideaProject: IdeaProject) : MergeReque
     }
 
     override fun setComments(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
+        myDetails.hide()
         myCollection.setComments(providerData, mergeRequest, comments)
     }
 
