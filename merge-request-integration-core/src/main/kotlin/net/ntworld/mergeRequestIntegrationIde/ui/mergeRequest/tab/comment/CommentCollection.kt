@@ -111,6 +111,7 @@ class CommentCollection(
             val providerData = myProviderData
             val comments = myComments
             if (null !== providerData && null != comments) {
+                myShowResolved = showResolved
                 filterAndDisplayComments(providerData, comments, showResolved)
             }
         }
@@ -144,7 +145,7 @@ class CommentCollection(
         myProviderData = providerData
         myMergeRequest = mergeRequest
         myComments = comments
-        filterAndDisplayComments(providerData, comments, false)
+        filterAndDisplayComments(providerData, comments, myShowResolved)
     }
 
     override fun createReplyComment() {

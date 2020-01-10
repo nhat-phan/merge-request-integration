@@ -7,10 +7,7 @@ import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.CommentApi
-import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabCreateDiffNoteCommand
-import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabCreateNoteCommand
-import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabDeleteNoteCommand
-import net.ntworld.mergeRequestIntegration.provider.gitlab.command.GitlabReplyNoteCommand
+import net.ntworld.mergeRequestIntegration.provider.gitlab.command.*
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRCommentsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRDiscussionsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabCommentTransformer
@@ -171,6 +168,24 @@ class GitlabCommentApi(
             noteId = comment.id.toInt()
         )
         infrastructure.commandBus() process command
+    }
+
+    override fun resolve(project: Project, mergeRequestId: String, comment: Comment) {
+        infrastructure.commandBus() process GitlabResolveNoteCommand(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            discussionId = comment.parentId,
+            resolve = true
+        )
+    }
+
+    override fun unresolve(project: Project, mergeRequestId: String, comment: Comment) {
+        infrastructure.commandBus() process GitlabResolveNoteCommand(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            discussionId = comment.parentId,
+            resolve = false
+        )
     }
 
     private fun findProjectFullPath(project: Project): String {

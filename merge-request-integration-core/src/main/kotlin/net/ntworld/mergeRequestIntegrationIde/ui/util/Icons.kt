@@ -21,4 +21,6 @@ object Icons {
     val WritingComment = IconLoader.getIcon("/icons/edit.svg", Icons::class.java)
     val ReplyComment = IconLoader.getIcon("/icons/edit-red.svg", Icons::class.java)
     val Trash = IconLoader.getIcon("/icons/trash.svg", Icons::class.java)
+    val Resolve = IconLoader.getIcon("/icons/check-circle-gray.svg", Icons::class.java)
+    val Resolved = IconLoader.getIcon("/icons/check-circle.svg", Icons::class.java)
 }

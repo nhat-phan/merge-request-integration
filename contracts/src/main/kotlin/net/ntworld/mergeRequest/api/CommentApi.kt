@@ -13,5 +13,9 @@ interface CommentApi {
 
     fun delete(project: Project, mergeRequestId: String, comment: Comment)
 
+    fun resolve(project: Project, mergeRequestId: String, comment: Comment)
+
+    fun unresolve(project: Project, mergeRequestId: String, comment: Comment)
+
     // fun update(projectId: String, mergeRequestId: String, comment: Comment): Boolean
 }
