@@ -1,8 +1,8 @@
 <idea-plugin>
     <id>net.ntworld.nhat-phan.merge-request-integration-ee</id>
     <name>Merge Request Integration EE - Code Review for GitLab</name>
-    <vendor email="nhat.phan@ntworld.net" url="https://merge-request-integration.ntworld.net/intellij-idea/">Nhat Phan</vendor>
-    <version>2019.3.1</version>
+    <vendor email="nhat.phan@ntworld.net" url="https://github.com/nhat-phan">Nhat Phan</vendor>
+    <version>2019.3.2</version>
     <product-descriptor code="PMRINTEGEE" release-date="20200107" release-version="20193"/>
     <idea-version since-build="193.4697.65"/>
 

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.ntworld.nhat-phan.merge-request-integration-ce</id>
     <name>Merge Request Integration CE - Code Review for GitLab</name>
-    <vendor email="nhat.phan@ntworld.net" url="https://merge-request-integration.ntworld.net/intellij-idea/">Nhat Phan</vendor>
+    <vendor email="nhat.phan@ntworld.net" url="https://github.com/nhat-phan">Nhat Phan</vendor>
     <idea-version since-build="193.4697.65"/>
 
     <depends>com.intellij.modules.platform</depends>
