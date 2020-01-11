@@ -1,9 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project as IdeaProject
@@ -11,13 +8,12 @@ import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ui.ChangesTreeImpl
 import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
 import com.intellij.ui.ScrollPaneFactory
-import com.intellij.ui.treeStructure.actions.CollapseAllAction
-import com.intellij.ui.treeStructure.actions.ExpandAllAction
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
+import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.tree.DefaultTreeModel
@@ -58,19 +54,13 @@ class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
             true
         )
 
-        val rightActionGroup = DefaultActionGroup()
-        rightActionGroup.add(ExpandAllAction(myTree))
-        rightActionGroup.add(CollapseAllAction(myTree))
-
-        val rightToolbar = ActionManager.getInstance().createActionToolbar(
-            "${CommitChanges::class.java.canonicalName}/toolbar-right",
-            rightActionGroup,
-            true
-        )
-
         panel.add(leftToolbar.component)
-        panel.add(rightToolbar.component)
-
+        panel.add(
+            ToolbarUtil.createExpandAndCollapseToolbar(
+                "${CommitChanges::class.java.canonicalName}/toolbar-right",
+                myTree
+            )
+        )
         return panel
     }
 

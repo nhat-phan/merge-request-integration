@@ -5,6 +5,7 @@ import com.intellij.diff.impl.CacheDiffRequestProcessor
 import com.intellij.diff.impl.DiffRequestProcessor
 import com.intellij.diff.requests.NoDiffRequest
 import com.intellij.diff.util.DiffPlaces
+import com.intellij.ide.ui.UISettings
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.*
 import com.intellij.openapi.project.Project as IdeaProject
@@ -25,13 +26,18 @@ import javax.swing.SwingConstants
 
 object DisplayChangesService {
     private var myTabPlacement: JBTabsPosition? = null
+    private val myChangePreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
 
     fun stop(ideaProject: IdeaProject, providerData: ProviderData, mergeRequest: MergeRequest) {
         closeAllDiffsAndRestoreTabPlacement(ideaProject)
         myTabPlacement = null
+        myChangePreviewDiffVirtualFileMap.clear()
     }
 
     fun start(ideaProject: IdeaProject, providerData: ProviderData, mergeRequest: MergeRequest, commits: List<Commit>) {
+        if (myChangePreviewDiffVirtualFileMap.isNotEmpty()) {
+            myChangePreviewDiffVirtualFileMap.clear()
+        }
         myTabPlacement = null
         val diff = mergeRequest.diffReference
         val repository = RepositoryUtil.findRepository(ideaProject, providerData)
@@ -66,7 +72,7 @@ object DisplayChangesService {
                 commits
             )
         }
-        removeCloseButtons(fileEditorManagerEx)
+        // rearrangeTabPlacement(fileEditorManagerEx)
     }
 
     private fun displayChangesForOneCommit(
@@ -142,18 +148,30 @@ object DisplayChangesService {
         changes: Collection<Change>
     ) {
         ProjectService.getInstance(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
-        changes.forEach { openChange(ideaProject, fileEditorManagerEx, it) }
+        val limit = UISettings().editorTabLimit
+        changes.forEachIndexed { index, item ->
+            if (index < limit) {
+                openChange(ideaProject, fileEditorManagerEx, item)
+            }
+        }
     }
 
-    private fun openChange(
+    fun openChange(
         ideaProject: IdeaProject,
         fileEditorManagerEx: FileEditorManagerEx,
-        change: Change
+        change: Change,
+        focus: Boolean = false
     ) {
         try {
-            val provider = MyDiffPreviewProvider(ideaProject, change)
-            val diffFile = PreviewDiffVirtualFile(provider)
-            fileEditorManagerEx.openFile(diffFile, false)
+            val diffFile = myChangePreviewDiffVirtualFileMap[change]
+            if (null === diffFile) {
+                val provider = MyDiffPreviewProvider(ideaProject, change)
+                val created = PreviewDiffVirtualFile(provider)
+                myChangePreviewDiffVirtualFileMap[change] = created
+                fileEditorManagerEx.openFile(created, focus)
+            } else {
+                fileEditorManagerEx.openFile(diffFile, focus)
+            }
         } catch (exception: Exception) {
             println(exception)
         }
@@ -183,18 +201,13 @@ object DisplayChangesService {
         }
     }
 
-    private fun removeCloseButtons(fileEditorManagerEx: FileEditorManagerEx) {
+    // TODO: Will add an option in configuration then call later
+    private fun rearrangeTabPlacement(fileEditorManagerEx: FileEditorManagerEx) {
         val editorWindows = fileEditorManagerEx.windows
         if (editorWindows.size == 1) {
             val editorWindow = editorWindows.first()
             myTabPlacement = editorWindow.tabbedPane.tabs.presentation.tabsPosition
             editorWindow.tabbedPane.setTabPlacement(SwingConstants.LEFT)
-            val tabs = editorWindow.tabbedPane.tabs
-            if (tabs is JBTabsImpl) {
-                for (entry in tabs.myInfo2Label) {
-                    entry.value.setActionPanelVisible(false)
-                }
-            }
         }
     }
 

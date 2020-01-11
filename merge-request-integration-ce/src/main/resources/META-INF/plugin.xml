@@ -31,7 +31,7 @@
                     canCloseContents="true"
                     factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.MainToolWindowFactory"/>
 
-        <toolWindow id="Changes"
+        <toolWindow id="Merge Request's Changes"
                     secondary="true"
                     anchor="left"
                     icon="/icons/compress-alt.svg"

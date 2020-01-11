@@ -186,6 +186,7 @@ open class ProjectServiceBase(private val ideaProject: IdeaProject) : ProjectSer
         if (null !== codeReviewService) {
             codeReviewService.changes = changes
         }
+        dispatcher.multicaster.codeReviewChangesSet(providerData, mergeRequest, changes)
     }
 
     override fun getCodeReviewChanges(): Collection<Change> {
