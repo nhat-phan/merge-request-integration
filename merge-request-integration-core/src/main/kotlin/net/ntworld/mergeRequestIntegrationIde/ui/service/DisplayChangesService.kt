@@ -78,6 +78,7 @@ object DisplayChangesService {
         log: VcsLogManager,
         hash: String
     ) {
+        // TODO: Reduce repetition
         val details = VcsLogUtil.getDetails(log.dataManager, repository.root, MyHash(hash))
         displayChanges(ideaProject, fileEditorManagerEx, providerData, mergeRequest, details.changes)
     }
@@ -91,6 +92,7 @@ object DisplayChangesService {
         log: VcsLogManager,
         commits: List<Commit>
     ) {
+        // TODO: Reduce repetition
         val details = VcsLogUtil.getDetails(
             log.dataManager.getLogProvider(repository.root),
             repository.root,
@@ -108,6 +110,28 @@ object DisplayChangesService {
             it.changes
         }
         displayChanges(ideaProject, fileEditorManagerEx, providerData, mergeRequest, changes)
+    }
+
+    fun findChanges(ideaProject: IdeaProject, providerData: ProviderData, hashes: List<String>) : List<Change> {
+        try {
+            val repository = RepositoryUtil.findRepository(ideaProject, providerData)
+            if (null === repository) {
+                return listOf()
+            }
+            val log = VcsLogContentUtil.getOrCreateLog(ideaProject)
+            if (null === log) {
+                return listOf()
+            }
+
+            val details = VcsLogUtil.getDetails(
+                log.dataManager.getLogProvider(repository.root),
+                repository.root,
+                hashes
+            )
+            return VcsLogUtil.collectChanges(details) { it.changes }
+        } catch (exception: Exception) {
+            return listOf()
+        }
     }
 
     private fun displayChanges(

@@ -46,11 +46,9 @@ class MergeRequestDetails(
         tabInfo
     }
 
-    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab()
+    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab(ideaProject)
     private val myCommitsTabInfo: TabInfo by lazy {
-        val tabInfo = TabInfo(
-            ScrollPaneFactory.createScrollPane(myCommitsTab.createComponent())
-        )
+        val tabInfo = TabInfo(myCommitsTab.createComponent())
         tabInfo.text = "Commit"
         tabInfo.icon = AllIcons.Vcs.CommitNode
 
@@ -111,7 +109,12 @@ class MergeRequestDetails(
             myToolbars.forEach {
                 it.setCommits(mergeRequestInfo, commits)
             }
-            myCommitsTab.setCommits(commits)
+            myCommitsTab.setCommits(providerData, commits)
+            if (commits.isEmpty()) {
+                myCommitsTabInfo.text = "Commits"
+            } else {
+                myCommitsTabInfo.text = "Commits · ${commits.size}"
+            }
         }
     }
     private val myGetCommentsListener = object: GetCommentsTask.Listener {
@@ -152,8 +155,8 @@ class MergeRequestDetails(
     init {
         myTabs.addTab(myInfoTabInfo)
         myTabs.addTab(myDescriptionTabInfo)
-        // myTabs.addTab(myCommitsTabInfo)
         myTabs.addTab(myCommentsTabInfo)
+        myTabs.addTab(myCommitsTabInfo)
         myCommentsTab.dispatcher.addListener(myCommentsTabListener)
         ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
     }

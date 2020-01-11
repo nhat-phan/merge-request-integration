@@ -134,7 +134,7 @@ class CommentCollection(
         myTree.selectionModel = treeSelectionModel
         myTree.addTreeSelectionListener(myTreeSelectionListener)
 
-        myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree))
+        myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree, true))
         myComponent.toolbar = myFilterToolbar.createComponent()
 
         myFilterToolbar.dispatcher.addListener(myFilterToolbarEventListener)
