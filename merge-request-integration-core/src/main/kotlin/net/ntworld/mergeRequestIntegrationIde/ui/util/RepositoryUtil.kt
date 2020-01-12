@@ -1,20 +1,25 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.util
 
 import com.intellij.dvcs.repo.VcsRepositoryManager
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.Project as IdeaProject
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.ProviderData
 import java.io.File
 
 object RepositoryUtil {
-    fun findRepository(ideaProject: Project, providerData: ProviderData): GitRepository? {
-        val vcsRepositoryManager = VcsRepositoryManager.getInstance(ideaProject)
-        for (repository in vcsRepositoryManager.repositories) {
-            if (repository.root.path == providerData.repository) {
-                return repository as GitRepository
+    private val repositoryCached = mutableMapOf<String, GitRepository>()
+
+    fun findRepository(ideaProject: IdeaProject, providerData: ProviderData): GitRepository? {
+        if (null == repositoryCached[providerData.id]) {
+            val vcsRepositoryManager = VcsRepositoryManager.getInstance(ideaProject)
+            for (repository in vcsRepositoryManager.repositories) {
+                if (repository.root.path == providerData.repository) {
+                    repositoryCached[providerData.id] = repository as GitRepository
+                    return repository
+                }
             }
         }
-        return null
+        return repositoryCached[providerData.id]
     }
 
     fun findAbsolutePath(repository: GitRepository?, relativePath: String): String {

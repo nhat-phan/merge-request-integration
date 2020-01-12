@@ -1,5 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
+import com.intellij.notification.NotificationDisplayType
+import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import net.ntworld.foundation.util.UUIDGenerator
@@ -20,6 +23,10 @@ open class ProjectServiceBase(private val ideaProject: IdeaProject) : ProjectSer
     private var myChanges: Collection<Change>? = null
 
     final override val dispatcher = EventDispatcher.create(ProjectEventListener::class.java)
+
+    override val notification: NotificationGroup = NotificationGroup(
+        "Merge Request Integration", NotificationDisplayType.BALLOON, true
+    )
 
     override val commentStore: CommentStore = CommentStoreImpl()
     override val codeReviewManager: CodeReviewManager?
@@ -192,5 +199,14 @@ open class ProjectServiceBase(private val ideaProject: IdeaProject) : ProjectSer
     override fun getCodeReviewChanges(): Collection<Change> {
         val codeReviewService = myCodeReviewManager
         return if (null === codeReviewService) listOf() else codeReviewService.changes
+    }
+
+    override fun notify(message: String) {
+        notify(message, NotificationType.INFORMATION)
+    }
+
+    override fun notify(message: String, type: NotificationType) {
+        val notification = notification.createNotification(message, type)
+        notification.notify(ideaProject)
     }
 }

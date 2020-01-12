@@ -23,6 +23,7 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewUtil
+import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.EditorUtil
 import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
@@ -34,6 +35,9 @@ internal class CodeReviewManagerImpl(
     override val mergeRequest: MergeRequest,
     val util: CodeReviewUtil
 ) : CodeReviewManager, CodeReviewUtil by util {
+    override val repository: GitRepository? = RepositoryUtil.findRepository(ideaProject, providerData)
+
+    private var myComments: Collection<Comment> = listOf()
     private var myChanges: Collection<Change> = listOf()
     private var myCommits: Collection<Commit> = listOf()
 
@@ -50,10 +54,16 @@ internal class CodeReviewManagerImpl(
             buildChangesMap(value)
         }
 
-    override var comments: Collection<Comment> = listOf()
+    override var comments: Collection<Comment>
+        get() = myComments
+        set(value) {
+            myComments = value
+            buildCommentsMap(value)
+        }
 
+
+    private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
     private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
-    private val myRepository: GitRepository? = RepositoryUtil.findRepository(ideaProject, providerData)
 
     private fun buildChangesMap(value: Collection<Change>) {
         myChangesMap.clear()
@@ -69,6 +79,37 @@ internal class CodeReviewManagerImpl(
                         list.add(change)
                     }
                 }
+            }
+        }
+    }
+
+    private fun buildCommentsMap(value: Collection<Comment>) {
+        if (null === repository) {
+            return
+        }
+        myCommentsMap.clear()
+        for (comment in value) {
+            val position = comment.position
+            if (null === position) {
+                continue
+            }
+            if (null !== position.newPath) {
+                doHashComment(repository, position.newPath!!, comment)
+            }
+            if (null !== position.oldPath) {
+                doHashComment(repository, position.oldPath!!, comment)
+            }
+        }
+    }
+
+    private fun doHashComment(repository: GitRepository, path: String, comment: Comment) {
+        val fullPath = RepositoryUtil.findAbsolutePath(repository, path)
+        val list = myCommentsMap[fullPath]
+        if (null === list) {
+            myCommentsMap[fullPath] = mutableListOf(comment)
+        } else {
+            if (!list.contains(comment)) {
+                list.add(comment)
             }
         }
     }
@@ -95,7 +136,10 @@ internal class CodeReviewManagerImpl(
                 return findCommentPositionForAddedCase(info.change.afterRevision!!, editor.caretModel.logicalPosition)
             }
             if (info.before && null !== info.change.beforeRevision) {
-                return findCommentPositionForDeletedCase(info.change.beforeRevision!!, editor.caretModel.logicalPosition)
+                return findCommentPositionForDeletedCase(
+                    info.change.beforeRevision!!,
+                    editor.caretModel.logicalPosition
+                )
             }
             return null
         }
@@ -147,15 +191,15 @@ internal class CodeReviewManagerImpl(
             baseHash = beforeRevision!!.revisionNumber.asString(),
             startHash = findStartHash(),
             headHash = afterRevision!!.revisionNumber.asString(),
-            oldPath = RepositoryUtil.findRelativePath(myRepository, beforeRevision.file.path),
-            newPath = RepositoryUtil.findRelativePath(myRepository, afterRevision.file.path),
+            oldPath = RepositoryUtil.findRelativePath(repository, beforeRevision.file.path),
+            newPath = RepositoryUtil.findRelativePath(repository, afterRevision.file.path),
             oldLine = (gutterMyLineNumberConvertor.get(gutter) as TIntFunction).execute(logicalPosition.line + 1),
             newLine = (gutterMyAdditionalLineNumberConvertor.get(gutter) as TIntFunction).execute(logicalPosition.line + 1),
             source = CommentPositionSource.UNIFIED
         )
     }
 
-    private fun findChangeInfoByPathAndContent(path: String, content: String): ChangeInfo? {
+    override fun findChangeInfoByPathAndContent(path: String, content: String): CodeReviewManager.ChangeInfo? {
         val changes = myChangesMap[path]
         if (null === changes || changes.isEmpty()) {
             return null
@@ -164,7 +208,7 @@ internal class CodeReviewManagerImpl(
         for (change in changes) {
             val beforeRevision = change.beforeRevision
             if (null !== beforeRevision && beforeRevision.content == content) {
-                return ChangeInfo(
+                return ChangeInfoImpl(
                     change = change,
                     contentRevision = beforeRevision,
                     before = true,
@@ -173,7 +217,7 @@ internal class CodeReviewManagerImpl(
             }
             val afterRevision = change.afterRevision
             if (null !== afterRevision && afterRevision.content == content) {
-                return ChangeInfo(
+                return ChangeInfoImpl(
                     change = change,
                     contentRevision = afterRevision,
                     before = false,
@@ -184,8 +228,31 @@ internal class CodeReviewManagerImpl(
         return null
     }
 
+    override fun findCommentPoints(path: String, changeInfo: CodeReviewManager.ChangeInfo): List<CommentPoint> {
+        val comments = myCommentsMap[path]
+        if (null === comments || comments.isEmpty()) {
+            return listOf()
+        }
+
+        val result = mutableListOf<CommentPoint>()
+        for (comment in comments) {
+            val position = comment.position!!
+            if (position.headHash == changeInfo.contentRevision.revisionNumber.asString()) {
+                if (changeInfo.before && null !== position.oldLine) {
+                    result.add(CommentPoint(position.oldLine!!, comment, changeInfo))
+                    continue
+                }
+                if (changeInfo.after && null !== position.newLine) {
+                    result.add(CommentPoint(position.newLine!!, comment, changeInfo))
+                    continue
+                }
+            }
+        }
+        return result
+    }
+
     private fun findCommentPositionForSideBySideViewer(
-        info: ChangeInfo,
+        info: CodeReviewManager.ChangeInfo,
         logicalPosition: LogicalPosition
     ): CommentPosition? {
         val beforeRevision = info.change.beforeRevision
@@ -215,7 +282,7 @@ internal class CodeReviewManagerImpl(
             startHash = findStartHash(),
             headHash = afterRevision.revisionNumber.asString(),
             oldPath = null,
-            newPath = RepositoryUtil.findRelativePath(myRepository, afterRevision.file.path),
+            newPath = RepositoryUtil.findRelativePath(repository, afterRevision.file.path),
             oldLine = null,
             newLine = logicalPosition.line + 1,
             source = CommentPositionSource.SIDE_BY_SIDE_RIGHT
@@ -230,7 +297,7 @@ internal class CodeReviewManagerImpl(
             baseHash = beforeRevision.revisionNumber.asString(),
             startHash = findStartHash(),
             headHash = findHeadHash(),
-            oldPath = RepositoryUtil.findRelativePath(myRepository, beforeRevision.file.path),
+            oldPath = RepositoryUtil.findRelativePath(repository, beforeRevision.file.path),
             newPath = null,
             oldLine = logicalPosition.line + 1,
             newLine = -1,
@@ -239,7 +306,7 @@ internal class CodeReviewManagerImpl(
     }
 
     private fun findCommentPositionForSideBySideViewerModifiedCase(
-        info: ChangeInfo,
+        info: CodeReviewManager.ChangeInfo,
         beforeRevision: ContentRevision,
         afterRevision: ContentRevision,
         logicalPosition: LogicalPosition
@@ -275,8 +342,8 @@ internal class CodeReviewManagerImpl(
                 baseHash = beforeRevision.revisionNumber.asString(),
                 startHash = findStartHash(),
                 headHash = afterRevision.revisionNumber.asString(),
-                oldPath = RepositoryUtil.findRelativePath(myRepository, beforeRevision.file.path),
-                newPath = RepositoryUtil.findRelativePath(myRepository, afterRevision.file.path),
+                oldPath = RepositoryUtil.findRelativePath(repository, beforeRevision.file.path),
+                newPath = RepositoryUtil.findRelativePath(repository, afterRevision.file.path),
                 oldLine = converter2!!.execute(logicalPosition.line + 1),
                 newLine = logicalPosition.line + 1,
                 source = CommentPositionSource.SIDE_BY_SIDE_RIGHT
@@ -298,8 +365,8 @@ internal class CodeReviewManagerImpl(
                 baseHash = beforeRevision.revisionNumber.asString(),
                 startHash = findStartHash(),
                 headHash = afterRevision.revisionNumber.asString(),
-                oldPath = RepositoryUtil.findRelativePath(myRepository, beforeRevision.file.path),
-                newPath = RepositoryUtil.findRelativePath(myRepository, afterRevision.file.path),
+                oldPath = RepositoryUtil.findRelativePath(repository, beforeRevision.file.path),
+                newPath = RepositoryUtil.findRelativePath(repository, afterRevision.file.path),
                 oldLine = oldLine,
                 newLine = newLine,
                 source = CommentPositionSource.SIDE_BY_SIDE_LEFT
@@ -332,11 +399,11 @@ internal class CodeReviewManagerImpl(
         return if (null === diff) "" else diff.headHash
     }
 
-    private data class ChangeInfo(
-        val change: Change,
-        val contentRevision: ContentRevision,
-        val before: Boolean,
-        val after: Boolean
-    )
+    private data class ChangeInfoImpl(
+        override val change: Change,
+        override val contentRevision: ContentRevision,
+        override val before: Boolean,
+        override val after: Boolean
+    ) : CodeReviewManager.ChangeInfo
 
 }

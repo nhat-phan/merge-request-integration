@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.service
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
@@ -45,6 +46,10 @@ object CodeReviewService {
     ) {
         CheckoutService.start(ideaProject, providerData, mergeRequest, object : CheckoutService.Listener {
             override fun onError(exception: Exception) {
+                ProjectService.getInstance(ideaProject).notify(
+                    "Cannot checkout branch ${mergeRequest.sourceBranch}\n\nPlease do git checkout manually before click Code Review",
+                    NotificationType.ERROR
+                )
                 this@CodeReviewService.stop(ideaProject, providerData, mergeRequest)
             }
 

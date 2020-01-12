@@ -28,4 +28,7 @@ interface ProjectEventListener : EventListener {
     ) {
     }
 
+    fun displayCommentRequested(comment: Comment) {
+    }
+
 }

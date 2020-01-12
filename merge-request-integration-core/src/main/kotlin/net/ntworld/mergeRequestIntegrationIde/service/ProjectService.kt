@@ -1,5 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.service
 
+import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
@@ -10,6 +12,8 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 interface ProjectService {
 
     val dispatcher: EventDispatcher<ProjectEventListener>
+
+    val notification: NotificationGroup
 
     val commentStore: CommentStore
 
@@ -58,6 +62,10 @@ interface ProjectService {
     )
 
     fun getCodeReviewChanges(): Collection<Change>
+
+    fun notify(message: String)
+
+    fun notify(message: String, type: NotificationType)
 
     companion object {
         fun getInstance(ideaProject: IdeaProject): ProjectService {

@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.ui.JBColor
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ENTERPRISE_EDITION_URL
@@ -17,6 +18,11 @@ class ProviderInformationPanel(
     private val providerData: ProviderData
 ): Component {
     var myWholePanel: JPanel? = null
+    var myWrapperPanel: JPanel? = null
+    var myLoggedUserWrapperPanel: JPanel? = null
+    var myUrlWrapperPanel: JPanel? = null
+    var myStatusWrapperPanel: JPanel? = null
+    var myLicenseWarningWrapperPanel: JPanel? = null
     var myOpenURLButton: JButton? = null
     var myBuyButton: JButton? = null
     var myProjectName: JLabel? = null
@@ -54,7 +60,6 @@ class ProviderInformationPanel(
             myLegalStatus!!.foreground = Color(0x68, 0x84, 0x57)
         }
         myBuyButton!!.isVisible = !isLegal
-        myLegalStatus!!.isVisible = !isLegal
         myLegalWarning!!.isVisible = !isLegal
         myWords1!!.isVisible = !isLegal
         myWords2!!.isVisible = !isLegal
@@ -63,6 +68,21 @@ class ProviderInformationPanel(
         myBuyButton!!.addActionListener {
             BrowserUtil.open(ENTERPRISE_EDITION_URL)
         }
+
+        setBackground()
+    }
+
+    private fun setBackground() {
+        myWholePanel!!.background = JBColor.background()
+        myOpenURLButton!!.isOpaque = true
+        myOpenURLButton!!.background = JBColor.background()
+        myBuyButton!!.isOpaque = true
+        myBuyButton!!.background = JBColor.background()
+        myWrapperPanel!!.background = JBColor.background()
+        myLoggedUserWrapperPanel!!.background = JBColor.background()
+        myUrlWrapperPanel!!.background = JBColor.background()
+        myStatusWrapperPanel!!.background = JBColor.background()
+        myLicenseWarningWrapperPanel!!.background = JBColor.background()
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

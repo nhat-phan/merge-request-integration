@@ -12,6 +12,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.task.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
+import net.ntworld.mergeRequestIntegrationIde.ui.service.FetchService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
@@ -162,6 +163,12 @@ class MergeRequestDetails(
         ) {
             myTabs.getTabs().select(myCommentsTabInfo, true)
         }
+
+        override fun displayCommentRequested(comment: Comment) {
+            if (ProjectService.getInstance(ideaProject).isDoingCodeReview()) {
+                myTabs.getTabs().select(myCommentsTabInfo, true)
+            }
+        }
     }
 
     private val myToolbarListener = object : MergeRequestDetailsToolbarUI.Listener {
@@ -194,6 +201,8 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequestInfo(mergeRequestInfo: MergeRequestInfo) {
+        FetchService.start(ideaProject, providerData, mergeRequestInfo)
+
         myInfoTab.setMergeRequestInfo(mergeRequestInfo)
         myDescriptionTab.setMergeRequestInfo(providerData, mergeRequestInfo)
         myCommentsTabInfo.text = "Comments"

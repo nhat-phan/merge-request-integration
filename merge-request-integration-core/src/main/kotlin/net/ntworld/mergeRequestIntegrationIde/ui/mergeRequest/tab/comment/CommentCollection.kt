@@ -68,6 +68,10 @@ class CommentCollection(
                 }
             }
         }
+
+        override fun displayCommentRequested(comment: Comment) {
+            findCommentNodeByIdAndGrabFocus(comment, myRoot)
+        }
     }
     private val myTreeSelectionListener = object : TreeSelectionListener {
         override fun valueChanged(e: TreeSelectionEvent?) {
@@ -196,7 +200,7 @@ class CommentCollection(
         }
     }
 
-    fun findEditorNodeByItemAndGrabFocus(item: CommentStore.Item, parent: DefaultMutableTreeNode) {
+    private fun findEditorNodeByItemAndGrabFocus(item: CommentStore.Item, parent: DefaultMutableTreeNode) {
         for (child in parent.children()) {
             if (child !is DefaultMutableTreeNode) {
                 continue
@@ -207,6 +211,23 @@ class CommentCollection(
                 continue
             }
             if (userObject.item.id == item.id) {
+                myTree.selectionPath = TreeUtil.getPath(myRoot, child)
+                return
+            }
+        }
+    }
+
+    private fun findCommentNodeByIdAndGrabFocus(comment: Comment, parent: DefaultMutableTreeNode) {
+        for (child in parent.children()) {
+            if (child !is DefaultMutableTreeNode) {
+                continue
+            }
+            val userObject = child.userObject
+            if (userObject !is CommentNode) {
+                findCommentNodeByIdAndGrabFocus(comment, child)
+                continue
+            }
+            if (userObject.comment.id == comment.id) {
                 myTree.selectionPath = TreeUtil.getPath(myRoot, child)
                 return
             }

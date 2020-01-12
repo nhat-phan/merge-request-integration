@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.ui.JBColor
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Commit
@@ -70,6 +71,7 @@ class CommitCollection : CommitCollectionUI {
 
     init {
         myList.layout = BoxLayout(myList, BoxLayout.Y_AXIS)
+        myList.background = JBColor.background()
 
         myComponent.setContent(ScrollPaneFactory.createScrollPane(myList, true))
         myComponent.toolbar = createToolbar()

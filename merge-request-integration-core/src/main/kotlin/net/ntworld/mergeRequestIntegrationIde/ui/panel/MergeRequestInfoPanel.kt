@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
 import com.intellij.icons.AllIcons
+import com.intellij.ui.JBColor
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import javax.swing.JComponent
@@ -9,7 +10,12 @@ import javax.swing.JPanel
 
 class MergeRequestInfoPanel {
     var myWholePanel: JPanel? = null
-    var myWrapper: JPanel? = null
+    var myWrapperPanel: JPanel? = null
+    var myBranchesWrapperPanel: JPanel? = null
+    var myMergedByWrapperPanel: JPanel? = null
+    var myClosedByWrapperPanel: JPanel? = null
+    var myAssignedWrapperPanel: JPanel? = null
+    var myAuthorWrapperPanel: JPanel? = null
     var myTitle: JLabel? = null
     var myCreatedAt: JLabel? = null
     var myUpdatedAt: JLabel? = null
@@ -36,6 +42,17 @@ class MergeRequestInfoPanel {
         displayTime(null, myCreatedAt!!)
         displayTime(null, myUpdatedAt!!)
         hide()
+        setBackground()
+    }
+
+    private fun setBackground() {
+        myWholePanel!!.background = JBColor.background()
+        myWrapperPanel!!.background = JBColor.background()
+        myBranchesWrapperPanel!!.background = JBColor.background()
+        myMergedByWrapperPanel!!.background = JBColor.background()
+        myClosedByWrapperPanel!!.background = JBColor.background()
+        myAssignedWrapperPanel!!.background = JBColor.background()
+        myAuthorWrapperPanel!!.background = JBColor.background()
     }
 
     fun setMergeRequestInfo(mr: MergeRequestInfo) {

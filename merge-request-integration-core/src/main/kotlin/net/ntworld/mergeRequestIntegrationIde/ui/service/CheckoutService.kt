@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.service
 
-import com.intellij.dvcs.repo.VcsRepositoryManager
 import com.intellij.openapi.components.ServiceManager
 import git4idea.branch.GitBrancher
 import com.intellij.openapi.project.Project as IdeaProject
