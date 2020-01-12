@@ -109,7 +109,7 @@ class MergeRequestDetails(
             myToolbars.forEach {
                 it.setCommits(mergeRequestInfo, commits)
             }
-            myCommitsTab.setCommits(providerData, commits)
+            myCommitsTab.setCommits(providerData, mergeRequestInfo, commits)
             if (commits.isEmpty()) {
                 myCommitsTabInfo.text = "Commits"
             } else {
@@ -117,6 +117,18 @@ class MergeRequestDetails(
             }
         }
     }
+    private val mySelectCommitsListener = object: MergeRequestCommitsTabUI.Listener {
+        override fun commitSelected(
+            providerData: ProviderData,
+            mergeRequestInfo: MergeRequestInfo,
+            commits: Collection<Commit>
+        ) {
+            myToolbars.forEach {
+                it.setCommitsForReviewing(mergeRequestInfo, commits.toList())
+            }
+        }
+    }
+
     private val myGetCommentsListener = object: GetCommentsTask.Listener {
         override fun onError(exception: Exception) {
             println(exception)
@@ -152,11 +164,19 @@ class MergeRequestDetails(
         }
     }
 
+    private val myToolbarListener = object : MergeRequestDetailsToolbarUI.Listener {
+        override fun refreshRequested(mergeRequestInfo: MergeRequestInfo) {
+            setMergeRequestInfo(mergeRequestInfo)
+        }
+    }
+
     init {
         myTabs.addTab(myInfoTabInfo)
         myTabs.addTab(myDescriptionTabInfo)
         myTabs.addTab(myCommentsTabInfo)
         myTabs.addTab(myCommitsTabInfo)
+
+        myCommitsTab.dispatcher.addListener(mySelectCommitsListener)
         myCommentsTab.dispatcher.addListener(myCommentsTabListener)
         ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
@@ -207,6 +227,7 @@ class MergeRequestDetails(
 
     private fun toolbarCommonSideComponentFactory(): JComponent {
         val toolbar: MergeRequestDetailsToolbarUI = MergeRequestDetailsToolbar(ideaProject, providerData, this)
+        toolbar.dispatcher.addListener(myToolbarListener)
         myToolbars.add(toolbar)
         return toolbar.createComponent()
     }

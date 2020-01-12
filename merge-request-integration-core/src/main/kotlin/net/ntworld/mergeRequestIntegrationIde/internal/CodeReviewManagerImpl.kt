@@ -35,8 +35,13 @@ internal class CodeReviewManagerImpl(
     val util: CodeReviewUtil
 ) : CodeReviewManager, CodeReviewUtil by util {
     private var myChanges: Collection<Change> = listOf()
+    private var myCommits: Collection<Commit> = listOf()
 
-    override var commits: Collection<Commit> = listOf()
+    override var commits: Collection<Commit>
+        get() = myCommits
+        set(value) {
+            myCommits = value
+        }
 
     override var changes: Collection<Change>
         get() = myChanges
@@ -305,6 +310,10 @@ internal class CodeReviewManagerImpl(
     }
 
     private fun findBaseHash(): String {
+        if (commits.isNotEmpty()) {
+            return commits.last().id
+        }
+
         val diff = mergeRequest.diffReference
         return if (null === diff) "" else diff.baseHash
     }
@@ -315,6 +324,10 @@ internal class CodeReviewManagerImpl(
     }
 
     private fun findHeadHash(): String {
+        if (commits.isNotEmpty()) {
+            return commits.first().id
+        }
+
         val diff = mergeRequest.diffReference
         return if (null === diff) "" else diff.headHash
     }

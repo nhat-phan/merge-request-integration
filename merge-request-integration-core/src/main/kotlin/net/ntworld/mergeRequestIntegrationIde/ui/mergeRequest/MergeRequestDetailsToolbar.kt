@@ -1,10 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.popup.AbstractPopup
+import com.intellij.util.EventDispatcher
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.ApproveMergeRequestCommand
@@ -26,10 +28,26 @@ class MergeRequestDetailsToolbar(
     private val providerData: ProviderData,
     private val details: MergeRequestDetailsUI
 ) : MergeRequestDetailsToolbarUI {
+    override val dispatcher = EventDispatcher.create(MergeRequestDetailsToolbarUI.Listener::class.java)
+
     private val myActionGroup = DefaultActionGroup()
     private var myMergeRequest: MergeRequest? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
     private var myComments: List<Comment>? = null
+    private val projectService = ProjectService.getInstance(ideaProject)
+
+    private val myRefreshAction = object : AnAction("Refresh", "Refresh merge request info", AllIcons.Actions.Refresh) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val mergeRequestInfo = myMergeRequestInfo
+            if (null !== mergeRequestInfo) {
+                dispatcher.multicaster.refreshRequested(mergeRequestInfo)
+            }
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isVisible = !projectService.isDoingCodeReview()
+        }
+    }
 
     private var myUpVotes = -1
     private var myDownVotes = -1
@@ -237,9 +255,10 @@ class MergeRequestDetailsToolbar(
     }
 
     private var myCommits: List<Commit> = listOf()
+    private var myReviewCommits: List<Commit> = listOf()
     private val myCodeReviewAction = object : ToggleAction(null, null, null) {
         override fun isSelected(e: AnActionEvent): Boolean {
-            return ProjectService.getInstance(ideaProject).isDoingCodeReview()
+            return projectService.isDoingCodeReview()
         }
 
         override fun setSelected(e: AnActionEvent, state: Boolean) {
@@ -250,9 +269,9 @@ class MergeRequestDetailsToolbar(
             if (state) {
                 val comments = myComments
                 if (null !== comments) {
-                    ProjectService.getInstance(ideaProject).setCodeReviewComments(providerData, mr, comments)
+                    projectService.setCodeReviewComments(providerData, mr, comments)
                 }
-                CodeReviewService.start(ideaProject, providerData, mr, myCommits)
+                CodeReviewService.start(ideaProject, providerData, mr, myReviewCommits)
             } else {
                 CodeReviewService.stop(ideaProject, providerData, mr)
             }
@@ -260,7 +279,7 @@ class MergeRequestDetailsToolbar(
 
         override fun update(e: AnActionEvent) {
             val mr = myMergeRequest
-            if (null === mr || myCommits.isEmpty()) {
+            if (null === mr || myReviewCommits.isEmpty()) {
                 e.presentation.isVisible = false
                 return
             }
@@ -270,7 +289,7 @@ class MergeRequestDetailsToolbar(
                     e.presentation.isVisible = false
                 }
                 MergeRequestState.OPENED -> {
-                    e.presentation.text = "Code Review"
+                    e.presentation.text = getCodeReviewText()
                     e.presentation.description = "Open diff in IDE and review"
                     e.presentation.isVisible = true
                 }
@@ -281,9 +300,9 @@ class MergeRequestDetailsToolbar(
                 // }
             }
 
-            val isDoingCodeReview = ProjectService.getInstance(ideaProject).isDoingCodeReview()
+            val isDoingCodeReview = projectService.isDoingCodeReview()
             if (isDoingCodeReview) {
-                val isReviewing = ProjectService.getInstance(ideaProject).isReviewing(providerData, mr)
+                val isReviewing = projectService.isReviewing(providerData, mr)
                 e.presentation.text = "Stop Reviewing"
                 e.presentation.description = "End reviewing and show other MRs"
                 e.presentation.isEnabled = isReviewing
@@ -292,10 +311,19 @@ class MergeRequestDetailsToolbar(
             }
         }
 
+        private fun getCodeReviewText(): String {
+            if (myCommits.size == myReviewCommits.size) {
+                return "Code Review"
+            }
+            return "Code Review ${myReviewCommits.size}/${myCommits.size} commits"
+        }
+
         override fun displayTextInToolbar(): Boolean = true
     }
 
     private val myToolbar by lazy {
+        myActionGroup.add(myRefreshAction)
+        myActionGroup.addSeparator()
         myActionGroup.add(myUpVotesAction)
         myActionGroup.add(myDownVotesAction)
         myActionGroup.add(myStateAction)
@@ -327,6 +355,14 @@ class MergeRequestDetailsToolbar(
         val currentMR = myMergeRequestInfo
         if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
             myCommits = commits
+            myReviewCommits = commits
+        }
+    }
+
+    override fun setCommitsForReviewing(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
+        val currentMR = myMergeRequestInfo
+        if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
+            myReviewCommits = commits
         }
     }
 
@@ -334,7 +370,6 @@ class MergeRequestDetailsToolbar(
         val currentMR = myMergeRequest
         if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
             myComments = comments
-            val projectService = ProjectService.getInstance(ideaProject)
             if (projectService.isDoingCodeReview()) {
                 projectService.setCodeReviewComments(providerData, currentMR, comments)
             }
@@ -361,6 +396,7 @@ class MergeRequestDetailsToolbar(
         myMergeRequestInfo = mergeRequestInfo
         myPipelines = listOf()
         myCommits = listOf()
+        myReviewCommits = listOf()
         myApproval = null
         myToolbar.component.isVisible = false
     }

@@ -38,6 +38,19 @@ class CommitItemPanel(val commit: Commit, private val changeListener: ChangeList
         myInfoDetailsWrapperPanel!!.background = JBColor.background()
     }
 
+    fun disable() {
+        if (this.isSelected()) {
+            mySelectedWrapperPanel!!.isVisible = false
+        } else {
+            myWholePanel!!.isVisible = false
+        }
+    }
+
+    fun enable() {
+        mySelectedWrapperPanel!!.isVisible = true
+        myWholePanel!!.isVisible = true
+    }
+
     fun isSelected(): Boolean = mySelected!!.isSelected
 
     fun isSelectable(selectable: Boolean, selected: Boolean? = null) {

@@ -9,9 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorSettingsProvider
 import com.intellij.ui.EditorTextField
 import com.intellij.util.EventDispatcher
-import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
-import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.CreateCommentCommand
 import net.ntworld.mergeRequest.command.ReplyCommentCommand
 import net.ntworld.mergeRequestIntegration.internal.CommentImpl
@@ -153,13 +151,38 @@ class CommentEditorPanel(
                 ApplicationService.instance.infrastructure.commandBus() process CreateCommentCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mergeRequest.id,
-                    position = position,
+                    position = rebuildPosition(position),
                     body = myEditorTextField.text
                 )
                 dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment, item)
             } catch (exception: Exception) {
             }
         }
+    }
+
+    private fun rebuildPosition(currentPosition: CommentPosition): CommentPosition {
+        val bashHash = myOldHash!!.text
+        val headHash = myNewHash!!.text
+        val oldLine = if (myOldLine!!.text.isEmpty()) null else myOldLine!!.text.toIntOrNull()
+        val newLine = if (myNewLine!!.text.isEmpty()) null else myNewLine!!.text.toIntOrNull()
+        val shouldRebuild = bashHash != currentPosition.baseHash ||
+            headHash != currentPosition.headHash ||
+            oldLine != currentPosition.oldLine ||
+            newLine != currentPosition.newLine
+
+        if (shouldRebuild) {
+            return CommentPositionImpl(
+                baseHash = bashHash,
+                startHash = currentPosition.startHash,
+                headHash = headHash,
+                oldPath = currentPosition.oldPath,
+                newPath = currentPosition.newPath,
+                oldLine = oldLine,
+                newLine = newLine,
+                source = currentPosition.source
+            )
+        }
+        return currentPosition
     }
 
     private fun initReplyComment() {

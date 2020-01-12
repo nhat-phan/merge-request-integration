@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Commit
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.CommitItemPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
@@ -22,6 +23,7 @@ class CommitCollection : CommitCollectionUI {
     private val myList = JPanel()
     private val myItems = mutableListOf<CommitItemPanel>()
     private var myProviderData: ProviderData? = null
+    private var myMergeRequestInfo: MergeRequestInfo? = null
     private val mySelectAllButton = object : AnAction(
         "Select all", "Select all commits to see changes or do code review", null
     ) {
@@ -78,9 +80,18 @@ class CommitCollection : CommitCollectionUI {
         myItems.clear()
     }
 
-    override fun setCommits(providerData: ProviderData, commits: Collection<Commit>) {
+    override fun disable() {
+        myItems.forEach { it.disable() }
+    }
+
+    override fun enable() {
+        myItems.forEach { it.enable() }
+    }
+
+    override fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
         clear()
         myProviderData = providerData
+        myMergeRequestInfo = mergeRequestInfo
         commits.forEach {
             val item = CommitItemPanel(it, myCommitSelectChangeListener)
             myItems.add(item)
@@ -92,8 +103,9 @@ class CommitCollection : CommitCollectionUI {
 
     private fun dispatchCommitSelectedEvent(commits: List<Commit>) {
         val providerData = myProviderData
-        if (null !== providerData) {
-            dispatcher.multicaster.commitsSelected(providerData, commits)
+        val mergeRequestInfo = myMergeRequestInfo
+        if (null !== providerData && null !== mergeRequestInfo) {
+            dispatcher.multicaster.commitsSelected(providerData, mergeRequestInfo, commits)
         }
     }
 

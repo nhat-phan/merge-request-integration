@@ -10,6 +10,7 @@ import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
 import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.Commit
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
@@ -33,7 +34,15 @@ class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
         }
     }
 
-    override fun setCommits(providerData: ProviderData, commits: Collection<Commit>) {
+    override fun disable() {
+        myComponent.isVisible = false
+    }
+
+    override fun enable() {
+        myComponent.isVisible = true
+    }
+
+    override fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
         myTree.isVisible = false
         ApplicationManager.getApplication().invokeLater {
             val changes = DisplayChangesService.findChanges(ideaProject, providerData, commits.map { it.id })
