@@ -31,7 +31,7 @@ class ProviderDetailsMRList(
             myItemPanels[index] = MergeRequestItemPanel(value)
         }
         val panel = myItemPanels[index]!!
-        panel.setBackground(UIUtil.getListBackground(isSelected, cellHasFocus))
+        panel.changeStyle(isSelected, cellHasFocus)
         panel.createComponent()
     }
     private val myListMouseListener = object: MouseAdapter() {

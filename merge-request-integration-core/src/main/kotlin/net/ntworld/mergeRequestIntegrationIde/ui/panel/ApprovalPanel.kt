@@ -10,11 +10,11 @@ import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-
 class ApprovalPanel : Component {
     var myWholePanel: JPanel? = null
     var myApproversWrapper: JPanel? = null
     var myApproveBtn: JButton? = null
+    private var myApproval: Approval? = null
     private var canApprove = false
     private var canUnapprove = false
     private val dispatcher = EventDispatcher.create(Listener::class.java)
@@ -38,6 +38,7 @@ class ApprovalPanel : Component {
     }
 
     fun setApproval(approval: Approval) {
+        myApproval = approval
         canApprove = false
         canUnapprove = false
         myApproveBtn!!.isVisible = approval.canApprove || approval.hasApproved
@@ -66,6 +67,16 @@ class ApprovalPanel : Component {
 
     fun addListener(listener: Listener) {
         dispatcher.addListener(listener)
+    }
+
+    fun shouldDisplayApprovalPanel() : Boolean {
+        val approval = myApproval
+        if (null === approval) {
+            return false
+        }
+        return approval.canApprove || approval.hasApproved ||
+            approval.approvedBy.isNotEmpty() ||
+            approval.approvers.isNotEmpty()
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

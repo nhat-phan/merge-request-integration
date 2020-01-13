@@ -1,11 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
 import com.intellij.openapi.util.IconLoader
+import com.intellij.ui.JBColor
+import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ImageUtil
-import java.awt.Color
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -37,13 +38,20 @@ class ProviderItemPanel(private val providerData: ProviderData) : Component {
         }
     }
 
-    fun setBackground(color: Color) {
-        myWholePanel!!.background = color
-        myWrapperPanel!!.background = color
-        myStatusWrapperPanel!!.background = color
-        myInfoWrapper!!.background = color
-        myAvatarWrapperPanel!!.background = color
-        myUserInfoWrapperPanel!!.background = color
+    fun changeStyle(selected: Boolean, hasFocus: Boolean) {
+        val backgroundColor = UIUtil.getListBackground(selected, hasFocus)
+
+        myWholePanel!!.background = backgroundColor
+        myWrapperPanel!!.background = backgroundColor
+        myStatusWrapperPanel!!.background = backgroundColor
+        myInfoWrapper!!.background = backgroundColor
+        myAvatarWrapperPanel!!.background = backgroundColor
+        myUserInfoWrapperPanel!!.background = backgroundColor
+
+        val foregroundColor = UIUtil.getListForeground(selected, hasFocus)
+        myProjectName!!.foreground = foregroundColor
+        myName!!.foreground = foregroundColor
+        myUsername!!.foreground = if (selected && hasFocus) foregroundColor else JBColor.gray
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

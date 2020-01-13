@@ -150,6 +150,9 @@ class MergeRequestDetailsToolbar(
     private var myApproval: Approval? = null
     private val myApprovalAction = object : AnAction(null, "Approval", null) {
         override fun actionPerformed(e: AnActionEvent) {
+            if (!myApprovalPanel.shouldDisplayApprovalPanel()) {
+                return
+            }
             val reference = createComponent() // toolbar component
             val popup = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(

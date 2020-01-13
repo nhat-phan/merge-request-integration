@@ -3,14 +3,12 @@ package net.ntworld.mergeRequestIntegrationIde.ui.provider
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
 import com.intellij.util.EventDispatcher
-import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProviderItemPanel
 import java.awt.Component
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
-
 
 class ProviderCollectionList : ProviderCollectionListUI {
     override val eventDispatcher = EventDispatcher.create(ProviderCollectionListEventListener::class.java)
@@ -32,7 +30,7 @@ class ProviderCollectionList : ProviderCollectionListUI {
                 myProviderItemPanels[index] = ProviderItemPanel(value)
             }
             val panel = myProviderItemPanels[index]!!
-            panel.setBackground(UIUtil.getListBackground(isSelected, cellHasFocus))
+            panel.changeStyle(isSelected, cellHasFocus)
             return panel.createComponent()
         }
     }

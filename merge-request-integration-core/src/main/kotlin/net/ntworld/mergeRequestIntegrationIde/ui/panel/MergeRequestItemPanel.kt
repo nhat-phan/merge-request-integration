@@ -1,5 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
+import com.intellij.ui.JBColor
+import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
@@ -27,10 +29,19 @@ class MergeRequestItemPanel(private val mergeRequestInfo: MergeRequestInfo): Com
         myUpdated!!.toolTipText = DateTimeUtil.formatDate(updated)
     }
 
-    fun setBackground(color: Color) {
-        myWholePanel!!.background = color
-        myWrapper!!.background = color
-        myTimeWrapper!!.background = color
+    fun changeStyle(selected: Boolean, hasFocus: Boolean) {
+        val backgroundColor = UIUtil.getListBackground(selected, hasFocus)
+
+        myWholePanel!!.background = backgroundColor
+        myWrapper!!.background = backgroundColor
+        myTimeWrapper!!.background = backgroundColor
+
+        val foregroundColor = UIUtil.getListForeground(selected, hasFocus)
+        myTitle!!.foreground = foregroundColor
+
+        val foregroundColorOrGray = if (selected && hasFocus) foregroundColor else JBColor.gray
+        myCreated!!.foreground = foregroundColorOrGray
+        myUpdated!!.foreground = foregroundColorOrGray
     }
 
     override fun createComponent(): JComponent = myWholePanel!!
