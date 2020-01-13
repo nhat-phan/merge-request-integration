@@ -5,12 +5,14 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.DataProvider
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBPanelWithEmptyText
+import com.intellij.ui.paint.LinePainter2D
 import com.intellij.ui.switcher.QuickActionProvider
 import com.intellij.util.ui.UIUtil
 import org.jetbrains.annotations.NonNls
 import java.awt.BorderLayout
 import java.awt.Container
 import java.awt.Graphics
+import java.awt.Graphics2D
 import java.awt.event.ContainerAdapter
 import java.awt.event.ContainerEvent
 import javax.swing.JComponent
@@ -136,10 +138,10 @@ class CustomSimpleToolWindowPanel(
             g.color = JBColor.border()
             if (myVertical) {
                 val y = myContent!!.bounds.maxY.toInt()
-                UIUtil.drawLine(g, 0, y, width, y)
+                LinePainter2D.paint(g as Graphics2D, 0.0, y.toDouble(), width.toDouble(), y.toDouble())
             } else {
                 val x = myContent!!.bounds.maxX.toInt()
-                UIUtil.drawLine(g, x, 0, x, height)
+                LinePainter2D.paint(g as Graphics2D, x.toDouble(), 0.0, x.toDouble(), height.toDouble())
             }
         }
     }

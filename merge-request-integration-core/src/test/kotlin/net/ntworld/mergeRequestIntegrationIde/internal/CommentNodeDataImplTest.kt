@@ -16,15 +16,16 @@ class CommentNodeDataImplTest {
             Item(true, "CommentNodeData.kt", 2020, "__________GENERAL")
         )
         for (item in dataset) {
-            assertEquals(
-                item.output,
-                CommentNodeDataImpl(
-                    isGeneral = item.general,
-                    fullPath = "app/impl/${item.fileName}",
-                    fileName = item.fileName,
-                    line = item.line
-                ).getHash()
+            val commentNodeData = CommentNodeDataImpl(
+                isGeneral = item.general,
+                fullPath = "app/impl/${item.fileName}",
+                fileName = item.fileName,
+                line = item.line
             )
+
+            val result = commentNodeData.getHash()
+
+            assertEquals(item.output, result)
         }
 
     }

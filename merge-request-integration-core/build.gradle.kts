@@ -6,6 +6,7 @@ val intellijVersion: String by project
 val jvmTarget: String by project
 val foundationVersion: String by project
 val gitlab4jVersion: String by project
+val githubApiVersion: String by project
 val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
 
@@ -22,6 +23,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.github.nhat-phan.foundation:foundation-jvm:$foundationVersion")
     implementation("org.gitlab4j:gitlab4j-api:$gitlab4jVersion")
+    implementation("org.kohsuke:github-api:$githubApiVersion")
     implementation("org.ocpsoft.prettytime:prettytime:$prettyTimeVersion")
     compile("com.atlassian.commonmark:commonmark:$commonmarkVersion")
 
@@ -30,6 +32,10 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 intellij {

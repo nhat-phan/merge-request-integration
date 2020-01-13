@@ -8,6 +8,7 @@ val javaFakerVersion: String by project
 val jodaTimeVersion: String by project
 val fuelVersion: String by project
 val gitlab4jVersion: String by project
+val githubApiVersion: String by project
 val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
 
@@ -28,6 +29,7 @@ dependencies {
     implementation("joda-time:joda-time:$jodaTimeVersion")
     implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
     implementation("org.gitlab4j:gitlab4j-api:$gitlab4jVersion")
+    implementation("org.kohsuke:github-api:$githubApiVersion")
     implementation("org.ocpsoft.prettytime:prettytime:$prettyTimeVersion")
 
     compile("com.atlassian.commonmark:commonmark:$commonmarkVersion")
