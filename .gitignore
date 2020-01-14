@@ -6,6 +6,7 @@ build
 
 out
 
+.kotlintest
 .idea
 *.iml
 *.ipr

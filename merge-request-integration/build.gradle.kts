@@ -41,6 +41,11 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 kapt {
