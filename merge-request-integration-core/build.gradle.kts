@@ -34,10 +34,6 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 intellij {
     version = intellijVersion
     setPlugins("git4idea")

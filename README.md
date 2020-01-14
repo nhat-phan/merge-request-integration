@@ -2,12 +2,16 @@
 
 Merge Request Integration is a plugin which helps you to do Code Review right in your IDE.
 
+<img src="https://raw.githubusercontent.com/nhat-phan/merge-request-integration/master/images/v2019.3.2.gif" alt="Merge Request Integration CE" style="width: 100%" />
+
+
 What you can do:
 
 - Filter Merge Requests which are assigned to you, waiting for your approval, etc
 - Check pipeline status and approval status.
+- Select and review 1 or all commits
 - Do code review, navigate code with Diff View right in your IDE.
-- Add and reply a comment
+- Add, reply, resolve or delete comments
 - Approve/revoke your approval
 - More and more features will be coming soon :)
 
@@ -53,5 +57,5 @@ Thanks in advance!
 
 ### Attribution
 
-- Icons by [Font Awesome](https://fontawesome.com/) is licensed under 
+- Icons by [Font Awesome](https://fontawesome.com/) are licensed under 
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
