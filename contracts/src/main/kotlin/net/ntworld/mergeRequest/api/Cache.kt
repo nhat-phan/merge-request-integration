@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 interface Cache {
     val defaultTTL: Int
 
-    fun <T> get(key: String): T?
+    fun <T> get(key: String): T
 
     fun has(key: String): Boolean
 
@@ -23,10 +23,14 @@ interface Cache {
 
     @Suppress("UNCHECKED_CAST")
     fun<T> getOrRun(key: String, run: (() -> T)): T {
-        if (!this.has(key)) {
+        try {
+            if (!this.has(key)) {
+                return run()
+            }
+            return this.get(key)
+        } catch (exception: CacheNotFoundException) {
             return run()
         }
-        return this.get<T>(key) as T
     }
 
     fun removeIfExpiredAfter(key: String, datetime: DateTime) {
