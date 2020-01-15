@@ -17,14 +17,38 @@ What you can do:
 
 Currently the plugin supports GitLab only (gitlab cloud and self-hosted).
 
+You can download the plugin on intellij plugins repository: 
+[Community Edition](https://plugins.jetbrains.com/plugin/13607-merge-request-integration-ce--code-review-for-gitlab/),
+[Enterprise Edition](https://plugins.jetbrains.com/plugin/13615-merge-request-integration-ee--code-review-for-gitlab/)
+
 ### How to setup Gitlab connection
 
-You need a personal api token. To get the token please follow these steps:
+#### Create Gitlab Personal Access Tokens
 
-- Log in to your Gitlab site
-- Go to Settings > Access Token and create a personal access token
-- Go to your IDE preferences, Merge Request Integration > Gitlab
-- Fill data, then save and click refresh button of Merge Request Integration CE window
+To get the your Personal Access Token please follow these steps:
+
+<img src="https://raw.githubusercontent.com/nhat-phan/merge-request-integration/master/images/gitlab-1.png" />
+
+Step 1: On top right corner > Settings
+
+<img src="https://raw.githubusercontent.com/nhat-phan/merge-request-integration/master/images/gitlab-2.png" />
+
+Step 2: Click to Access Tokens menu
+
+<img src="https://raw.githubusercontent.com/nhat-phan/merge-request-integration/master/images/gitlab-3.png" />
+
+Step 3: Create a Personal Access Tokens with api scope
+
+#### Config connection in your IDE Settings
+
+After creating the Personal Access Tokens:
+
+- Go to your IDE preferences (macOS: `⌘,` Windows: `Ctrl+Alt+S`)
+- Merge Request Integration > Gitlab
+- Fill data, then save. *Tip: you can use Starred/Membership/Own option to search your project quicker.* 
+- Click refresh button of Merge Request Integration CE window if you don't see the connection.
+
+If your project has more than 1 repository, just setup multiple connections.
 
 ### License
 
@@ -35,7 +59,9 @@ It's totally free if you are using it for public repositories.
 
 For private repositories, this plugin is a trial. How long is the trial period? Equal to WINRAR's trial period 🙈
 
-Community Edition (CE) is exactly the same as Enterprise Edition (EE). 
+[Community Edition (CE)](https://plugins.jetbrains.com/plugin/13607-merge-request-integration-ce--code-review-for-gitlab/) 
+is exactly the same as 
+[Enterprise Edition (EE)](https://plugins.jetbrains.com/plugin/13615-merge-request-integration-ee--code-review-for-gitlab/). 
 You don't need to hack or find a cracked version.
 Cracking software invites virus to your computer.
 
