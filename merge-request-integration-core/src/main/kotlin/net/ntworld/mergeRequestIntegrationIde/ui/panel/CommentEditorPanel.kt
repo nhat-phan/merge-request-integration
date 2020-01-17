@@ -1,10 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
-import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.DocumentImpl
-import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorSettingsProvider
 import com.intellij.ui.EditorTextField
@@ -12,12 +10,12 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.CreateCommentCommand
 import net.ntworld.mergeRequest.command.ReplyCommentCommand
-import net.ntworld.mergeRequestIntegration.internal.CommentImpl
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
+import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
 import java.lang.Exception
 import java.util.*
 import javax.swing.*
@@ -43,22 +41,6 @@ class CommentEditorPanel(
     var myNewPath: JLabel? = null
 
     private val dispatcher = EventDispatcher.create(Listener::class.java)
-    private val myLanguage = Language.findInstancesByMimeType("text/x-markdown")
-    private val myFileType = object : LanguageFileType(myLanguage.first()) {
-        override fun getIcon(): Icon? = null
-
-        override fun getName(): String {
-            return "Markdown"
-        }
-
-        override fun getDefaultExtension(): String {
-            return "md"
-        }
-
-        override fun getDescription(): String {
-            return "Markdown"
-        }
-    }
 
     private val myDocument = DocumentImpl("")
     private val myEditorSettingsProvider = object : EditorSettingsProvider {
@@ -73,7 +55,7 @@ class CommentEditorPanel(
         }
     }
     private val myEditorTextField by lazy {
-        val textField = EditorTextField(myDocument, ideaProject, myFileType)
+        val textField = EditorTextField(myDocument, ideaProject, FileTypeUtil.markdownFileType)
         textField.setOneLineMode(false)
         textField.addSettingsProvider(myEditorSettingsProvider)
         textField
