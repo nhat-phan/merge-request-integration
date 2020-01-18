@@ -82,23 +82,23 @@ class GitlabCommentApi(
                     body = body,
                     position = buildSecondAttemptPosition(position)
                 ) {
-                    throw it
+                    tryCreateNoteCommand(
+                        mergeRequestInternalId = mergeRequestId.toInt(),
+                        body = body,
+                        position = buildThirdAttemptPosition(position)
+                    ) {
+                        throw it
+                    }
                 }
             }
         }
     }
 
     private fun buildFirstAttemptPosition(position: CommentPosition) : Position {
-        val model = Position()
-        model.baseSha = position.baseHash
-        model.headSha = position.headHash
-        model.startSha = position.startHash
-        model.oldPath = position.oldPath
-        model.newPath = position.newPath
-        model.positionType = Position.PositionType.TEXT
+        val model = makePosition(position)
         when (position.source) {
             CommentPositionSource.UNKNOWN -> {
-                model.oldLine = position.oldLine
+                model.oldLine = null
                 model.newLine = position.newLine
             }
             CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
@@ -110,7 +110,7 @@ class GitlabCommentApi(
                 model.newLine = position.newLine
             }
             CommentPositionSource.UNIFIED -> {
-                model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
+                model.oldLine = null
                 model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
             }
         }
@@ -118,14 +118,42 @@ class GitlabCommentApi(
     }
 
     private fun buildSecondAttemptPosition(position: CommentPosition) : Position {
+        val model = makePosition(position)
+        model.oldLine = position.oldLine
+        model.newLine = position.newLine
+        return model
+    }
+
+    private fun buildThirdAttemptPosition(position: CommentPosition) : Position {
+        val model = makePosition(position)
+        when (position.source) {
+            CommentPositionSource.UNKNOWN -> {
+                model.oldLine = position.oldLine
+                model.newLine = null
+            }
+            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
+                model.oldLine = position.oldLine
+                model.newLine = null
+            }
+            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
+                model.oldLine = null
+                model.newLine = position.newLine
+            }
+            CommentPositionSource.UNIFIED -> {
+                model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
+                model.newLine = null
+            }
+        }
+        return model
+    }
+
+    private fun makePosition(position: CommentPosition) : Position {
         val model = Position()
         model.baseSha = position.baseHash
         model.headSha = position.headHash
         model.startSha = position.startHash
         model.oldPath = position.oldPath
-        model.oldLine = position.oldLine
         model.newPath = position.newPath
-        model.newLine = position.newLine
         model.positionType = Position.PositionType.TEXT
         return model
     }
@@ -133,7 +161,7 @@ class GitlabCommentApi(
     private fun tryCreateNoteCommand(
         mergeRequestInternalId: Int,
         body: String,
-        position: Position,
+        position: Position?,
         failed: (exception: Exception) -> Unit
     ) {
         try {

@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.DocumentImpl
@@ -14,6 +15,7 @@ import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
 import java.lang.Exception
@@ -103,7 +105,8 @@ class CommentEditorPanel(
             myNewPath!!.text = if (null !== position.newPath) position.newPath else ""
             myOldPath!!.text = if (null !== position.oldPath) position.oldPath else ""
         }
-        showDebugInfo()
+        showCreateNewCommentComponents()
+        hideDebugOfCreateNewCommentComponents()
     }
 
     private fun findLine(line: Int?): String {
@@ -138,6 +141,12 @@ class CommentEditorPanel(
                 )
                 dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment, item)
             } catch (exception: Exception) {
+                ProjectService.getInstance(ideaProject).notify(
+                    "There was an error from server. \n\n Please fill the line of old commit and new commit then try again.",
+                    NotificationType.ERROR
+                )
+                showDebugOfCreateNewCommentComponents()
+                throw exception
             }
         }
     }
@@ -168,7 +177,8 @@ class CommentEditorPanel(
     }
 
     private fun initReplyComment() {
-        hideDebugInfo()
+        hideCreateNewCommentComponents()
+        hideDebugOfCreateNewCommentComponents()
     }
 
     private fun replyComment() {
@@ -188,13 +198,19 @@ class CommentEditorPanel(
         dispatcher.addListener(listener)
     }
 
-    private fun showDebugInfo() {
+    private fun showCreateNewCommentComponents() {
         myAddDiffComment!!.isVisible = true
+    }
+
+    private fun showDebugOfCreateNewCommentComponents() {
         myDebugInfoWrapper!!.isVisible = true
     }
 
-    private fun hideDebugInfo() {
+    private fun hideCreateNewCommentComponents() {
         myAddDiffComment!!.isVisible = false
+    }
+
+    private fun hideDebugOfCreateNewCommentComponents() {
         myDebugInfoWrapper!!.isVisible = false
     }
 

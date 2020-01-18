@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.progress.DumbProgressIndicator
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangesUtil
@@ -207,7 +208,7 @@ internal class CodeReviewManagerImpl(
 
         for (change in changes) {
             val beforeRevision = change.beforeRevision
-            if (null !== beforeRevision && beforeRevision.content == content) {
+            if (null !== beforeRevision && compareContent(beforeRevision.content, content)) {
                 return ChangeInfoImpl(
                     change = change,
                     contentRevision = beforeRevision,
@@ -216,7 +217,7 @@ internal class CodeReviewManagerImpl(
                 )
             }
             val afterRevision = change.afterRevision
-            if (null !== afterRevision && afterRevision.content == content) {
+            if (null !== afterRevision && compareContent(afterRevision.content, content)) {
                 return ChangeInfoImpl(
                     change = change,
                     contentRevision = afterRevision,
@@ -226,6 +227,18 @@ internal class CodeReviewManagerImpl(
             }
         }
         return null
+    }
+
+    private fun compareContent(left: String?, right: String?): Boolean {
+        // we cannot compare content directly because newline in Windows & macOS is different
+        // newline in Windows is \r\n but in macOs or Linux it is \n
+        // so we compare each line of the content
+        if (null !== left && null !== right) {
+            return StringUtil.convertLineSeparators(left).equals(
+                StringUtil.convertLineSeparators(right)
+            )
+        }
+        return left.equals(right)
     }
 
     override fun findCommentPoints(path: String, changeInfo: CodeReviewManager.ChangeInfo): List<CommentPoint> {
@@ -319,8 +332,8 @@ internal class CodeReviewManagerImpl(
             DumbProgressIndicator.INSTANCE
         )
 
-        val document1 = DocumentImpl(beforeRevision.content ?: "")
-        val document2 = DocumentImpl(afterRevision.content ?: "")
+        val document1 = DocumentImpl(beforeRevision.content ?: "", true, false)
+        val document2 = DocumentImpl(afterRevision.content ?: "", true, false)
         val contentConvertor1 = TIntFunction { it }
         val contentConvertor2 = TIntFunction { it }
 

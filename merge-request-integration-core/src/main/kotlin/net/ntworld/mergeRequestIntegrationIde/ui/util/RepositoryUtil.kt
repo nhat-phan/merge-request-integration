@@ -33,10 +33,15 @@ object RepositoryUtil {
         if (null === repository) {
             return absolutePath.replace(File.separatorChar, '/')
         }
-        val root = "${repository.root.path}${File.separatorChar}"
+        val root = repository.root.path
         if (!absolutePath.startsWith(root)) {
             return absolutePath.replace(File.separatorChar, '/')
         }
-        return absolutePath.substring(root.length).replace(File.separatorChar, '/')
+        val path = absolutePath.substring(root.length).replace(File.separatorChar, '/')
+        return if (path.startsWith('/')) {
+            path.substring(1)
+        } else {
+            path
+        }
     }
 }
