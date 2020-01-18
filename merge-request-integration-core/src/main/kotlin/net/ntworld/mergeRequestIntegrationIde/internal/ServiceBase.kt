@@ -1,12 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
 import com.intellij.credentialStore.CredentialAttributes
+import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
 import com.intellij.openapi.components.PersistentStateComponent
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
-import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 import org.jdom.Element
 
@@ -60,8 +60,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
     }
 
     protected fun encryptCredentials(info: ProviderInfo, credentials: ApiCredentials): ApiCredentials {
-        val credentialAttributes = createCredentialAttribute(info, credentials)
-        PasswordSafe.instance.setPassword(credentialAttributes, credentials.token)
+        encryptPassword(info, credentials, credentials.token)
         return ApiCredentialsImpl(
             url = credentials.url,
             login = "",
@@ -73,19 +72,45 @@ open class ServiceBase : PersistentStateComponent<Element> {
     }
 
     protected fun decryptCredentials(info: ProviderInfo, credentials: ApiCredentials): ApiCredentials {
-        val credentialAttributes = createCredentialAttribute(info, credentials)
-        val password = PasswordSafe.instance.getPassword(credentialAttributes)
         return ApiCredentialsImpl(
             url = credentials.url,
             login = "",
-            token = password ?: "",
+            token = decryptPassword(info, credentials) ?: "",
             projectId = credentials.projectId,
             version = credentials.version,
             info = credentials.info
         )
     }
 
-    private fun createCredentialAttribute(info: ProviderInfo, credentials: ApiCredentials): CredentialAttributes {
+    private fun encryptPassword(info: ProviderInfo, credentials: ApiCredentials, password: String) {
+        PasswordSafe.instance.setPassword(makeCredentialAttribute(info, credentials), password)
+    }
+
+    private fun decryptPassword(info: ProviderInfo, credentials: ApiCredentials): String? {
+        val password = PasswordSafe.instance.getPassword(makeCredentialAttribute(info, credentials))
+        if (null === password || password.isEmpty()) {
+            // Handle legacy CredentialAttribute
+            return PasswordSafe.instance.getPassword(makeLegacyCredentialAttribute(info, credentials))
+        }
+        return password
+    }
+
+    /**
+     * For Windows, Intellij is using KeePass which have a 36 chars limitation on the group name, therefore I have
+     * to shorten the group name since v2019.3.3
+     */
+    private fun makeCredentialAttribute(info: ProviderInfo, credentials: ApiCredentials): CredentialAttributes {
+        if (credentials.url == credentials.login) {
+            return CredentialAttributes("MRI:${info.id}", credentials.url)
+        }
+        return CredentialAttributes("MRI:${info.id}", "${credentials.login}:${credentials.url}")
+    }
+
+    /**
+     * I have to keep legacy credential attribute otherwise current users have to input the token again
+     * which is not available anymore. I meant can't see the token again after refreshing Gitlab's page.
+     */
+    private fun makeLegacyCredentialAttribute(info: ProviderInfo, credentials: ApiCredentials): CredentialAttributes {
         return CredentialAttributes(
             "MRI - ${info.id} - ${credentials.url} - ${credentials.login}"
         )
