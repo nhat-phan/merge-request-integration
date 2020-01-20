@@ -21,7 +21,7 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
     private var myTotalPages: Int = 0
     private var myTotalItems: Int = 0
 
-    private val myRefreshButtonAction = object : AnAction(null, "Refresh", AllIcons.Actions.Refresh) {
+    private val myRefreshButtonAction = object : AnAction("Refresh", "Refresh", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent) {
             eventDispatcher.multicaster.changePage(myPage)
         }
@@ -31,7 +31,7 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
         }
     }
 
-    private val myFirstAction = object : AnAction(null, "Go to the first page", AllIcons.Actions.Play_first) {
+    private val myFirstAction = object : AnAction("First", "Go to the first page", AllIcons.Actions.Play_first) {
         override fun actionPerformed(e: AnActionEvent) {
             setData(1, myTotalPages, myTotalItems)
             eventDispatcher.multicaster.changePage(myPage)
@@ -42,7 +42,7 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
         }
     }
 
-    private val myPrevAction = object : AnAction(null, "Previous page", AllIcons.Actions.Play_back) {
+    private val myPrevAction = object : AnAction("Previous", "Previous page", AllIcons.Actions.Play_back) {
         override fun actionPerformed(e: AnActionEvent) {
             setData(myPage - 1, myTotalPages, myTotalItems)
             eventDispatcher.multicaster.changePage(myPage)
@@ -53,7 +53,7 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
         }
     }
 
-    private val myNextAction = object : AnAction(null, "Next page", AllIcons.Actions.Play_forward) {
+    private val myNextAction = object : AnAction("Next", "Next page", AllIcons.Actions.Play_forward) {
         override fun actionPerformed(e: AnActionEvent) {
             setData(myPage + 1, myTotalPages, myTotalItems)
             eventDispatcher.multicaster.changePage(myPage)
@@ -64,7 +64,7 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
         }
     }
 
-    private val myLastAction = object : AnAction(null, "Go to the last page", AllIcons.Actions.Play_last) {
+    private val myLastAction = object : AnAction("Last", "Go to the last page", AllIcons.Actions.Play_last) {
         override fun actionPerformed(e: AnActionEvent) {
             setData(myTotalPages, myTotalPages, myTotalItems)
             eventDispatcher.multicaster.changePage(myPage)
