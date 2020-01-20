@@ -49,7 +49,7 @@ object UpdateManager {
         if (null === currentVersion) {
             return listOf()
         }
-        val updates = metadata.filter { it.id > currentVersion.id && currentVersion.active }
+        val updates = metadata.filter { it.id > currentVersion.id && it.active }
         return updates.map {
             try {
                 val (_, _, result) = Fuel.get(it.changesUrl).responseString()
