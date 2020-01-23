@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegration.update
 
-import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.ResponseResultOf
 import com.github.kittinunf.result.Result
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -24,9 +25,13 @@ object UpdateManager {
         return difference > CHECK_INTERVAL
     }
 
+    private fun makeGetRequest(url: String): ResponseResultOf<String> {
+        return FuelManager().get(url).responseString()
+    }
+
     fun getAvailableUpdates(): List<String> {
         try {
-            val (_, _, result) = Fuel.get(METADATA_URL).responseString()
+            val (_, _, result) = makeGetRequest(METADATA_URL)
             return when (result) {
                 is Result.Success -> {
                     myLastCheckDate = Date()
@@ -52,7 +57,7 @@ object UpdateManager {
         val updates = metadata.filter { it.id > currentVersion.id && it.active }
         return updates.map {
             try {
-                val (_, _, result) = Fuel.get(it.changesUrl).responseString()
+                val (_, _, result) = makeGetRequest(it.changesUrl)
                 when (result) {
                     is Result.Success -> {
                         result.value

@@ -11,6 +11,18 @@ import org.gitlab4j.api.GitLabApiException
 
 class GitlabClient {
     companion object {
+        private fun makeGitLabApi(credentials: ApiCredentials): GitLabApi {
+            val api = GitLabApi(
+                credentials.url,
+                Constants.TokenType.PRIVATE,
+                credentials.token
+            )
+            if (credentials.ignoreSSLCertificateErrors) {
+                api.ignoreCertificateErrors = true
+            }
+            return api
+        }
+
         operator fun <T, R : Response> invoke(
             request: T,
             execute: (GitLabApi.(T) -> R),
@@ -18,11 +30,7 @@ class GitlabClient {
         ): R where T : Request<R>, T : GitlabRequest {
             return try {
                 execute.invoke(
-                    GitLabApi(
-                        request.credentials.url,
-                        Constants.TokenType.PRIVATE,
-                        request.credentials.token
-                    ),
+                    makeGitLabApi(request.credentials),
                     request
                 )
             } catch (exception: GitLabApiException) {
@@ -42,11 +50,7 @@ class GitlabClient {
         ): T {
             return try {
                 execute.invoke(
-                    GitLabApi(
-                        credentials.url,
-                        Constants.TokenType.PRIVATE,
-                        credentials.token
-                    )
+                    makeGitLabApi(credentials)
                 )
             } catch (exception: GitLabApiException) {
                 failed.invoke(

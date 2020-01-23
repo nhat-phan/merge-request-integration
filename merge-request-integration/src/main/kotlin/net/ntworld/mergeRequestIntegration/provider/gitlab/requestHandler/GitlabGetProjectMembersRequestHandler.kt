@@ -13,8 +13,6 @@ class GitlabGetProjectMembersRequestHandler :
     override fun handle(request: GitlabGetProjectMembersRequest): GitlabGetProjectMembersResponse = GitlabClient(
         request = request,
         execute = {
-            this.ignoreCertificateErrors = true
-
             val members = this.projectApi.getAllMembers(request.credentials.projectId.toInt())
             GitlabGetProjectMembersResponse(error = null, members = members)
         },
