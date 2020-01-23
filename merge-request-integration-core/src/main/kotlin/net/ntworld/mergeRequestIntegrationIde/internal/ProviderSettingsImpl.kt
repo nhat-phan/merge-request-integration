@@ -22,7 +22,8 @@ data class ProviderSettingsImpl(
                     token = "",
                     projectId = "",
                     version = "",
-                    info = ""
+                    info = "",
+                    ignoreSSLCertificateErrors = false
                 ),
                 repository = "",
                 sharable = false

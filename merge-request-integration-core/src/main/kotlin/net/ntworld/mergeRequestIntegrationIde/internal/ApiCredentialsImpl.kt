@@ -8,5 +8,6 @@ data class ApiCredentialsImpl(
     override val token: String,
     override val projectId: String,
     override val version: String,
-    override val info: String
+    override val info: String,
+    override val ignoreSSLCertificateErrors: Boolean
 ): ApiCredentials

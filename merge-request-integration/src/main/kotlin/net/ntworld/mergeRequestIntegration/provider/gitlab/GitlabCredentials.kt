@@ -13,7 +13,9 @@ data class GitlabCredentials(
 
     override val version: String = "v4",
 
-    override val info: String = ""
+    override val info: String = "",
+
+    override val ignoreSSLCertificateErrors: Boolean = false
 ): ApiCredentials {
 
     companion object {

@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
+import com.intellij.ui.layout.selected
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
@@ -40,6 +41,7 @@ class GitlabSettingPanel(
     var mySearchMembership: JCheckBox? = null
     var mySearchOwn: JCheckBox? = null
     var myMergeApprovalsFeature: JCheckBox? = null
+    var myIgnoreSSLError: JCheckBox? = null
 
     private var myOldId: String = ""
 
@@ -130,6 +132,7 @@ class GitlabSettingPanel(
         myUrl!!.text = if (providerSettings.credentials.url.isNotEmpty()) providerSettings.credentials.url else "https://gitlab.com"
         myToken!!.text = providerSettings.credentials.token
         myShared!!.isSelected = isShared
+        myIgnoreSSLError!!.isSelected = providerSettings.credentials.ignoreSSLCertificateErrors
         myMergeApprovalsFeature!!.isSelected = GitlabUtil.hasMergeApprovalFeature(providerSettings.credentials)
 
         myName!!.document.addDocumentListener(myNameDocumentListener)
@@ -168,7 +171,8 @@ class GitlabSettingPanel(
                 token = getToken().trim(),
                 projectId = myProjectFinder.getSelectedProjectId(),
                 version = "v4",
-                info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else ""
+                info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
+                ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
             ),
             repository = myRepository!!.selectedItem as String? ?: ""
         )
@@ -205,7 +209,8 @@ class GitlabSettingPanel(
             token = getToken().trim(),
             projectId = "",
             version = "v4",
-            info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else ""
+            info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
+            ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
         ))
         if (null !== mySelectedRepository) {
             myRepository!!.selectedItem = mySelectedRepository

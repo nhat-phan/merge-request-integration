@@ -25,6 +25,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
             item.setAttribute("projectId", it.credentials.projectId)
             item.setAttribute("version", it.credentials.version)
             item.setAttribute("info", it.credentials.info)
+            item.setAttribute("ignoreSSLCertificateErrors", if (it.credentials.ignoreSSLCertificateErrors) "1" else "0")
             item.setAttribute("repository", it.repository)
             element.addContent(item)
         }
@@ -47,7 +48,8 @@ open class ServiceBase : PersistentStateComponent<Element> {
                 token = "",
                 projectId = item.getAttribute("projectId").value,
                 version = item.getAttribute("version").value,
-                info = item.getAttribute("info").value
+                info = item.getAttribute("info").value,
+                ignoreSSLCertificateErrors = shouldIgnoreSSLCertificateErrors(item)
             )
             val id = item.getAttribute("id").value
             myProvidersData[id] = ProviderSettingsImpl(
@@ -59,6 +61,14 @@ open class ServiceBase : PersistentStateComponent<Element> {
         }
     }
 
+    private fun shouldIgnoreSSLCertificateErrors(item: Element): Boolean {
+        val attribute = item.getAttribute("ignoreSSLCertificateErrors")
+        if (null === attribute) {
+            return false
+        }
+        return attribute.value == "1" || attribute.value.toLowerCase() == "true"
+    }
+
     protected fun encryptCredentials(info: ProviderInfo, credentials: ApiCredentials): ApiCredentials {
         encryptPassword(info, credentials, credentials.token)
         return ApiCredentialsImpl(
@@ -67,7 +77,8 @@ open class ServiceBase : PersistentStateComponent<Element> {
             token = "",
             projectId = credentials.projectId,
             version = credentials.version,
-            info = credentials.info
+            info = credentials.info,
+            ignoreSSLCertificateErrors = credentials.ignoreSSLCertificateErrors
         )
     }
 
@@ -78,7 +89,8 @@ open class ServiceBase : PersistentStateComponent<Element> {
             token = decryptPassword(info, credentials) ?: "",
             projectId = credentials.projectId,
             version = credentials.version,
-            info = credentials.info
+            info = credentials.info,
+            ignoreSSLCertificateErrors = credentials.ignoreSSLCertificateErrors
         )
     }
 

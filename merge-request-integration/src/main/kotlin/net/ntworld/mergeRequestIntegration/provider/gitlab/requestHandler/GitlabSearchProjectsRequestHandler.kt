@@ -13,6 +13,8 @@ class GitlabSearchProjectsRequestHandler : RequestHandler<GitlabSearchProjectsRe
     override fun handle(request: GitlabSearchProjectsRequest): GitlabSearchProjectsResponse = GitlabClient(
         request = request,
         execute = {
+            this.ignoreCertificateErrors = true
+
             val projects = if (it.term.isEmpty()) {
                 this.projectApi.getProjects(10).first()
             } else {
