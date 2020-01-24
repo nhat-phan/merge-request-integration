@@ -1,13 +1,15 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
-import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import com.intellij.openapi.project.Project
 
 open class GitlabConnectionsConfigurableBase(
-    settings: List<ProviderSettings>
-) : AbstractConnectionsConfigurable(settings) {
+    private val ideaProject: Project
+) : AbstractConnectionsConfigurable(ideaProject) {
+    override fun makeConnection(): ConnectionUI {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun getId(): String = "MRI:gitlab"
 
     override fun getDisplayName(): String = "Gitlab new"
-    
 }
