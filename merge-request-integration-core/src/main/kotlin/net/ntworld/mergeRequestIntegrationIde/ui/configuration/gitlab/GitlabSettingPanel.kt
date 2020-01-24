@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
-import com.intellij.ui.layout.selected
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
@@ -8,6 +7,9 @@ import net.ntworld.mergeRequestIntegrationIde.ui.configuration.gitlab.GitlabProj
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
 import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ConnectionConfigActionListener
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ConnectionConfigurationListener
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ProjectChangedListener
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.awt.event.ActionEvent
 import javax.swing.*
@@ -100,7 +102,8 @@ class GitlabSettingPanel(
         override fun removeUpdate(e: DocumentEvent?) = changedUpdate(e)
     }
 
-    private val myConnectionConfigurationListener = object: ConnectionConfigurationListener {
+    private val myConnectionConfigurationListener = object:
+        ConnectionConfigurationListener {
 
         override fun connectionValidated(index: Int, providerSettings: ProviderSettings, isValid: Boolean) {
             if (index == myIndex) {
@@ -145,7 +148,8 @@ class GitlabSettingPanel(
                 myActionListener.fieldsChanged(myIndex, buildData(), myIsVerified, myShared!!.isSelected)
             }
         })
-        myProjectFinder.addProjectChangedListener(object: ProjectChangedListener {
+        myProjectFinder.addProjectChangedListener(object:
+            ProjectChangedListener {
             override fun projectChanged(projectId: String) {
                 myActionListener.fieldsChanged(myIndex, buildData(), myIsVerified, myShared!!.isSelected)
             }

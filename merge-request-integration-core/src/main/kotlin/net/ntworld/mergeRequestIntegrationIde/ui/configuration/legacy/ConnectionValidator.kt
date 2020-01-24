@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.configuration
+package net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy
 
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.exception.NotSupportedProviderException
@@ -7,7 +7,12 @@ import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 object ConnectionValidator {
 
     fun isValidForTesting(list: List<ProviderSettings?>, index: Int, settings: ProviderSettings): Boolean {
-        if (!validateUniqueName(list, index, settings)) {
+        if (!validateUniqueName(
+                list,
+                index,
+                settings
+            )
+        ) {
             return false
         }
         return when (settings.info) {

@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.configuration
+package net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy
 
 import java.util.*
 

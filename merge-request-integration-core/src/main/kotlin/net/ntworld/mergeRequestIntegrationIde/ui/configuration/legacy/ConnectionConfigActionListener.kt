@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.configuration
+package net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy
 
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 

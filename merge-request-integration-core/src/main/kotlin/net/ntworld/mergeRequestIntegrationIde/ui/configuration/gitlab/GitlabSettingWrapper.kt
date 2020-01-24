@@ -9,6 +9,9 @@ import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ConnectionConfigActionListener
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ConnectionConfigurationListener
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ConnectionValidator
 import javax.swing.*
 
 class GitlabSettingWrapper(private val myIdeaProject: IdeaProject, private val mySavedConnections: List<ProviderSettings>) {
@@ -49,7 +52,8 @@ class GitlabSettingWrapper(private val myIdeaProject: IdeaProject, private val m
         myTabbedPane!!.addTab(name, tab.getComponent())
     }
 
-    private class MyTabActionListener(private val self: GitlabSettingWrapper) : ConnectionConfigActionListener {
+    private class MyTabActionListener(private val self: GitlabSettingWrapper) :
+        ConnectionConfigActionListener {
         override fun initialized(index: Int, providerSettings: ProviderSettings, isShared: Boolean) {
             val valid = this.validate(index, providerSettings, isShared)
             if (valid && providerSettings.credentials.projectId.isNotEmpty()) {
