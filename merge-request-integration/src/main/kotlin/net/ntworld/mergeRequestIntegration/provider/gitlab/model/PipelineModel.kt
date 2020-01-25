@@ -14,10 +14,10 @@ data class PipelineModel(
     val status: String,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
     @SerialName("web_url")
     val webUrl: String
