@@ -9,23 +9,23 @@ import java.util.*
 interface ConnectionUI : Component {
     val dispatcher: EventDispatcher<EventListener>
 
-    fun onConnectionTested(id: String, connection: ApiConnection, shared: Boolean)
+    fun setName(name: String)
 
-    fun onConnectionError(id: String, connection: ApiConnection, shared: Boolean)
+    fun onConnectionTested(name: String, connection: ApiConnection, shared: Boolean)
 
-    fun onCredentialsVerified(id: String, credentials: ApiCredentials, repository: String)
+    fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean)
 
-    fun onCredentialsInvalid(id: String, credentials: ApiCredentials, repository: String)
+    fun onCredentialsVerified(name: String, credentials: ApiCredentials, repository: String)
+
+    fun onCredentialsInvalid(name: String, credentials: ApiCredentials, repository: String)
 
     interface Listener : EventListener {
-        fun test(id: String, connection: ApiConnection, shared: Boolean)
+        fun test(name: String, connection: ApiConnection, shared: Boolean)
 
-        fun verify(id: String, credentials: ApiCredentials, repository: String)
+        fun verify(name: String, credentials: ApiCredentials, repository: String)
 
-        fun makeNewConnection()
+        fun connectionDeleted(name: String)
 
-        fun connectionDeleted(id: String)
-
-        fun idChanged(oldId: String, newId: String)
+        fun nameChanged(oldName: String, newName: String)
     }
 }
