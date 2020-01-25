@@ -74,9 +74,31 @@ abstract class AbstractConnectionsConfigurable(
                 name = "Connection $count"
             }
             val data = ProviderSettingsImpl.makeDefault(findIdFromName(name), makeProviderInfo())
-            val connection = makeConnection()
+            val connection = makeConnectionWithEventListener()
             connection.setName(name)
             addConnectionToTabPane(data, connection, true)
+        }
+    }
+    private val myConnectionListener = object : ConnectionUI.Listener {
+        override fun test(connectionUI: ConnectionUI, name: String, connection: ApiConnection, shared: Boolean) {
+            try {
+                assertConnectionIsValid(connection)
+                connectionUI.onConnectionTested(name, connection, shared)
+            } catch (exception: Exception) {
+                connectionUI.onConnectionError(name, connection, shared, exception)
+            }
+        }
+
+        override fun verify(connectionUI: ConnectionUI, name: String, credentials: ApiCredentials, repository: String) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun connectionDeleted(connectionUI: ConnectionUI, name: String) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun nameChanged(connectionUI: ConnectionUI, oldName: String, newName: String) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
@@ -104,12 +126,18 @@ abstract class AbstractConnectionsConfigurable(
 
     abstract fun validateConnection(connection: ApiConnection): Boolean
 
+    abstract fun assertConnectionIsValid(connection: ApiConnection)
+
+    private fun makeConnectionWithEventListener() : ConnectionUI {
+        val connection = makeConnection()
+        connection.dispatcher.addListener(myConnectionListener)
+
+        return connection
+    }
+
     private fun initConnection(data: ProviderSettings): ConnectionUI {
-        val ui = makeConnection()
-        ui.onConnectionTested(findNameFromId(data.id), data.credentials, data.sharable)
-        if (data.repository.isNotEmpty()) {
-            ui.onCredentialsVerified(findNameFromId(data.id), data.credentials, data.repository)
-        }
+        val ui = makeConnectionWithEventListener()
+        ui.initialize(findNameFromId(data.id), data.credentials, data.sharable, data.repository)
         return ui
     }
 

@@ -7,25 +7,27 @@ import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.util.*
 
 interface ConnectionUI : Component {
-    val dispatcher: EventDispatcher<EventListener>
+    val dispatcher: EventDispatcher<Listener>
+
+    fun initialize(name: String, credentials: ApiCredentials, shared: Boolean, repository: String)
 
     fun setName(name: String)
 
     fun onConnectionTested(name: String, connection: ApiConnection, shared: Boolean)
 
-    fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean)
+    fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception)
 
     fun onCredentialsVerified(name: String, credentials: ApiCredentials, repository: String)
 
     fun onCredentialsInvalid(name: String, credentials: ApiCredentials, repository: String)
 
     interface Listener : EventListener {
-        fun test(name: String, connection: ApiConnection, shared: Boolean)
+        fun test(connectionUI: ConnectionUI, name: String, connection: ApiConnection, shared: Boolean)
 
-        fun verify(name: String, credentials: ApiCredentials, repository: String)
+        fun verify(connectionUI: ConnectionUI, name: String, credentials: ApiCredentials, repository: String)
 
-        fun connectionDeleted(name: String)
+        fun connectionDeleted(connectionUI: ConnectionUI, name: String)
 
-        fun nameChanged(oldName: String, newName: String)
+        fun nameChanged(connectionUI: ConnectionUI, oldName: String, newName: String)
     }
 }
