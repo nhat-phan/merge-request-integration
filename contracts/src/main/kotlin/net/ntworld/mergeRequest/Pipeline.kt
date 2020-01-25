@@ -11,9 +11,9 @@ interface Pipeline {
 
     val url: String
 
-    val createdAt: DateTime
+    val createdAt: DateTime?
 
-    val updatedAt: DateTime
+    val updatedAt: DateTime?
 
     companion object
 }

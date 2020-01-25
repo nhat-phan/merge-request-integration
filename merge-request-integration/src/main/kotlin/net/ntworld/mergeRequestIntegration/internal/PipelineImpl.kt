@@ -10,6 +10,6 @@ data class PipelineImpl(
     override val ref: String,
     override val status: PipelineStatus,
     override val url: String,
-    override val createdAt: DateTime,
-    override val updatedAt: DateTime
+    override val createdAt: DateTime?,
+    override val updatedAt: DateTime?
 ) : Pipeline
