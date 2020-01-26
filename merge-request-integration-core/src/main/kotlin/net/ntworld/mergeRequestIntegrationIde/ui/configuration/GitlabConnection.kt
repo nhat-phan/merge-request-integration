@@ -8,8 +8,13 @@ import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
+import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ProjectChangedListener
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
+import javax.swing.event.ChangeEvent
+import javax.swing.event.ChangeListener
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -46,7 +51,7 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
             myMergeApprovalsFeature!!
         )
     }
-    private val myNameFieldListener = object: DocumentListener {
+    private val myNameFieldListener = object : DocumentListener {
         override fun changedUpdate(e: DocumentEvent?) {
             val newName = myName!!.text
             if (newName.trim() != myCurrentName) {
@@ -59,9 +64,10 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
 
         override fun removeUpdate(e: DocumentEvent?) = changedUpdate(e)
     }
-    private val myConnectionFieldsListener = object: DocumentListener {
+    private val myConnectionFieldsListener = object : DocumentListener {
         override fun changedUpdate(e: DocumentEvent?) {
-            myTestBtn!!.isEnabled = myName!!.text.isEmpty() && myUrl!!.text.isEmpty() && getToken().isEmpty()
+            myTestBtn!!.isEnabled = myName!!.text.isNotEmpty() && myUrl!!.text.isNotEmpty() && getToken().isNotEmpty()
+            updateConnectionData()
         }
 
         override fun insertUpdate(e: DocumentEvent?) = changedUpdate(e)
@@ -85,6 +91,17 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
         myName!!.document.addDocumentListener(myConnectionFieldsListener)
         myUrl!!.document.addDocumentListener(myConnectionFieldsListener)
         myToken!!.document.addDocumentListener(myConnectionFieldsListener)
+
+        myIgnoreSSLError!!.addChangeListener { updateConnectionData() }
+        myRepository!!.addActionListener {
+            updateConnectionData()
+        }
+        myProjectFinder.addProjectChangedListener(object: ProjectChangedListener {
+            override fun projectChanged(projectId: String) {
+                updateConnectionData()
+            }
+        })
+        myMergeApprovalsFeature!!.addChangeListener { updateConnectionData() }
     }
 
     override fun initialize(name: String, credentials: ApiCredentials, shared: Boolean, repository: String) {
@@ -94,7 +111,13 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
         myUrl!!.text = credentials.url
         myToken!!.text = credentials.token
         myIgnoreSSLError!!.isSelected = credentials.ignoreSSLCertificateErrors
+        myShared!!.isSelected = shared
         mySelectedRepository = repository
+
+        myMergeApprovalsFeature!!.isSelected = GitlabUtil.hasMergeApprovalFeature(credentials)
+        if (credentials.projectId.isNotEmpty()) {
+            dispatcher.multicaster.verify(this, name, credentials, repository)
+        }
         updateFieldsState()
     }
 
@@ -107,24 +130,46 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
         myIsTested = true
         myTestBtn!!.isEnabled = false
         Messages.showInfoMessage("Successfully connected!", "Info")
+        updateFieldsState()
     }
 
     override fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception) {
         myIsTested = false
         Messages.showErrorDialog("Cannot connect, error: ${exception.message}", "Error")
         updateFieldsState()
-
     }
 
-    override fun onCredentialsVerified(name: String, credentials: ApiCredentials, repository: String) {
-
+    override fun onCredentialsVerified(
+        name: String, credentials: ApiCredentials, repository: String, project: Project
+    ) {
+        mySelectedProject = project
+        mySelectedRepository = repository
+        updateFieldsState()
     }
 
     override fun onCredentialsInvalid(name: String, credentials: ApiCredentials, repository: String) {
-
+        updateFieldsState()
     }
 
     override fun createComponent(): JComponent = myWholePanel!!
+
+    private fun updateConnectionData() {
+        dispatcher.multicaster.update(
+            this,
+            myName!!.text.trim(),
+            ApiCredentialsImpl(
+                url = myUrl!!.text.trim(),
+                login = "",
+                token = getToken().trim(),
+                projectId = myProjectFinder.getSelectedProjectId(),
+                version = "v4",
+                info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
+                ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
+            ),
+            myShared!!.isSelected,
+            myRepository!!.selectedItem as String? ?: ""
+        )
+    }
 
     private fun getToken(): String {
         return String(myToken!!.password)
@@ -132,15 +177,17 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
 
     private fun updateFieldsState() {
         myRepository!!.isEnabled = myIsTested
-        myProjectFinder.setEnabled(myIsTested, ApiCredentialsImpl(
-            url = myUrl!!.text.trim(),
-            login = "",
-            token = getToken().trim(),
-            projectId = "",
-            version = "v4",
-            info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
-            ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
-        ))
+        myProjectFinder.setEnabled(
+            myIsTested, ApiCredentialsImpl(
+                url = myUrl!!.text.trim(),
+                login = "",
+                token = getToken().trim(),
+                projectId = "",
+                version = "v4",
+                info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
+                ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
+            )
+        )
         if (null !== mySelectedRepository) {
             myRepository!!.selectedItem = mySelectedRepository
         }

@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.ui.tabs.TabInfo
+import net.ntworld.mergeRequest.Project
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
@@ -23,54 +24,13 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
 
 abstract class AbstractConnectionsConfigurable(
-    project: IdeaProject
+    private val ideaProject: IdeaProject
 ) : SearchableConfigurable, Disposable {
     private val logger = Logger.getInstance(AbstractConnectionsConfigurable::class.java)
-    private val ideaProject = project
     private val myData = mutableMapOf<String, MyProviderSettings>()
     private val myTabInfos = mutableMapOf<String, TabInfo>()
-    private val myInitializedData: Map<String, MyProviderSettings> by lazy {
-        val connections = mutableMapOf<String, MyProviderSettings>()
-        val appConnections = ApplicationService.instance.getProviderConfigurations()
-        ProjectService.getInstance(ideaProject).getProviderConfigurations().forEach {
-            connections[it.id] = MyProviderSettings(
-                id = it.id,
-                info = it.info,
-                credentials = it.credentials,
-                repository = it.repository,
-                sharable = it.sharable,
-                deleted = false
-            )
-        }
-        for (appConnection in appConnections) {
-            if (connections.containsKey(appConnection.id)) {
-                connections[appConnection.id] = MyProviderSettings(
-                    id = connections[appConnection.id]!!.id,
-                    info = connections[appConnection.id]!!.info,
-                    credentials = connections[appConnection.id]!!.credentials,
-                    repository = connections[appConnection.id]!!.repository,
-                    sharable = true,
-                    deleted = false
-                )
-            } else {
-                connections[appConnection.id] = MyProviderSettings(
-                    id = appConnection.id,
-                    info = appConnection.info,
-                    credentials = appConnection.credentials,
-                    repository = "",
-                    sharable = true,
-                    deleted = false
-                )
-            }
-        }
-        connections.forEach { (key, value) ->
-            val connectionUI = initConnection(value)
-            addConnectionToTabPane(value, connectionUI)
-            myData[key] = value
-        }
-
-        connections
-    }
+    private val myInitializedData = mutableMapOf<String, MyProviderSettings>()
+    private var myIsInitialized = false
     private val myTabs: TabsUI by lazy {
         val tabs = Tabs(ideaProject, this)
 
@@ -119,7 +79,18 @@ abstract class AbstractConnectionsConfigurable(
         }
 
         override fun verify(connectionUI: ConnectionUI, name: String, credentials: ApiCredentials, repository: String) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            logger.debug("Start verifying credentials $name")
+            try {
+                val project = findProject(credentials)
+                if (null !== project) {
+                    connectionUI.onCredentialsVerified(name, credentials, repository, project)
+                } else {
+                    connectionUI.onCredentialsInvalid(name, credentials, repository)
+                }
+            } catch (exception: Exception) {
+                logger.debug("Connection $name has error ${exception.message}")
+                connectionUI.onCredentialsInvalid(name, credentials, repository)
+            }
         }
 
         override fun delete(connectionUI: ConnectionUI, name: String) {
@@ -141,6 +112,27 @@ abstract class AbstractConnectionsConfigurable(
                 myAddTabAction.perform()
             } else {
                 tabs.select(tabs.getTabAt(0), true)
+            }
+        }
+
+        override fun update(
+            connectionUI: ConnectionUI,
+            name: String,
+            credentials: ApiCredentials,
+            shared: Boolean,
+            repository: String
+        ) {
+            val id = findIdFromName(name)
+            val settings = MyProviderSettings(
+                id = id,
+                info = makeProviderInfo(),
+                credentials = credentials,
+                repository = repository,
+                sharable = shared,
+                deleted = false
+            )
+            if (validateProviderSettings(settings)) {
+                myData[id] = settings
             }
         }
 
@@ -174,7 +166,64 @@ abstract class AbstractConnectionsConfigurable(
 
     abstract fun validateConnection(connection: ApiConnection): Boolean
 
+    abstract fun findProject(credentials: ApiCredentials): Project?
+
     abstract fun assertConnectionIsValid(connection: ApiConnection)
+
+    private fun buildInitializedData(initUI: Boolean = true, initDataForCheckModification: Boolean = true) {
+        if (myIsInitialized) {
+            return
+        }
+
+        myInitializedData.clear()
+        val appConnections = ApplicationService.instance.getProviderConfigurations()
+        ProjectService.getInstance(ideaProject).getProviderConfigurations().forEach {
+            myInitializedData[it.id] = MyProviderSettings(
+                id = it.id,
+                info = it.info,
+                credentials = it.credentials,
+                repository = it.repository,
+                sharable = it.sharable,
+                deleted = false
+            )
+        }
+        for (appConnection in appConnections) {
+            if (myInitializedData.containsKey(appConnection.id)) {
+                myInitializedData[appConnection.id] = MyProviderSettings(
+                    id = myInitializedData[appConnection.id]!!.id,
+                    info = myInitializedData[appConnection.id]!!.info,
+                    credentials = appConnection.credentials,
+                    repository = myInitializedData[appConnection.id]!!.repository,
+                    sharable = true,
+                    deleted = false
+                )
+            } else {
+                myInitializedData[appConnection.id] = MyProviderSettings(
+                    id = appConnection.id,
+                    info = appConnection.info,
+                    credentials = MyProviderSettings.makeCredentialsFromApplicationLevel(
+                        appConnection.credentials
+                    ),
+                    repository = "",
+                    sharable = true,
+                    deleted = false
+                )
+            }
+        }
+        myIsInitialized = true
+        if (initUI) {
+            myInitializedData.forEach { (key, value) ->
+                val connectionUI = initConnection(value)
+                addConnectionToTabPane(value, connectionUI)
+                myData[key] = value
+            }
+        }
+        if (initDataForCheckModification) {
+            myInitializedData.forEach { (key, value) ->
+                myData[key] = value
+            }
+        }
+    }
 
     private fun makeConnectionWithEventListener(): ConnectionUI {
         val connection = makeConnection()
@@ -201,6 +250,7 @@ abstract class AbstractConnectionsConfigurable(
     }
 
     override fun isModified(): Boolean {
+        buildInitializedData()
         val initializedData = myInitializedData.filter { validateProviderSettings(it.value) }
         val validData = myData.filter { validateProviderSettings(it.value) }
         if (validData.size != initializedData.size) {
@@ -229,26 +279,40 @@ abstract class AbstractConnectionsConfigurable(
     }
 
     override fun apply() {
+        logger.info("Delete global connections")
+        ApplicationService.instance.removeAllProviderConfigurations()
+
+        val projectService = ProjectService.getInstance(ideaProject)
         for (entry in myData) {
             if (entry.value.deleted) {
-                println("Delete connection ${entry.key}")
                 logger.info("Delete connection ${entry.key}")
+                projectService.removeProviderConfiguration(entry.value.id)
                 continue
+            }
+
+            if (entry.value.sharable) {
+                logger.info("Save connection ${entry.key} to global")
+                ApplicationService.instance.addProviderConfiguration(
+                    id = entry.value.id,
+                    info = entry.value.info,
+                    credentials = entry.value.credentials
+                )
             }
 
             if (validateProviderSettings(entry.value)) {
                 logger.info("Save connection ${entry.key}")
-                println("Save connection ${entry.key}")
-                println("id: ${entry.value.id}")
-                println("projectId: ${entry.value.credentials.projectId}")
-                println("url: ${entry.value.credentials.url}")
-                println("login: ${entry.value.credentials.login}")
-                println("token: ${entry.value.credentials.token}")
-                println("ignoreSSLCertificateErrors: ${entry.value.credentials.ignoreSSLCertificateErrors}")
-                println("repository: ${entry.value.repository}")
-                println("--------------------------")
+                projectService.addProviderConfiguration(
+                    id = entry.value.id,
+                    info = entry.value.info,
+                    credentials = entry.value.credentials,
+                    repository = entry.value.repository
+                )
             }
         }
+
+        myData.clear()
+        myIsInitialized = false
+        buildInitializedData(initUI = false, initDataForCheckModification = true)
     }
 
     override fun dispose() {
@@ -293,6 +357,18 @@ abstract class AbstractConnectionsConfigurable(
         }
 
         companion object {
+            fun makeCredentialsFromApplicationLevel(credentials: ApiCredentials): ApiCredentials {
+                return ApiCredentialsImpl(
+                    url = credentials.url,
+                    login = credentials.login,
+                    token = credentials.token,
+                    projectId = "",
+                    version = credentials.version,
+                    info = "",
+                    ignoreSSLCertificateErrors = credentials.ignoreSSLCertificateErrors
+                )
+            }
+
             fun makeDefault(id: String, info: ProviderInfo): MyProviderSettings {
                 return MyProviderSettings(
                     id = id,

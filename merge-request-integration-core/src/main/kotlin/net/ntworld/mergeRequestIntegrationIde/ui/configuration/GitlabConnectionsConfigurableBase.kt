@@ -5,7 +5,9 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
+import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabFindProjectRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
+import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -32,6 +34,19 @@ open class GitlabConnectionsConfigurableBase(
 
     override fun validateConnection(connection: ApiConnection): Boolean {
         return connection.url.isNotEmpty() && connection.token.isNotEmpty()
+    }
+
+    override fun findProject(credentials: ApiCredentials): net.ntworld.mergeRequest.Project? {
+        val out = ApplicationService.instance.infrastructure.serviceBus() process GitlabFindProjectRequest(
+            credentials = credentials,
+            projectId = credentials.projectId
+        )
+        val response = out.getResponse()
+        return if (response.isSuccess) {
+            GitlabProjectTransformer.transform(response.project)
+        } else {
+            null
+        }
     }
 
     override fun assertConnectionIsValid(connection: ApiConnection) {

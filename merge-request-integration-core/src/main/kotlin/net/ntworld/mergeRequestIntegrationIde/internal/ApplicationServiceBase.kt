@@ -29,8 +29,9 @@ open class ApplicationServiceBase : ApplicationService, ServiceBase() {
         )
     }
 
-    override fun removeProviderConfiguration(id: String) {
-        myProvidersData.remove(id)
+    override fun removeAllProviderConfigurations() {
+        myProvidersData.clear()
+        this.getState()
     }
 
     override fun getProviderConfigurations(): List<ProviderSettings> {

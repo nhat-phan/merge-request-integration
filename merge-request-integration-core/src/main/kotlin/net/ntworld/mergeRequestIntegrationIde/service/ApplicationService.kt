@@ -14,7 +14,7 @@ interface ApplicationService {
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)
 
-    fun removeProviderConfiguration(id: String)
+    fun removeAllProviderConfigurations()
 
     fun getProviderConfigurations(): List<ProviderSettings>
 

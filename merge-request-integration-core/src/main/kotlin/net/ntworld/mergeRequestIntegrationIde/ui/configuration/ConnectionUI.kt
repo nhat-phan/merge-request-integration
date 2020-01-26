@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.util.EventDispatcher
+import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
@@ -17,7 +18,7 @@ interface ConnectionUI : Component {
 
     fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception)
 
-    fun onCredentialsVerified(name: String, credentials: ApiCredentials, repository: String)
+    fun onCredentialsVerified(name: String, credentials: ApiCredentials, repository: String, project: Project)
 
     fun onCredentialsInvalid(name: String, credentials: ApiCredentials, repository: String)
 
@@ -27,6 +28,14 @@ interface ConnectionUI : Component {
         fun verify(connectionUI: ConnectionUI, name: String, credentials: ApiCredentials, repository: String)
 
         fun delete(connectionUI: ConnectionUI, name: String)
+
+        fun update(
+            connectionUI: ConnectionUI,
+            name: String,
+            credentials: ApiCredentials,
+            shared: Boolean,
+            repository: String
+        )
 
         fun changeName(connectionUI: ConnectionUI, oldName: String, newName: String)
     }
