@@ -26,8 +26,8 @@ interface ConnectionUI : Component {
 
         fun verify(connectionUI: ConnectionUI, name: String, credentials: ApiCredentials, repository: String)
 
-        fun connectionDeleted(connectionUI: ConnectionUI, name: String)
+        fun delete(connectionUI: ConnectionUI, name: String)
 
-        fun nameChanged(connectionUI: ConnectionUI, oldName: String, newName: String)
+        fun changeName(connectionUI: ConnectionUI, oldName: String, newName: String)
     }
 }

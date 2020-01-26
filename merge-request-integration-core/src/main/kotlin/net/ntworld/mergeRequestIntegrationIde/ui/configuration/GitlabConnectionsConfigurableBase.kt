@@ -27,7 +27,7 @@ open class GitlabConnectionsConfigurableBase(
     }
 
     override fun makeConnection(): ConnectionUI {
-        return GitlabConnection()
+        return GitlabConnection(ideaProject)
     }
 
     override fun validateConnection(connection: ApiConnection): Boolean {

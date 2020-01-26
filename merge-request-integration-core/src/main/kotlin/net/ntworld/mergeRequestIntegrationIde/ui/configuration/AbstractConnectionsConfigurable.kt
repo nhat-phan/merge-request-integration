@@ -5,12 +5,15 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.ui.tabs.TabInfo
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
 import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
@@ -20,8 +23,10 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
 
 abstract class AbstractConnectionsConfigurable(
-    private val ideaProject: IdeaProject
+    project: IdeaProject
 ) : SearchableConfigurable, Disposable {
+    private val logger = Logger.getInstance(AbstractConnectionsConfigurable::class.java)
+    private val ideaProject = project
     private val myData = mutableMapOf<String, MyProviderSettings>()
     private val myTabInfos = mutableMapOf<String, TabInfo>()
     private val myInitializedData: Map<String, MyProviderSettings> by lazy {
@@ -58,33 +63,57 @@ abstract class AbstractConnectionsConfigurable(
                 )
             }
         }
+        connections.forEach { (key, value) ->
+            val connectionUI = initConnection(value)
+            addConnectionToTabPane(value, connectionUI)
+            myData[key] = value
+        }
+
         connections
     }
     private val myTabs: TabsUI by lazy {
-        Tabs(ideaProject, this)
+        val tabs = Tabs(ideaProject, this)
+
+        tabs.setCommonCenterActionGroupFactory {
+            val actionGroup = DefaultActionGroup()
+            actionGroup.add(myAddTabAction)
+            actionGroup
+        }
+
+        tabs
     }
     private val myAddTabAction = object : AnAction(
         "New Connection", "Add new connection", AllIcons.Actions.OpenNewTab
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            var count = myTabs.getTabs().tabCount
+            perform()
+        }
+
+        fun perform() {
+            var count = myTabs.getTabs().tabCount + 1
             var name = "Connection $count"
             while (myData.containsKey(findIdFromName(name))) {
                 count++
                 name = "Connection $count"
             }
-            val data = ProviderSettingsImpl.makeDefault(findIdFromName(name), makeProviderInfo())
+            val id = findIdFromName(name)
+            val data = MyProviderSettings.makeDefault(id, makeProviderInfo())
             val connection = makeConnectionWithEventListener()
             connection.setName(name)
+
+            myData[id] = data
             addConnectionToTabPane(data, connection, true)
         }
     }
     private val myConnectionListener = object : ConnectionUI.Listener {
         override fun test(connectionUI: ConnectionUI, name: String, connection: ApiConnection, shared: Boolean) {
+            logger.debug("Start testing connection $name")
             try {
                 assertConnectionIsValid(connection)
+                logger.debug("Connection $name tested")
                 connectionUI.onConnectionTested(name, connection, shared)
             } catch (exception: Exception) {
+                logger.debug("Connection $name has error ${exception.message}")
                 connectionUI.onConnectionError(name, connection, shared, exception)
             }
         }
@@ -93,26 +122,45 @@ abstract class AbstractConnectionsConfigurable(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun connectionDeleted(connectionUI: ConnectionUI, name: String) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun delete(connectionUI: ConnectionUI, name: String) {
+            logger.debug("Delete connection $name")
+            val id = findIdFromName(name)
+            val settings = myData[id]
+            if (null !== settings) {
+                logger.debug("Update 'deleted' of connection $name to true")
+                myData[id] = settings.copy(deleted = true)
+            }
+
+            val tabs = myTabs.getTabs()
+            val tabInfo = myTabInfos[id]
+            if (null !== tabInfo) {
+                tabs.removeTab(tabInfo)
+            }
+
+            if (tabs.tabCount == 0) {
+                myAddTabAction.perform()
+            } else {
+                tabs.select(tabs.getTabAt(0), true)
+            }
         }
 
-        override fun nameChanged(connectionUI: ConnectionUI, oldName: String, newName: String) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    }
+        override fun changeName(connectionUI: ConnectionUI, oldName: String, newName: String) {
+            logger.debug("Name of connection change from $oldName to $newName")
+            val oldId = findIdFromName(oldName)
+            val newId = findIdFromName(newName)
 
-    init {
-        myTabs.setCommonCenterActionGroupFactory {
-            val actionGroup = DefaultActionGroup()
-            actionGroup.add(myAddTabAction)
-            actionGroup
-        }
+            val oldData = myData[oldId]
+            if (null !== oldData) {
+                myData[newId] = oldData.copy(id = newId, deleted = false)
+                myData[oldId] = oldData.copy(deleted = true)
+            }
 
-        myInitializedData.forEach { (key, value) ->
-            val connectionUI = initConnection(value)
-            addConnectionToTabPane(value, connectionUI)
-            myData[key] = value
+            val tabInfo = myTabInfos[oldId]
+            if (null !== tabInfo) {
+                tabInfo.text = newName
+                myTabInfos[newId] = tabInfo
+                myTabInfos.remove(oldId)
+            }
         }
     }
 
@@ -128,7 +176,7 @@ abstract class AbstractConnectionsConfigurable(
 
     abstract fun assertConnectionIsValid(connection: ApiConnection)
 
-    private fun makeConnectionWithEventListener() : ConnectionUI {
+    private fun makeConnectionWithEventListener(): ConnectionUI {
         val connection = makeConnection()
         connection.dispatcher.addListener(myConnectionListener)
 
@@ -153,23 +201,30 @@ abstract class AbstractConnectionsConfigurable(
     }
 
     override fun isModified(): Boolean {
+        val initializedData = myInitializedData.filter { validateProviderSettings(it.value) }
         val validData = myData.filter { validateProviderSettings(it.value) }
-        if (validData.size != myInitializedData.size) {
+        if (validData.size != initializedData.size) {
+            logger.info("Size of valid data & initialized data is not match")
             return true
         }
 
         for (entry in validData) {
-            if (!myInitializedData.containsKey(entry.key)) {
+            if (!initializedData.containsKey(entry.key)) {
+                logger.info("Initialized data does not contains ${entry.key}")
                 return true
             }
-            val initializedItem = myInitializedData[entry.key]
+            val initializedItem = initializedData[entry.key]
             if (null === initializedItem) {
+                logger.info("Initialized data does not contains ${entry.key}")
                 return true
             }
-            if (!initializedItem.equals(entry.value)) {
+            if (!initializedItem.isEquals(entry.value)) {
+                logger.info("Initialized data and data of ${entry.key} is not equals")
                 return true
             }
         }
+
+        logger.info("All data are matched, not modified")
         return false
     }
 
@@ -177,11 +232,13 @@ abstract class AbstractConnectionsConfigurable(
         for (entry in myData) {
             if (entry.value.deleted) {
                 println("Delete connection ${entry.key}")
+                logger.info("Delete connection ${entry.key}")
                 continue
             }
 
             if (validateProviderSettings(entry.value)) {
-                println("Save connection ----------")
+                logger.info("Save connection ${entry.key}")
+                println("Save connection ${entry.key}")
                 println("id: ${entry.value.id}")
                 println("projectId: ${entry.value.credentials.projectId}")
                 println("url: ${entry.value.credentials.url}")
@@ -214,5 +271,46 @@ abstract class AbstractConnectionsConfigurable(
         override val repository: String,
         override val sharable: Boolean,
         val deleted: Boolean
-    ): ProviderSettings
+    ) : ProviderSettings {
+
+        fun isEquals(other: MyProviderSettings): Boolean {
+            return id == other.id &&
+                info.id == other.info.id &&
+                isCredentialsEquals(other.credentials) &&
+                repository == other.repository &&
+                sharable == other.sharable &&
+                deleted == other.deleted
+        }
+
+        private fun isCredentialsEquals(other: ApiCredentials): Boolean {
+            return credentials.projectId == other.projectId &&
+                credentials.version == other.version &&
+                credentials.info == other.info &&
+                credentials.url == other.url &&
+                credentials.ignoreSSLCertificateErrors == other.ignoreSSLCertificateErrors &&
+                credentials.login == other.login &&
+                credentials.token == other.token
+        }
+
+        companion object {
+            fun makeDefault(id: String, info: ProviderInfo): MyProviderSettings {
+                return MyProviderSettings(
+                    id = id,
+                    info = info,
+                    credentials = ApiCredentialsImpl(
+                        url = "",
+                        login = "",
+                        token = "",
+                        projectId = "",
+                        version = "",
+                        info = "",
+                        ignoreSSLCertificateErrors = false
+                    ),
+                    repository = "",
+                    sharable = false,
+                    deleted = false
+                )
+            }
+        }
+    }
 }
