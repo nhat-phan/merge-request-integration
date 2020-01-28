@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.configuration;
+package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.Messages
@@ -8,13 +8,8 @@ import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
-import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
-import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ProjectChangedListener
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
-import javax.swing.event.ChangeEvent
-import javax.swing.event.ChangeListener
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -96,7 +91,7 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
         myRepository!!.addActionListener {
             updateConnectionData()
         }
-        myProjectFinder.addProjectChangedListener(object: ProjectChangedListener {
+        myProjectFinder.addProjectChangedListener(object: GitlabProjectFinder.ProjectChangedListener {
             override fun projectChanged(projectId: String) {
                 updateConnectionData()
             }
@@ -108,11 +103,12 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
         myIsTested = true
         myCurrentName = name.trim()
         myName!!.text = name.trim()
-        myUrl!!.text = credentials.url
+        myUrl!!.text = if (credentials.url.isNotEmpty()) credentials.url else "https://gitlab.com"
         myToken!!.text = credentials.token
         myIgnoreSSLError!!.isSelected = credentials.ignoreSSLCertificateErrors
         myShared!!.isSelected = shared
         mySelectedRepository = repository
+        myTestBtn!!.isEnabled = false
 
         myMergeApprovalsFeature!!.isSelected = GitlabUtil.hasMergeApprovalFeature(credentials)
         if (credentials.projectId.isNotEmpty()) {
@@ -123,6 +119,7 @@ class GitlabConnection(private val ideaProject: IdeaProject) : ConnectionUI {
 
     override fun setName(name: String) {
         myName!!.text = name.trim()
+        myUrl!!.text = "https://gitlab.com"
         myCurrentName = name.trim()
     }
 

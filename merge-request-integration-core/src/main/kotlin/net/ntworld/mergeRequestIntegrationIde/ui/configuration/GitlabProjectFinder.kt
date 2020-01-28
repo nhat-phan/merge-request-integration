@@ -11,7 +11,6 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.ui.configuration.legacy.ProjectChangedListener
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProjectPanel
 import java.awt.Component
 import java.awt.event.FocusEvent
@@ -173,5 +172,9 @@ class GitlabProjectFinder(
         }
 
         private class Indicator(private val task: MySearchTask) : BackgroundableProcessIndicator(task)
+    }
+
+    interface ProjectChangedListener : EventListener {
+        fun projectChanged(projectId: String)
     }
 }

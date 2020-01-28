@@ -59,6 +59,9 @@ class ProviderCollectionList : ProviderCollectionListUI {
     }
 
     init {
+        myProviderItemPanels.clear()
+        myProviderDataMap.clear()
+        myList.clearSelection()
         myList.selectionMode = ListSelectionModel.SINGLE_SELECTION
         myList.cellRenderer = myCellRenderer
         myList.addMouseListener(myListMouseListener)

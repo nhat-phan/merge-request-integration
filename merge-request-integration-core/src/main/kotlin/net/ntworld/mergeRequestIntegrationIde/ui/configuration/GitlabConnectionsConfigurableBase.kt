@@ -17,16 +17,9 @@ open class GitlabConnectionsConfigurableBase(
 ) : AbstractConnectionsConfigurable(ideaProject) {
     override fun makeProviderInfo(): ProviderInfo = Gitlab
 
-    override fun findNameFromId(id: String): String {
-        if (id.startsWith(PREFIX)) {
-            return id.substring(PREFIX.length)
-        }
-        return id
-    }
+    override fun findNameFromId(id: String) = Companion.findNameFromId(id)
 
-    override fun findIdFromName(name: String): String {
-        return "$PREFIX$name"
-    }
+    override fun findIdFromName(name: String) = Companion.findIdFromName(name)
 
     override fun makeConnection(): ConnectionUI {
         return GitlabConnection(ideaProject)
@@ -75,5 +68,16 @@ open class GitlabConnectionsConfigurableBase(
 
     companion object {
         private const val PREFIX = "gitlab:"
+
+        fun findNameFromId(id: String): String {
+            if (id.startsWith(PREFIX)) {
+                return id.substring(PREFIX.length)
+            }
+            return id
+        }
+
+        fun findIdFromName(name: String): String {
+            return "$PREFIX$name"
+        }
     }
 }

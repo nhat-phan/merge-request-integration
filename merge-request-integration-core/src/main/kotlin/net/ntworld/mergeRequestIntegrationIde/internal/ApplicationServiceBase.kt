@@ -31,7 +31,7 @@ open class ApplicationServiceBase : ApplicationService, ServiceBase() {
 
     override fun removeAllProviderConfigurations() {
         myProvidersData.clear()
-        this.getState()
+        this.state
     }
 
     override fun getProviderConfigurations(): List<ProviderSettings> {

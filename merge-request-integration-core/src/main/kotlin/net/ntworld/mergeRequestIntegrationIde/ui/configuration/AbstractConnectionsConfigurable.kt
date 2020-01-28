@@ -95,7 +95,7 @@ abstract class AbstractConnectionsConfigurable(
 
         override fun delete(connectionUI: ConnectionUI, name: String) {
             logger.debug("Delete connection $name")
-            val id = findIdFromName(name)
+            val id = findIdFromName(name).trim()
             val settings = myData[id]
             if (null !== settings) {
                 logger.debug("Update 'deleted' of connection $name to true")
@@ -138,8 +138,8 @@ abstract class AbstractConnectionsConfigurable(
 
         override fun changeName(connectionUI: ConnectionUI, oldName: String, newName: String) {
             logger.debug("Name of connection change from $oldName to $newName")
-            val oldId = findIdFromName(oldName)
-            val newId = findIdFromName(newName)
+            val oldId = findIdFromName(oldName).trim()
+            val newId = findIdFromName(newName).trim()
 
             val oldData = myData[oldId]
             if (null !== oldData) {
@@ -242,7 +242,7 @@ abstract class AbstractConnectionsConfigurable(
         val tabInfo = TabInfo(connectionUI.createComponent())
         tabInfo.text = findNameFromId(data.id)
 
-        myTabInfos[data.id] = tabInfo
+        myTabInfos[data.id.trim()] = tabInfo
         myTabs.addTab(tabInfo)
         if (selected) {
             myTabs.getTabs().select(tabInfo, true)
@@ -286,14 +286,14 @@ abstract class AbstractConnectionsConfigurable(
         for (entry in myData) {
             if (entry.value.deleted) {
                 logger.info("Delete connection ${entry.key}")
-                projectService.removeProviderConfiguration(entry.value.id)
+                projectService.removeProviderConfiguration(entry.value.id.trim())
                 continue
             }
 
             if (entry.value.sharable) {
                 logger.info("Save connection ${entry.key} to global")
                 ApplicationService.instance.addProviderConfiguration(
-                    id = entry.value.id,
+                    id = entry.value.id.trim(),
                     info = entry.value.info,
                     credentials = entry.value.credentials
                 )
@@ -302,7 +302,7 @@ abstract class AbstractConnectionsConfigurable(
             if (validateProviderSettings(entry.value)) {
                 logger.info("Save connection ${entry.key}")
                 projectService.addProviderConfiguration(
-                    id = entry.value.id,
+                    id = entry.value.id.trim(),
                     info = entry.value.info,
                     credentials = entry.value.credentials,
                     repository = entry.value.repository
@@ -312,7 +312,16 @@ abstract class AbstractConnectionsConfigurable(
 
         myData.clear()
         myIsInitialized = false
+        ProjectService.getInstance(ideaProject).clear()
         buildInitializedData(initUI = false, initDataForCheckModification = true)
+    }
+
+    override fun reset() {
+        myData.clear()
+        myTabInfos.clear()
+        myTabs.getTabs().removeAllTabs()
+        myIsInitialized = false
+        buildInitializedData()
     }
 
     override fun dispose() {

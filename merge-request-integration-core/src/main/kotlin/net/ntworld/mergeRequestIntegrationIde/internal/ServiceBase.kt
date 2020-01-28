@@ -21,7 +21,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
             item.setAttribute("id", it.id)
             item.setAttribute("providerId", it.info.id)
             item.setAttribute("url", it.credentials.url)
-            item.setAttribute("login", it.credentials.url)
+            item.setAttribute("login", it.credentials.login)
             item.setAttribute("projectId", it.credentials.projectId)
             item.setAttribute("version", it.credentials.version)
             item.setAttribute("info", it.credentials.info)
@@ -53,7 +53,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
             )
             val id = item.getAttribute("id").value
             myProvidersData[id] = ProviderSettingsImpl(
-                id = id,
+                id = id.trim(),
                 info = info,
                 credentials = decryptCredentials(info, credentials),
                 repository = item.getAttribute("repository").value
@@ -73,8 +73,13 @@ open class ServiceBase : PersistentStateComponent<Element> {
         encryptPassword(info, credentials, credentials.token)
         return ApiCredentialsImpl(
             url = credentials.url,
-            login = "",
-            token = "",
+            // -----------------------------------------------------------------
+            // Always bind login and token because if we don't the token will be
+            // empty if the state not stored to the storage yet.
+            // It's safe because the secret is stored on memory only.
+            login = credentials.login,
+            token = credentials.token,
+            // -----------------------------------------------------------------
             projectId = credentials.projectId,
             version = credentials.version,
             info = credentials.info,
@@ -85,8 +90,13 @@ open class ServiceBase : PersistentStateComponent<Element> {
     protected fun decryptCredentials(info: ProviderInfo, credentials: ApiCredentials): ApiCredentials {
         return ApiCredentialsImpl(
             url = credentials.url,
-            login = "",
-            token = decryptPassword(info, credentials) ?: "",
+            // -----------------------------------------------------------------
+            // Always bind login and token because if we don't the token will be
+            // empty if the state not stored to the storage yet.
+            // It's safe because the secret is stored on memory only.
+            login = credentials.login,
+            token = decryptPassword(info, credentials) ?: credentials.token,
+            // -----------------------------------------------------------------
             projectId = credentials.projectId,
             version = credentials.version,
             info = credentials.info,
@@ -95,7 +105,9 @@ open class ServiceBase : PersistentStateComponent<Element> {
     }
 
     private fun encryptPassword(info: ProviderInfo, credentials: ApiCredentials, password: String) {
+        println("encryptPassword $password")
         PasswordSafe.instance.setPassword(makeCredentialAttribute(info, credentials), password)
+        println("decryptPassword ${decryptPassword(info, credentials)}")
     }
 
     private fun decryptPassword(info: ProviderInfo, credentials: ApiCredentials): String? {

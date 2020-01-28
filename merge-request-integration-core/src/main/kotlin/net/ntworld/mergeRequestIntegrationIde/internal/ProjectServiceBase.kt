@@ -13,7 +13,7 @@ import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
-import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabSettingPanel
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 
 open class ProjectServiceBase(private val ideaProject: IdeaProject) : ProjectService, ServiceBase() {
     private var myIsInitialized = false
@@ -117,7 +117,7 @@ open class ProjectServiceBase(private val ideaProject: IdeaProject) : ProjectSer
     override fun register(settings: ProviderSettings) {
         var name = ""
         if (settings.info.id == Gitlab.id) {
-            name = GitlabSettingPanel.findNameFromId(settings.id)
+            name = GitlabConnectionsConfigurableBase.findNameFromId(settings.id)
         }
 
         val task = RegisterProviderTask(

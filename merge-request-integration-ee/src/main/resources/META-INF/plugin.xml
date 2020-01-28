@@ -22,10 +22,6 @@
                              displayName="Merge Request Integration"
                              instance="net.ntworld.mergeRequestIntegrationIdeEE.Configuration"/>
         <projectConfigurable groupId="merge-request-integration-ee"
-                             id="merge-request-integration-gitlab-legacy"
-                             displayName="Gitlab Legacy"
-                             instance="net.ntworld.mergeRequestIntegrationIdeEE.LegacyGitlabConnectionsConfigurable"/>
-        <projectConfigurable groupId="merge-request-integration-ee"
                              id="merge-request-integration-gitlab"
                              displayName="Gitlab"
                              instance="net.ntworld.mergeRequestIntegrationIdeEE.GitlabConnectionsConfigurable"/>
