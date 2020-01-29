@@ -87,7 +87,7 @@ object ApiProviderManager {
         return Pair(findDataOrFail(id), findProviderOrFail(id))
     }
 
-    fun findDataOrFail(id: String): ProviderData {
+    private fun findDataOrFail(id: String): ProviderData {
         val data = data[id]
         return if (null !== data) {
             data
@@ -96,7 +96,7 @@ object ApiProviderManager {
         }
     }
 
-    fun findProviderOrFail(id: String): ApiProvider {
+    private fun findProviderOrFail(id: String): ApiProvider {
         val provider = api[id]
         return if (null !== provider) {
             provider

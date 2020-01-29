@@ -10,6 +10,8 @@ interface ApplicationService {
 
     val infrastructure: Infrastructure
 
+    val settings: ApplicationSettings
+
     fun supported(): List<ProviderInfo>
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)
@@ -19,6 +21,8 @@ interface ApplicationService {
     fun getProviderConfigurations(): List<ProviderSettings>
 
     fun isLegal(providerData: ProviderData): Boolean
+
+    fun updateSettings(settings: ApplicationSettings)
 
     companion object {
         val instance: ApplicationService

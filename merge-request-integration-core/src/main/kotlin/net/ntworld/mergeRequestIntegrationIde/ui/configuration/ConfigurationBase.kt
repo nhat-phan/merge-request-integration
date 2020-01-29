@@ -1,25 +1,39 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.options.SearchableConfigurable
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import javax.swing.JComponent
-import javax.swing.JPanel
 
-abstract class ConfigurationBase : SearchableConfigurable, Disposable {
+abstract class ConfigurationBase : SearchableConfigurable {
+    private var myInitializedSettings = ApplicationService.instance.settings
+    private var myCurrentSettings = ApplicationService.instance.settings
+    private val mySettingsUI: SettingsUI = SettingsConfiguration()
+    private val mySettingsListener = object: SettingsUI.Listener {
+        override fun change(settings: ApplicationSettings) {
+            myCurrentSettings = settings
+        }
+    }
+
+    init {
+        mySettingsUI.initialize(myInitializedSettings)
+
+        mySettingsUI.dispatcher.addListener(mySettingsListener)
+    }
 
     override fun isModified(): Boolean {
-        return false
+        return myCurrentSettings != myInitializedSettings
     }
 
     override fun apply() {
+        ApplicationService.instance.updateSettings(myCurrentSettings)
+        myInitializedSettings = myCurrentSettings
     }
 
-    override fun createComponent(): JComponent? {
-        return JPanel()
+    override fun reset() {
+        myCurrentSettings = myInitializedSettings
+        mySettingsUI.initialize(myInitializedSettings)
     }
 
-    override fun dispose() {
-
-    }
-
+    override fun createComponent(): JComponent? = mySettingsUI.createComponent()
 }
