@@ -8,6 +8,8 @@ interface ApiProvider {
 
     val credentials: ApiCredentials
 
+    val cache: Cache
+
     val user: UserApi
 
     val mergeRequest: MergeRequestApi

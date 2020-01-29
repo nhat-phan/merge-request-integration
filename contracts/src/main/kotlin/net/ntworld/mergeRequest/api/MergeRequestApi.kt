@@ -25,13 +25,7 @@ interface MergeRequestApi {
         itemsPerPage: Int
     ): SearchResult
 
-    fun findOrFail(projectId: String, mergeRequestId: String): MergeRequest {
-        val mergeRequest = find(projectId, mergeRequestId)
-        if (null === mergeRequest) {
-            throw Exception("MergeRequest $mergeRequestId not found.")
-        }
-        return mergeRequest
-    }
+    fun findOrFail(projectId: String, mergeRequestId: String): MergeRequest
 
     interface SearchResult {
         val data: List<MergeRequestInfo>

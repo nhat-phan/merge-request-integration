@@ -15,13 +15,13 @@ class MemoryCache(ttl: Int? = null) : Cache {
         private set
 
     init {
-        if (null === ttl) {
-            defaultTTL = 60
+        defaultTTL = if (null === ttl) {
+            60000
         } else {
             if (ttl <= 0) {
                 throw InvalidTTLException()
             }
-            defaultTTL = ttl
+            ttl
         }
     }
 
@@ -58,7 +58,12 @@ class MemoryCache(ttl: Int? = null) : Cache {
     }
 
     override fun isExpiredAfter(key: String, datetime: DateTime): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        assertKeyIsValid(key)
+        val cachedItem = data[key]
+        if (null === cachedItem) {
+            throw CacheNotFoundException()
+        }
+        return cachedItem.expired < toUtc(datetime).millis
     }
 
     private fun assertKeyIsValid(key: String) {
@@ -72,7 +77,7 @@ class MemoryCache(ttl: Int? = null) : Cache {
     }
 
     internal fun now(): Long {
-        return DateTime.now().millis
+        return toUtc(DateTime.now()).millis
     }
 
     private fun toUtc(datetime: DateTime): DateTime {

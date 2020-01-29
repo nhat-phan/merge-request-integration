@@ -7,6 +7,7 @@ import net.ntworld.mergeRequest.api.Cache
 import net.ntworld.mergeRequest.api.CacheNotFoundException
 import net.ntworld.mergeRequestIntegration.exception.InvalidCacheKeyException
 import net.ntworld.mergeRequestIntegration.exception.InvalidTTLException
+import org.joda.time.DateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -23,7 +24,7 @@ class MemoryCacheTests : DescribeSpec({
 
                 val defaultTimeToLive = cache.defaultTTL
 
-                assertEquals(60, defaultTimeToLive)
+                assertEquals(60000, defaultTimeToLive)
             }
         }
 
@@ -78,9 +79,9 @@ class MemoryCacheTests : DescribeSpec({
         context("exists, still alive") {
             it("returns set value") {
                 val cache = makeMemoryCache()
-                cache.set("abc", "value")
+                cache.set("abcd", "value")
 
-                val result: String = cache.get("abc")
+                val result: String = cache.get("abcd")
 
                 assertEquals("value", result)
             }
@@ -172,7 +173,7 @@ class MemoryCacheTests : DescribeSpec({
         }
 
         context("valid key") {
-            it ("removes given key") {
+            it("removes given key") {
                 val cache = makeMemoryCache()
                 cache.set("abc", "")
 
@@ -182,6 +183,56 @@ class MemoryCacheTests : DescribeSpec({
 
                 assertTrue(beforeRemoving)
                 assertFalse(afterRemoving)
+            }
+        }
+    }
+
+    describe(".isExpiredAfter()") {
+        context("invalid key") {
+            it("throws InvalidCacheKeyException with empty key") {
+                val cache = makeMemoryCache()
+
+                assertFailsWith<InvalidCacheKeyException> {
+                    cache.isExpiredAfter("", DateTime.now())
+                }
+            }
+
+            it("throws InvalidCacheKeyException with key contains all space characters") {
+                val cache = makeMemoryCache()
+
+                assertFailsWith<InvalidCacheKeyException> {
+                    cache.isExpiredAfter(" ", DateTime.now())
+                }
+            }
+        }
+
+        context("key not found") {
+            it("returns true") {
+                val cache = makeMemoryCache()
+
+                assertFailsWith<CacheNotFoundException> {
+                    cache.isExpiredAfter("abc", DateTime.now())
+                }
+            }
+        }
+
+        context("key found") {
+            it("returns false if not expired yet") {
+                val cache = makeMemoryCache()
+                cache.set("abc", "value")
+
+                val result = cache.isExpiredAfter("abc", DateTime.now())
+
+                assertFalse(result)
+            }
+
+            it("returns true if the key already expired") {
+                val cache = makeMemoryCache()
+                cache.set("abc", "value")
+
+                val result = cache.isExpiredAfter("abc", DateTime.now().plus(86400))
+
+                assertTrue(result)
             }
         }
     }

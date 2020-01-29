@@ -105,9 +105,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
     }
 
     private fun encryptPassword(info: ProviderInfo, credentials: ApiCredentials, password: String) {
-        println("encryptPassword $password")
         PasswordSafe.instance.setPassword(makeCredentialAttribute(info, credentials), password)
-        println("decryptPassword ${decryptPassword(info, credentials)}")
     }
 
     private fun decryptPassword(info: ProviderInfo, credentials: ApiCredentials): String? {

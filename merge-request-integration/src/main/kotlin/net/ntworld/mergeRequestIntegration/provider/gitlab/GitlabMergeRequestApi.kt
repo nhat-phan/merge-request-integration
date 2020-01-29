@@ -110,6 +110,14 @@ class GitlabMergeRequestApi(
         }
     }
 
+    override fun findOrFail(projectId: String, mergeRequestId: String): MergeRequest  {
+        val mergeRequest = find(projectId, mergeRequestId)
+        if (null === mergeRequest) {
+            throw Exception("MergeRequest $mergeRequestId not found.")
+        }
+        return mergeRequest
+    }
+
     private fun resolveState(state: MergeRequestState): Constants.MergeRequestState = when (state) {
         MergeRequestState.ALL -> Constants.MergeRequestState.ALL
         MergeRequestState.OPENED -> Constants.MergeRequestState.OPENED

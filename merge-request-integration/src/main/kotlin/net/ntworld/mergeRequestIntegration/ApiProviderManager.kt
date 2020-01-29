@@ -7,6 +7,7 @@ import net.ntworld.mergeRequest.api.ApiProvider
 import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.internal.ProviderDataImpl
 import net.ntworld.mergeRequestIntegration.internal.UserImpl
+import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabApiProvider
 
@@ -71,7 +72,11 @@ object ApiProviderManager {
         credentials: ApiCredentials
     ): ApiProvider {
         val created = when (info.id) {
-            Gitlab.id -> GitlabApiProvider(credentials = credentials, infrastructure = infrastructure)
+            Gitlab.id -> GitlabApiProvider(
+                credentials = credentials,
+                infrastructure = infrastructure,
+                cache = MemoryCache()
+            )
             else -> throw Exception("Cannot create ApiProvider ${info.id}")
         }
         api[id] = created
