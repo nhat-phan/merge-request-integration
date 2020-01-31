@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets
 import java.security.Signature
 import java.security.cert.*
 import java.util.*
+import java.util.Base64.getMimeDecoder
 
 /**
  * @author Eugene Zhuravlev
@@ -157,30 +158,28 @@ object CheckLicense {
 
     private fun isLicenseServerStampValid(serverStamp: String): Boolean {
         try {
-            val parts = serverStamp.split(":").toTypedArray()
-            val base64 = Base64.getMimeDecoder()
-            val timeStamp = parts[0].toLong()
-            val machineId = parts[1]
-            val signatureType = parts[2]
-            val signatureBytes =
-                base64.decode(parts[3].toByteArray(StandardCharsets.UTF_8))
-            val certBytes =
-                base64.decode(parts[4].toByteArray(StandardCharsets.UTF_8))
+            val parts = serverStamp.split(":".toRegex()).toTypedArray()
+            val base64 = getMimeDecoder()
+            val expectedMachineId = parts[0]
+            val timeStamp = parts[1].toLong()
+            val machineId = parts[2]
+            val signatureType = parts[3]
+            val signatureBytes = base64.decode(parts[4].toByteArray(StandardCharsets.UTF_8))
+            val certBytes = base64.decode(parts[5].toByteArray(StandardCharsets.UTF_8))
             val intermediate: MutableCollection<ByteArray> =
                 ArrayList()
-            for (idx in 5 until parts.size) {
+            for (idx in 6 until parts.size) {
                 intermediate.add(base64.decode(parts[idx].toByteArray(StandardCharsets.UTF_8)))
             }
             val sig = Signature.getInstance(signatureType)
             // the last parameter of 'createCertificate()' set to 'true' causes the certificate to be checked for
             // expiration. Expired certificates from a license server cannot be trusted
             sig.initVerify(createCertificate(certBytes, intermediate, true))
-            sig.update((parts[0] + ":" + parts[1]).toByteArray(StandardCharsets.UTF_8))
+            sig.update("$timeStamp:$machineId".toByteArray(StandardCharsets.UTF_8))
             if (sig.verify(signatureBytes)) {
-                val thisMachineId = PermanentInstallationID.get()
                 // machineId must match the machineId from the server reply and
                 // server reply should be relatively 'fresh'
-                return thisMachineId == machineId && Math.abs(System.currentTimeMillis() - timeStamp) < TIMESTAMP_VALIDITY_PERIOD_MS
+                return expectedMachineId == machineId && Math.abs(System.currentTimeMillis() - timeStamp) < TIMESTAMP_VALIDITY_PERIOD_MS
             }
         } catch (ignored: Throwable) { // consider serverStamp invalid
         }
