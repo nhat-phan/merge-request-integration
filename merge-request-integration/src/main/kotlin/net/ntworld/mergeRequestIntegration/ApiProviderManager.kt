@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegration
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequest.api.ApiOptions
 import net.ntworld.mergeRequest.api.ApiProvider
 import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.internal.ProviderDataImpl
@@ -17,6 +18,10 @@ object ApiProviderManager {
 
     val providerDataCollection
         get() = data.values.toList()
+
+    fun updateApiOptions(options: ApiOptions) {
+        api.forEach { it.value.setOptions(options) }
+    }
 
     fun register(
         infrastructure: Infrastructure,

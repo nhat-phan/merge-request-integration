@@ -17,4 +17,6 @@ interface ApiProvider {
     val project: ProjectApi
 
     val comment: CommentApi
+
+    fun setOptions(options: ApiOptions)
 }

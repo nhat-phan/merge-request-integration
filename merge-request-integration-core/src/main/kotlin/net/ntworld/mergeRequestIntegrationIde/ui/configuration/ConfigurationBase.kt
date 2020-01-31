@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.openapi.options.SearchableConfigurable
+import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import javax.swing.JComponent
@@ -28,6 +29,7 @@ abstract class ConfigurationBase : SearchableConfigurable {
     override fun apply() {
         ApplicationService.instance.updateSettings(myCurrentSettings)
         myInitializedSettings = myCurrentSettings
+        ApiProviderManager.updateApiOptions(myCurrentSettings.toApiOptions())
     }
 
     override fun reset() {

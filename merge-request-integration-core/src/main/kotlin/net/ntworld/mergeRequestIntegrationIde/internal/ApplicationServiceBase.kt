@@ -6,6 +6,7 @@ import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.internal.option.EnableRequestCacheOption
 import net.ntworld.mergeRequestIntegrationIde.internal.option.SettingOption
@@ -63,6 +64,7 @@ open class ApplicationServiceBase : ApplicationService, ServiceBase() {
             }
         }
         myApplicationSettings = settings
+        ApiProviderManager.updateApiOptions(settings.toApiOptions())
     }
 
     override fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials) {

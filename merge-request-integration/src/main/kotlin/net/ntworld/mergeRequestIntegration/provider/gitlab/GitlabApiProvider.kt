@@ -11,17 +11,21 @@ class GitlabApiProvider(
 
     override val cache: Cache
 ) : ApiProvider {
+    private val myMergeRequestApi = GitlabMergeRequestApiCache(
+        GitlabMergeRequestApi(infrastructure, credentials), cache
+    )
 
     override val info: ProviderInfo = Gitlab
 
     override val user: UserApi = GitlabUserApi(infrastructure, credentials)
 
-    override val mergeRequest: MergeRequestApi = GitlabMergeRequestApiCache(
-        GitlabMergeRequestApi(infrastructure, credentials), cache
-    )
+    override val mergeRequest: MergeRequestApi = myMergeRequestApi
 
     override val project: ProjectApi = GitlabProjectApi(infrastructure, credentials)
 
     override val comment: CommentApi = GitlabCommentApi(infrastructure, credentials)
 
+    override fun setOptions(options: ApiOptions) {
+        myMergeRequestApi.options = options
+    }
 }
