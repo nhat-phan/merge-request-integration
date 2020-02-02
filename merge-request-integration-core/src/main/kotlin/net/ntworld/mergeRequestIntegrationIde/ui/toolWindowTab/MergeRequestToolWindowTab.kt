@@ -4,12 +4,14 @@ import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.content.ContentManager
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.*
 import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
 
 class MergeRequestToolWindowTab(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val contentManager: ContentManager,
     private val providerData: ProviderData
@@ -20,8 +22,8 @@ class MergeRequestToolWindowTab(
             0.35f
         )
     }
-    private val myCollection: MergeRequestCollectionUI = MergeRequestCollection(ideaProject, providerData)
-    private val myDetails: MergeRequestDetailsUI = MergeRequestDetails(ideaProject, contentManager, providerData)
+    private val myCollection: MergeRequestCollectionUI = MergeRequestCollection(applicationService, ideaProject, providerData)
+    private val myDetails: MergeRequestDetailsUI = MergeRequestDetails(applicationService, ideaProject, contentManager, providerData)
     private val myCollectionListener = object : MergeRequestCollectionEventListener {
         override fun mergeRequestUnselected() {
             myDetails.hide()

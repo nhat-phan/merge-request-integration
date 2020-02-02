@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.SearchMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.PaginationToolbar
@@ -16,6 +17,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.PaginationToolbarUI
 import javax.swing.JComponent
 
 abstract class AbstractMergeRequestCollection(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData
 ) : MergeRequestCollectionUI {
@@ -90,6 +92,7 @@ abstract class AbstractMergeRequestCollection(
     private fun fetchPage(page: Int) {
         if (providerData.status == ProviderStatus.ACTIVE) {
             val task = SearchMergeRequestTask(
+                applicationService = applicationService,
                 ideaProject = ideaProject,
                 providerData = providerData,
                 filtering = myFilter,

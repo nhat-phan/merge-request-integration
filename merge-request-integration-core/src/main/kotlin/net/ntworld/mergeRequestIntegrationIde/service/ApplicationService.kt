@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.service
 
-import com.intellij.openapi.components.ServiceManager
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
@@ -23,9 +22,4 @@ interface ApplicationService {
     fun isLegal(providerData: ProviderData): Boolean
 
     fun updateSettings(settings: ApplicationSettings)
-
-    companion object {
-        val instance: ApplicationService
-            get() = ServiceManager.getService(ApplicationService::class.java)
-    }
 }

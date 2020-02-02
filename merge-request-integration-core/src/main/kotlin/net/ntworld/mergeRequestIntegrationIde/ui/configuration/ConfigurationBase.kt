@@ -6,9 +6,11 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import javax.swing.JComponent
 
-abstract class ConfigurationBase : SearchableConfigurable {
-    private var myInitializedSettings = ApplicationService.instance.settings
-    private var myCurrentSettings = ApplicationService.instance.settings
+abstract class ConfigurationBase(
+    private val applicationService: ApplicationService
+) : SearchableConfigurable {
+    private var myInitializedSettings = applicationService.settings
+    private var myCurrentSettings = applicationService.settings
     private val mySettingsUI: SettingsUI = SettingsConfiguration()
     private val mySettingsListener = object: SettingsUI.Listener {
         override fun change(settings: ApplicationSettings) {
@@ -27,7 +29,7 @@ abstract class ConfigurationBase : SearchableConfigurable {
     }
 
     override fun apply() {
-        ApplicationService.instance.updateSettings(myCurrentSettings)
+        applicationService.updateSettings(myCurrentSettings)
         myInitializedSettings = myCurrentSettings
         ApiProviderManager.updateApiOptions(myCurrentSettings.toApiOptions())
     }

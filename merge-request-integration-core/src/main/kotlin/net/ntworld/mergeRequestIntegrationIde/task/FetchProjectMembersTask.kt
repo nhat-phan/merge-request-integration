@@ -14,6 +14,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import com.intellij.openapi.project.Project as IdeaProject
 
 class FetchProjectMembersTask(
+    private val applicationService: ApplicationService,
     ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val addEmptyMember: Boolean,
@@ -30,7 +31,7 @@ class FetchProjectMembersTask(
         try {
             listener.taskStarted()
             val query = GetProjectMembersQuery.make(providerData.id)
-            val result = ApplicationService.instance.infrastructure.queryBus() process query
+            val result = applicationService.infrastructure.queryBus() process query
             val data = result.members
                 .filter { it.status == UserStatus.ACTIVE }
                 .sortedBy { it.name }

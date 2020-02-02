@@ -10,8 +10,7 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceInterface="net.ntworld.mergeRequestIntegrationIde.service.ApplicationService"
-                            serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ApplicationServiceImpl"/>
+        <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ApplicationServiceImpl"/>
 
         <projectService serviceInterface="net.ntworld.mergeRequestIntegrationIde.service.ProjectService"
                         serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ProjectServiceImpl"/>

@@ -26,7 +26,9 @@ import java.awt.event.ActionListener
 import java.util.*
 import javax.swing.*
 
-class CommentPanel : Component {
+class CommentPanel(
+    private val applicationService: ApplicationService
+) : Component {
     var myWholePanel: JPanel? = null
     var myFullName: JLabel? = null
     var myUsername: JLabel? = null
@@ -70,7 +72,7 @@ class CommentPanel : Component {
                 comment = comment
             )
         }
-        ApplicationService.instance.infrastructure.commandBus() process command
+        applicationService.infrastructure.commandBus() process command
         dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment)
     }
     private val myDeleteButtonActionListener = ActionListener {
@@ -85,7 +87,7 @@ class CommentPanel : Component {
             "Do you want to delete the comment?", "Are you sure", Messages.getQuestionIcon()
         )
         if (result == Messages.YES) {
-            ApplicationService.instance.infrastructure.commandBus() process DeleteCommentCommand.make(
+            applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id,
                 comment = comment

@@ -24,6 +24,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
 
 abstract class AbstractConnectionsConfigurable(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject
 ) : SearchableConfigurable, Disposable {
     private val logger = Logger.getInstance(AbstractConnectionsConfigurable::class.java)
@@ -170,7 +171,7 @@ abstract class AbstractConnectionsConfigurable(
         }
 
         myInitializedData.clear()
-        val appConnections = ApplicationService.instance.getProviderConfigurations()
+        val appConnections = applicationService.getProviderConfigurations()
         ProjectService.getInstance(ideaProject).getProviderConfigurations().forEach {
             myInitializedData[it.id] = MyProviderSettings(
                 id = it.id,
@@ -287,7 +288,7 @@ abstract class AbstractConnectionsConfigurable(
 
     override fun apply() {
         logger.info("Delete global connections")
-        ApplicationService.instance.removeAllProviderConfigurations()
+        applicationService.removeAllProviderConfigurations()
 
         val projectService = ProjectService.getInstance(ideaProject)
         for (entry in myData) {
@@ -299,7 +300,7 @@ abstract class AbstractConnectionsConfigurable(
 
             if (entry.value.sharable) {
                 logger.info("Save connection ${entry.key} to global")
-                ApplicationService.instance.addProviderConfiguration(
+                applicationService.addProviderConfiguration(
                     id = entry.value.id.trim(),
                     info = entry.value.info,
                     credentials = entry.value.credentials

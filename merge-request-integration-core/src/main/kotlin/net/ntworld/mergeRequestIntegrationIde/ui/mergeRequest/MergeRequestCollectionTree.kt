@@ -6,6 +6,7 @@ import com.intellij.ui.treeStructure.Tree
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import java.awt.Component
 import javax.swing.JComponent
 import javax.swing.JTree
@@ -14,9 +15,10 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class MergeRequestCollectionTree(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData
-) : AbstractMergeRequestCollection(ideaProject, providerData), TreeCellRenderer {
+) : AbstractMergeRequestCollection(applicationService, ideaProject, providerData), TreeCellRenderer {
 
     private val myTree = Tree()
     private val myRoot = DefaultMutableTreeNode()

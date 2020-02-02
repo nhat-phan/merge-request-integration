@@ -24,6 +24,7 @@ import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
 class MergeRequestDetailsToolbar(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val details: MergeRequestDetailsUI
@@ -124,7 +125,7 @@ class MergeRequestDetailsToolbar(
             val mr = myMergeRequest
             if (null !== approval && null !== mr) {
                 myApprovalPanel.hide()
-                ApplicationService.instance.infrastructure.commandBus() process ApproveMergeRequestCommand.make(
+                applicationService.infrastructure.commandBus() process ApproveMergeRequestCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mr.id,
                     sha = mr.diffReference!!.headHash
@@ -138,7 +139,7 @@ class MergeRequestDetailsToolbar(
             val mr = myMergeRequest
             if (null !== approval && null !== mr) {
                 myApprovalPanel.hide()
-                ApplicationService.instance.infrastructure.commandBus() process UnapproveMergeRequestCommand.make(
+                applicationService.infrastructure.commandBus() process UnapproveMergeRequestCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mr.id
                 )

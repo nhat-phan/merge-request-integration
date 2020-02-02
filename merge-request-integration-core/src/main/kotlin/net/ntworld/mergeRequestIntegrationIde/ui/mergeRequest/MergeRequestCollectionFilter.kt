@@ -13,6 +13,7 @@ import com.intellij.util.ui.JBUI
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestFilterPropertiesPanel
 import java.awt.Point
 import java.awt.event.KeyEvent
@@ -23,6 +24,7 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
 class MergeRequestCollectionFilter(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData
 ) : MergeRequestCollectionFilterUI {
@@ -40,7 +42,7 @@ class MergeRequestCollectionFilter(
         true
     )
     private val myAdvanceFilterButton: AdvanceFilterButton = AdvanceFilterButton(
-        ideaProject, providerData, myToolbar.component, myFilterPropertiesChanged
+        applicationService, ideaProject, providerData, myToolbar.component, myFilterPropertiesChanged
     )
 
     private val myPanel by lazy {
@@ -138,6 +140,7 @@ class MergeRequestCollectionFilter(
     }
 
     private class AdvanceFilterButton(
+        private val applicationService: ApplicationService,
         private val ideaProject: IdeaProject,
         private val providerData: ProviderData,
         private val preferableFocusComponent: JComponent,
@@ -148,7 +151,7 @@ class MergeRequestCollectionFilter(
             myIsReady = true
         }
         private val myFilterPropertiesPanel = MergeRequestFilterPropertiesPanel(
-            ideaProject, providerData, onChanged, myFilterPropertiesReady
+            applicationService, ideaProject, providerData, onChanged, myFilterPropertiesReady
         )
 
         override fun actionPerformed(e: AnActionEvent) {

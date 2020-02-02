@@ -13,6 +13,7 @@ import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class GetCommitsTask(
+    private val applicationService: ApplicationService,
     ideaProject: Project,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
@@ -30,7 +31,7 @@ class GetCommitsTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = ApplicationService.instance.infrastructure.queryBus() process GetCommitsQuery.make(
+            val result = applicationService.infrastructure.queryBus() process GetCommitsQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestInfo.id
             )

@@ -8,6 +8,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.AbstractMergeRequestCollection
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestItemPanel
@@ -18,11 +19,12 @@ import javax.swing.ListCellRenderer
 import javax.swing.ListSelectionModel
 
 class ProviderDetailsMRList(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val filterBy: GetMergeRequestFilter,
     private val orderBy:  MergeRequestOrdering
-): AbstractMergeRequestCollection(ideaProject, providerData) {
+): AbstractMergeRequestCollection(applicationService, ideaProject, providerData) {
     private var isLoaded = false
     private val myList = JBList<MergeRequestInfo>()
     private val myItemPanels = mutableMapOf<Int, MergeRequestItemPanel>()

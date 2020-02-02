@@ -15,6 +15,7 @@ import net.ntworld.mergeRequestIntegrationIde.SEARCH_MERGE_REQUEST_ITEMS_PER_PAG
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class SearchMergeRequestTask(
+    private val applicationService: ApplicationService,
     ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val filtering: GetMergeRequestFilter,
@@ -43,7 +44,7 @@ class SearchMergeRequestTask(
                 page = currentPage,
                 itemsPerPage = SEARCH_MERGE_REQUEST_ITEMS_PER_PAGE
             )
-            val result = ApplicationService.instance.infrastructure.queryBus() process query
+            val result = applicationService.infrastructure.queryBus() process query
             listener.dataReceived(result.mergeRequests, currentPage, result.totalPages, result.totalItems)
             listener.taskEnded()
         } catch (exception: Exception) {

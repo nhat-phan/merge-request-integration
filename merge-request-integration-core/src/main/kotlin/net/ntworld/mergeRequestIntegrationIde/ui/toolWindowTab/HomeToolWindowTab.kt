@@ -19,6 +19,7 @@ import javax.swing.JPanel
 import com.intellij.openapi.project.Project as IdeaProject
 
 class HomeToolWindowTab(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val toolWindow: ToolWindow
 ) : Component {
@@ -63,7 +64,8 @@ class HomeToolWindowTab(
         override fun providerSelected(providerData: ProviderData) {
             if (null === myDetailPanels[providerData.id]) {
                 val details = ProviderDetails(
-                    ideaProject, toolWindow, myCollectionPanel.getListEventDispatcher(), providerData
+                    applicationService, ideaProject, toolWindow,
+                    myCollectionPanel.getListEventDispatcher(), providerData
                 )
                 myDetailPanels[providerData.id] = details
                 details.listEventDispatcher.addListener(myDetailsListEventListener)
@@ -124,7 +126,7 @@ class HomeToolWindowTab(
     }
 
     private fun findNameForTab(providerData: ProviderData): String {
-        if (ApplicationService.instance.isLegal(providerData)) {
+        if (this.applicationService.isLegal(providerData)) {
             return providerData.name
         }
         return if (providerData.name.length < 20) {
@@ -136,7 +138,9 @@ class HomeToolWindowTab(
 
     private fun openTab(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo? = null) {
         if (null === myContents[providerData.id]) {
-            val toolWindowTab = MergeRequestToolWindowTab(ideaProject, toolWindow.contentManager, providerData)
+            val toolWindowTab = MergeRequestToolWindowTab(
+                applicationService, ideaProject, toolWindow.contentManager, providerData
+            )
             myMRToolWindowTabs[providerData.id] = toolWindowTab
 
             val content = toolWindow.contentManager.factory.createContent(

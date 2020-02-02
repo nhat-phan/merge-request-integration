@@ -23,6 +23,7 @@ import java.util.*
 import javax.swing.*
 
 class CommentEditorPanel(
+    private val applicationService: ApplicationService,
     private val ideaProject: Project,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
@@ -119,7 +120,7 @@ class CommentEditorPanel(
     private fun createComment() {
         if (!myAddDiffComment!!.isSelected) {
             try {
-                ApplicationService.instance.infrastructure.commandBus() process CreateCommentCommand.make(
+                applicationService.infrastructure.commandBus() process CreateCommentCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mergeRequest.id,
                     position = null,
@@ -133,7 +134,7 @@ class CommentEditorPanel(
         val position = item.position
         if (null !== position) {
             try {
-                ApplicationService.instance.infrastructure.commandBus() process CreateCommentCommand.make(
+                applicationService.infrastructure.commandBus() process CreateCommentCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mergeRequest.id,
                     position = rebuildPosition(position),
@@ -184,7 +185,7 @@ class CommentEditorPanel(
     private fun replyComment() {
         val repliedComment = comment
         if (null !== repliedComment) {
-            ApplicationService.instance.infrastructure.commandBus() process ReplyCommentCommand.make(
+            applicationService.infrastructure.commandBus() process ReplyCommentCommand.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id,
                 repliedComment = repliedComment,

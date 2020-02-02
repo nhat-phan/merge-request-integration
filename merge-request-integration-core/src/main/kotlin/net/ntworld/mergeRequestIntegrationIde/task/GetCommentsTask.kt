@@ -13,6 +13,7 @@ import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class GetCommentsTask(
+    private val applicationService: ApplicationService,
     ideaProject: Project,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
@@ -30,7 +31,7 @@ class GetCommentsTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = ApplicationService.instance.infrastructure.queryBus() process GetCommentsQuery.make(
+            val result = applicationService.infrastructure.queryBus() process GetCommentsQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id
             )

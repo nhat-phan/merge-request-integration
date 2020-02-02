@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.CommentEditorPanel
@@ -14,10 +15,13 @@ import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class CommentDetails(private val ideaProject: IdeaProject) : CommentDetailsUI {
+class CommentDetails(
+    private val applicationService: ApplicationService,
+    private val ideaProject: IdeaProject
+) : CommentDetailsUI {
     override val dispatcher = EventDispatcher.create(CommentDetailsUI.Listener::class.java)
 
-    private val myCommentPanel = CommentPanel()
+    private val myCommentPanel = CommentPanel(applicationService)
     private val myCommentPanelComponent = myCommentPanel.createComponent()
     private val myCommentEditorPanelMap = mutableMapOf<CommentStore.Item, CommentEditorPanel>()
     private val myCommentEditorPanelComponentMap = mutableMapOf<CommentStore.Item, Component>()
@@ -90,7 +94,7 @@ class CommentDetails(private val ideaProject: IdeaProject) : CommentDetailsUI {
 
         if (!myCommentEditorPanelMap.containsKey(item)) {
             val commentEditorPanel = CommentEditorPanel(
-                ideaProject, providerData, mergeRequest, comment, item
+                applicationService, ideaProject, providerData, mergeRequest, comment, item
             )
             commentEditorPanel.addDestroyListener(myCommentEditorPanelListener)
             val commentEditorPanelComponent = commentEditorPanel.createComponent()

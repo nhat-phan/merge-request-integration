@@ -13,6 +13,7 @@ import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class FindApprovalTask(
+    private val applicationService: ApplicationService,
     ideaProject: Project,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
@@ -30,7 +31,7 @@ class FindApprovalTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = ApplicationService.instance.infrastructure.queryBus() process FindApprovalQuery.make(
+            val result = applicationService.infrastructure.queryBus() process FindApprovalQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestInfo.id
             )

@@ -8,21 +8,23 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import javax.swing.JComponent
 
 class MergeRequestCollection(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData
 ) : MergeRequestCollectionUI {
     private val myComponent = SimpleToolWindowPanel(true, true)
     private val myFilter: MergeRequestCollectionFilterUI by lazy {
-        MergeRequestCollectionFilter(ideaProject, providerData)
+        MergeRequestCollectionFilter(applicationService, ideaProject, providerData)
     }
     private val myTree: MergeRequestCollectionUI by lazy {
-        val tree = MergeRequestCollectionTree(ideaProject, providerData)
+        val tree = MergeRequestCollectionTree(applicationService, ideaProject, providerData)
         tree.fetchData()
         tree
     }

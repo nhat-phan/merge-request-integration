@@ -12,6 +12,7 @@ import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class FindMergeRequestTask(
+    private val applicationService: ApplicationService,
     ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val mergeRequestId: String,
@@ -29,7 +30,7 @@ class FindMergeRequestTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = ApplicationService.instance.infrastructure.queryBus() process FindMergeRequestQuery.make(
+            val result = applicationService.infrastructure.queryBus() process FindMergeRequestQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestId
             )

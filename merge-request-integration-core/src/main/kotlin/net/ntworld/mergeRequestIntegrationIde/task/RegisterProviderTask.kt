@@ -11,6 +11,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 
 class RegisterProviderTask(
+    private val applicationService: ApplicationService,
     ideaProject: Project,
     private val id: String,
     private val name: String,
@@ -28,7 +29,7 @@ class RegisterProviderTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             val providerData = ApiProviderManager.register(
-                infrastructure = ApplicationService.instance.infrastructure,
+                infrastructure = applicationService.infrastructure,
                 id = id,
                 name = name,
                 info = settings.info,

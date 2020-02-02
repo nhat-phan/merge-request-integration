@@ -15,6 +15,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 class ProviderInformationPanel(
+    private val applicationService: ApplicationService,
     private val providerData: ProviderData
 ): Component {
     var myWholePanel: JPanel? = null
@@ -51,7 +52,7 @@ class ProviderInformationPanel(
             BrowserUtil.open(providerData.project.url)
         }
 
-        val isLegal = ApplicationService.instance.isLegal(providerData)
+        val isLegal = this.applicationService.isLegal(providerData)
         if (!isLegal) {
             myLegalStatus!!.text = "Illegal"
             myLegalStatus!!.foreground = Color(0xBA, 0x3F, 0x3C)

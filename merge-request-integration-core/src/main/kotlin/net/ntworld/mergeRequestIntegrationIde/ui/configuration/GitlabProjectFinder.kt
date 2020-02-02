@@ -22,6 +22,7 @@ import javax.swing.event.DocumentListener
 import com.intellij.openapi.project.Project as IdeaProject
 
 class GitlabProjectFinder(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val myTerm: JTextField,
     private val myProjectList: JList<Project>,
@@ -100,7 +101,7 @@ class GitlabProjectFinder(
 
     private fun triggerSearchTask(term: String) {
         myProjectChangedDispatcher.multicaster.projectChanged("")
-        MySearchTask(term, this).start()
+        MySearchTask(applicationService, term, this).start()
     }
 
     fun addProjectChangedListener(listener: ProjectChangedListener) {
@@ -140,9 +141,11 @@ class GitlabProjectFinder(
         fun searchFinished(term: String, projects: List<Project>)
     }
 
-    private class MySearchTask(private val term: String, private val self: GitlabProjectFinder) : Task.Backgroundable(
-        self.ideaProject, "Searching gitlab projects...", false
-    ) {
+    private class MySearchTask(
+        private val applicationService: ApplicationService,
+        private val term: String,
+        private val self: GitlabProjectFinder
+    ) : Task.Backgroundable(self.ideaProject, "Searching gitlab projects...", false) {
         fun start() {
             if (self.myIsTermTouched) {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(this, Indicator(this))
@@ -156,7 +159,7 @@ class GitlabProjectFinder(
                 return
             }
 
-            val out = ApplicationService.instance.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
+            val out = applicationService.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
                 credentials = credentials,
                 term = term,
                 owner = self.mySearchOwn.isSelected,

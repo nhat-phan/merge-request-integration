@@ -8,12 +8,14 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.UserInfo
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.FetchProjectMembersTask
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.awt.event.ActionListener
 import javax.swing.*
 
 class MergeRequestFilterPropertiesPanel(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val onChanged: (() -> Unit),
@@ -68,7 +70,7 @@ class MergeRequestFilterPropertiesPanel(
     }
 
     init {
-        val task = FetchProjectMembersTask(ideaProject, providerData, true, myListener)
+        val task = FetchProjectMembersTask(applicationService, ideaProject, providerData, true, myListener)
         if (!isFetched) {
             task.start()
         }
