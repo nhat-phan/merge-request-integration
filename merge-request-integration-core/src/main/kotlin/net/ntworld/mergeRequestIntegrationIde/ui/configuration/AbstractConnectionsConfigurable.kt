@@ -56,13 +56,7 @@ abstract class AbstractConnectionsConfigurable(
                 count++
                 name = "Connection $count"
             }
-            val id = findIdFromName(name)
-            val data = MyProviderSettings.makeDefault(id, makeProviderInfo())
-            val connection = makeConnectionWithEventListener()
-            connection.setName(name)
-
-            myData[id] = data
-            addConnectionToTabPane(data, connection, true)
+            addNewConnection(name)
         }
     }
     private val myConnectionListener = object : ConnectionUI.Listener {
@@ -212,6 +206,9 @@ abstract class AbstractConnectionsConfigurable(
         }
         myIsInitialized = true
         if (initUI) {
+            if (myInitializedData.isEmpty()) {
+                addNewConnection("Default")
+            }
             myInitializedData.forEach { (key, value) ->
                 val connectionUI = initConnection(value)
                 addConnectionToTabPane(value, connectionUI)
@@ -247,6 +244,16 @@ abstract class AbstractConnectionsConfigurable(
         if (selected) {
             myTabs.getTabs().select(tabInfo, true)
         }
+    }
+
+    private fun addNewConnection(name: String) {
+        val id = findIdFromName(name)
+        val data = MyProviderSettings.makeDefault(id, makeProviderInfo())
+        val connection = makeConnectionWithEventListener()
+        connection.setName(name)
+
+        myData[id] = data
+        addConnectionToTabPane(data, connection, true)
     }
 
     override fun isModified(): Boolean {
@@ -329,7 +336,10 @@ abstract class AbstractConnectionsConfigurable(
         myTabInfos.clear()
     }
 
-    override fun createComponent(): JComponent? = myTabs.component
+    override fun createComponent(): JComponent? {
+        val component = myTabs.component
+        return component
+    }
 
     private fun validateProviderSettings(providerSettings: ProviderSettings): Boolean {
         return validateConnection(providerSettings.credentials) &&

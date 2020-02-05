@@ -20,7 +20,7 @@
                              displayName="Merge Request Integration CE"
                              instance="net.ntworld.mergeRequestIntegrationIdeCE.Configuration"/>
         <projectConfigurable groupId="merge-request-integration-ce"
-                             id="merge-request-integration-gitlab"
+                             id="MRI:gitlab-ce"
                              displayName="Gitlab"
                              instance="net.ntworld.mergeRequestIntegrationIdeCE.GitlabConnectionsConfigurable"/>
 
