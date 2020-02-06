@@ -7,11 +7,16 @@ import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
-open class AddCommentEditorActionBase : EditorAction(Handler) {
+open class AddCommentEditorActionBase(
+    private val applicationService: ApplicationService
+) : EditorAction(MyHandler(applicationService)) {
 
-    companion object Handler : EditorActionHandler() {
+    private class MyHandler(
+        private val applicationService: ApplicationService
+    ) : EditorActionHandler() {
         private fun findPositionForCurrentCaret(
             editor: Editor,
             caret: Caret?,
@@ -22,7 +27,7 @@ open class AddCommentEditorActionBase : EditorAction(Handler) {
                 return null
             }
 
-            val projectService = ProjectService.getInstance(ideaProject)
+            val projectService = applicationService.getProjectService(ideaProject)
             val codeReviewManager = projectService.codeReviewManager
             if (null === codeReviewManager) {
                 return null
@@ -50,7 +55,7 @@ open class AddCommentEditorActionBase : EditorAction(Handler) {
                 return
             }
 
-            val projectService = ProjectService.getInstance(editor.project!!)
+            val projectService = applicationService.getProjectService(editor.project!!)
             val providerData = projectService.codeReviewManager!!.providerData
             val mergeRequest = projectService.codeReviewManager!!.mergeRequest
             val item = CommentStoreItem.createNewItem(

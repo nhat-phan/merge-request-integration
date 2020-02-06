@@ -24,7 +24,7 @@ class MergeRequestCommentsTab(
         MergeRequestCommentsTab::class.java.canonicalName,
         0.5f
     )
-    private val myCollection : CommentCollectionUI = CommentCollection(ideaProject)
+    private val myCollection : CommentCollectionUI = CommentCollection(applicationService, ideaProject)
     private val myCollectionEventListener = object: CommentCollectionUI.Listener {
         override fun commentUnselected() {
             myDetails.hide()

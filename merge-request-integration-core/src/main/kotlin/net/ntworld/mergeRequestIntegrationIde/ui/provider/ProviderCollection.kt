@@ -7,6 +7,7 @@ import com.intellij.openapi.wm.ToolWindow
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
@@ -14,10 +15,11 @@ import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
 
 class ProviderCollection(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val toolWindow: ToolWindow
 ): Component, Disposable {
-    private val myProjectService = ProjectService.getInstance(ideaProject)
+    private val myProjectService = applicationService.getProjectService(ideaProject)
     private val myListUI: ProviderCollectionListUI by lazy {
         val list = ProviderCollectionList()
         list.setProviders(myProjectService.registeredProviders)

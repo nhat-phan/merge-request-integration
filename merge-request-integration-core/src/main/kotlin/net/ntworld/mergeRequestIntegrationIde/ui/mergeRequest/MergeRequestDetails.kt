@@ -49,7 +49,7 @@ class MergeRequestDetails(
         tabInfo
     }
 
-    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab(ideaProject)
+    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab(applicationService, ideaProject)
     private val myCommitsTabInfo: TabInfo by lazy {
         val tabInfo = TabInfo(myCommitsTab.createComponent())
         tabInfo.text = "Commit"
@@ -167,7 +167,7 @@ class MergeRequestDetails(
         }
 
         override fun displayCommentRequested(comment: Comment) {
-            if (ProjectService.getInstance(ideaProject).isDoingCodeReview()) {
+            if (applicationService.getProjectService(ideaProject).isDoingCodeReview()) {
                 myTabs.getTabs().select(myCommentsTabInfo, true)
             }
         }
@@ -187,7 +187,7 @@ class MergeRequestDetails(
 
         myCommitsTab.dispatcher.addListener(mySelectCommitsListener)
         myCommentsTab.dispatcher.addListener(myCommentsTabListener)
-        ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
+        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
     override fun hide() {
@@ -203,7 +203,7 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequestInfo(mergeRequestInfo: MergeRequestInfo) {
-        FetchService.start(ideaProject, providerData, mergeRequestInfo)
+        FetchService.start(applicationService, ideaProject, providerData, mergeRequestInfo)
 
         myInfoTab.setMergeRequestInfo(mergeRequestInfo)
         myDescriptionTab.setMergeRequestInfo(providerData, mergeRequestInfo)

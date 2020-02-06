@@ -19,6 +19,6 @@ open class MainToolWindowFactoryBase(
         )
         home.isCloseable = false
         toolWindow.contentManager.addContent(home)
-        EditorWatcher.start(ideaProject, toolWindow)
+        EditorWatcher.start(applicationService, ideaProject, toolWindow)
     }
 }

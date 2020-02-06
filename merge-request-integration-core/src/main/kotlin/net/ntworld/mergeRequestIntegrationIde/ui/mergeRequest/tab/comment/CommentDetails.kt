@@ -40,7 +40,7 @@ class CommentDetails(
             }
             myCommentEditorPanelMap.remove(item)
             myCommentEditorPanelComponentMap.remove(item)
-            ProjectService.getInstance(ideaProject).commentStore.remove(item.id)
+            applicationService.getProjectService(ideaProject).commentStore.remove(item.id)
             dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest)
         }
     }

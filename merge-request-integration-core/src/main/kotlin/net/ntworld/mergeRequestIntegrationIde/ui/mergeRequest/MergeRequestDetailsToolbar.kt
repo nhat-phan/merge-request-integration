@@ -35,7 +35,7 @@ class MergeRequestDetailsToolbar(
     private var myMergeRequest: MergeRequest? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
     private var myComments: List<Comment>? = null
-    private val projectService = ProjectService.getInstance(ideaProject)
+    private val projectService = applicationService.getProjectService(ideaProject)
 
     private val myRefreshAction = object : AnAction("Refresh", "Refresh merge request info", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -275,9 +275,9 @@ class MergeRequestDetailsToolbar(
                 if (null !== comments) {
                     projectService.setCodeReviewComments(providerData, mr, comments)
                 }
-                CodeReviewService.start(ideaProject, providerData, mr, myReviewCommits)
+                CodeReviewService.start(applicationService, ideaProject, providerData, mr, myReviewCommits)
             } else {
-                CodeReviewService.stop(ideaProject, providerData, mr)
+                CodeReviewService.stop(applicationService, ideaProject, providerData, mr)
             }
         }
 

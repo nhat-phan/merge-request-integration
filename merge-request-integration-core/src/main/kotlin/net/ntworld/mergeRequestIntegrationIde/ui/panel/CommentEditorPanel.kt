@@ -142,7 +142,7 @@ class CommentEditorPanel(
                 )
                 dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment, item)
             } catch (exception: Exception) {
-                ProjectService.getInstance(ideaProject).notify(
+                applicationService.getProjectService(ideaProject).notify(
                     "There was an error from server. \n\n Please fill the line of old commit and new commit then try again.",
                     NotificationType.ERROR
                 )

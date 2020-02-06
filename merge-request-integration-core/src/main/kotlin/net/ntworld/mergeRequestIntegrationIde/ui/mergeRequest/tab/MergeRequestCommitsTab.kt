@@ -6,6 +6,7 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
@@ -16,6 +17,7 @@ import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
 
 class MergeRequestCommitsTab(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject
 ) : MergeRequestCommitsTabUI {
     override val dispatcher = EventDispatcher.create(MergeRequestCommitsTabUI.Listener::class.java)
@@ -53,7 +55,7 @@ class MergeRequestCommitsTab(
         mySplitter.secondComponent = myChanges.createComponent()
 
         myCollection.dispatcher.addListener(myCollectionListener)
-        ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
+        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
     override fun clear() {

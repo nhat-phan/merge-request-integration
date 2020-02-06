@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.service
 
+import com.intellij.openapi.project.Project
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
@@ -10,6 +11,8 @@ interface ApplicationService {
     val infrastructure: Infrastructure
 
     val settings: ApplicationSettings
+
+    fun getProjectService(project: Project): ProjectService
 
     fun supported(): List<ProviderInfo>
 
@@ -22,4 +25,5 @@ interface ApplicationService {
     fun isLegal(providerData: ProviderData): Boolean
 
     fun updateSettings(settings: ApplicationSettings)
+
 }

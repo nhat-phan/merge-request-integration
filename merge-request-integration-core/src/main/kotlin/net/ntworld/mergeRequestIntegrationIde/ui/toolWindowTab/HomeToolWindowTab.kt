@@ -24,7 +24,7 @@ class HomeToolWindowTab(
     private val toolWindow: ToolWindow
 ) : Component {
     private val mySplitter = OnePixelSplitter(HomeToolWindowTab::class.java.canonicalName, 0.35f)
-    private val myCollectionPanel = ProviderCollection(ideaProject, toolWindow)
+    private val myCollectionPanel = ProviderCollection(applicationService, ideaProject, toolWindow)
     private val myDetailPanels = mutableMapOf<String, ProviderDetailsUI>()
     private val myContents = mutableMapOf<String, Content>()
     private val myMRToolWindowTabs = mutableMapOf<String, MergeRequestToolWindowTab>()
@@ -122,7 +122,7 @@ class HomeToolWindowTab(
         toolWindow.contentManager.addContentManagerListener(myContentManagerListener)
         myCollectionPanel.addListEventListener(myCollectionPanelListEventListener)
         myCollectionPanel.addToolbarEventListener(myCollectionPanelToolbarEventListener)
-        ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
+        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
     private fun findNameForTab(providerData: ProviderData): String {

@@ -14,6 +14,7 @@ import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
@@ -29,7 +30,10 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
-class ChangesToolWindowTab(private val ideaProject: Project) : Component {
+class ChangesToolWindowTab(
+    private val applicationService: ApplicationService,
+    private val ideaProject: Project
+) : Component {
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel()
     private val myComponent = SimpleToolWindowPanel(true, true)
@@ -91,7 +95,7 @@ class ChangesToolWindowTab(private val ideaProject: Project) : Component {
     }
 
     init {
-        val projectService = ProjectService.getInstance(ideaProject)
+        val projectService = applicationService.getProjectService(ideaProject)
         myLabelEmpty.text = "Changes will be displayed when you do Code Review"
         myComponentEmpty.background = JBColor.background()
         myComponentEmpty.layout = GridBagLayout()

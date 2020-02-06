@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.DocumentMarkupModel
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.util.Key
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import javax.swing.Icon
@@ -15,7 +16,7 @@ object EditorCommentManager {
     private val LINE_THREADS_KEY = Key<MutableMap<Int, MutableList<String>>?>("MRI-LineThreads")
 
 
-    fun createPoint(editor: EditorEx, point: CommentPoint) {
+    fun createPoint(applicationService: ApplicationService, editor: EditorEx, point: CommentPoint) {
         val ideaProject = editor.project
         val commentData = findCommentPointsData(editor)
         if (null === ideaProject || commentData.containsKey(point.id)) {
@@ -28,7 +29,7 @@ object EditorCommentManager {
             val document = editor.document
             val makeupModel = DocumentMarkupModel.forDocument(document, ideaProject, true)
             val highlighter = makeupModel.addLineHighlighter(point.line, 0, null)
-            highlighter.gutterIconRenderer = MyCommentGutterIconRenderer(point)
+            highlighter.gutterIconRenderer = MyCommentGutterIconRenderer(applicationService, point)
 
             threadsInLine.add(point.comment.parentId)
         }
@@ -49,12 +50,17 @@ object EditorCommentManager {
         return if (null === data) mutableMapOf() else data
     }
 
-    private class MyCommentGutterIconRenderer(private val point: CommentPoint): GutterIconRenderer() {
+    private class MyCommentGutterIconRenderer(
+        private val applicationService: ApplicationService,
+        private val point: CommentPoint
+    ): GutterIconRenderer() {
         private val myClickAction = object : AnAction() {
             override fun actionPerformed(e: AnActionEvent) {
                 val project = e.project
                 if (null !== project) {
-                    ProjectService.getInstance(project).dispatcher.multicaster.displayCommentRequested(point.comment)
+                    applicationService.getProjectService(project).dispatcher.multicaster.displayCommentRequested(
+                        point.comment
+                    )
                 }
             }
         }

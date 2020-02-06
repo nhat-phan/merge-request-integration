@@ -172,7 +172,7 @@ abstract class AbstractConnectionsConfigurable(
 
         myInitializedData.clear()
         val appConnections = applicationService.getProviderConfigurations()
-        ProjectService.getInstance(ideaProject).getProviderConfigurations().forEach {
+        applicationService.getProjectService(ideaProject).getProviderConfigurations().forEach {
             myInitializedData[it.id] = MyProviderSettings(
                 id = it.id,
                 info = it.info,
@@ -290,7 +290,7 @@ abstract class AbstractConnectionsConfigurable(
         logger.info("Delete global connections")
         applicationService.removeAllProviderConfigurations()
 
-        val projectService = ProjectService.getInstance(ideaProject)
+        val projectService = applicationService.getProjectService(ideaProject)
         for (entry in myData) {
             if (entry.value.deleted) {
                 logger.info("Delete connection ${entry.key}")
@@ -320,7 +320,7 @@ abstract class AbstractConnectionsConfigurable(
 
         myData.clear()
         myIsInitialized = false
-        ProjectService.getInstance(ideaProject).clear()
+        applicationService.getProjectService(ideaProject).clear()
         buildInitializedData(initUI = false, initDataForCheckModification = true)
     }
 

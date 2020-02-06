@@ -10,15 +10,16 @@ import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.ui.content.ContentFactory
 import net.ntworld.mergeRequestIntegration.update.UpdateManager
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.GetAvailableUpdatesTask
 import net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab.UpdateInfoTab
 
 class EditorWatcher private constructor(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val toolWindow: ToolWindow
 ) : EditorTrackerListener {
-    private val projectService = ProjectService.getInstance(ideaProject)
+    private val projectService = applicationService.getProjectService(ideaProject)
 
     private val myGetAvailableUpdatesListener = object: GetAvailableUpdatesTask.Listener {
         override fun dataReceived(updates: List<String>) {
@@ -70,7 +71,7 @@ class EditorWatcher private constructor(
             val points = codeReviewManager.findCommentPoints(path, info)
             points.forEach {
                 if (!it.comment.resolved) {
-                    EditorCommentManager.createPoint(activeEditor, it)
+                    EditorCommentManager.createPoint(applicationService, activeEditor, it)
                 }
             }
         }
@@ -86,10 +87,10 @@ class EditorWatcher private constructor(
     companion object {
         private var started: Boolean = false
 
-        fun start(ideaProject: IdeaProject, toolWindow: ToolWindow) {
+        fun start(applicationService: ApplicationService, ideaProject: IdeaProject, toolWindow: ToolWindow) {
             if (!started) {
                 started = true
-                val instance = EditorWatcher(ideaProject, toolWindow)
+                val instance = EditorWatcher(applicationService, ideaProject, toolWindow)
                 ideaProject.messageBus.connect().subscribe(
                     EditorTrackerListener.TOPIC,
                     instance

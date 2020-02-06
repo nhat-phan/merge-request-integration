@@ -23,10 +23,7 @@ import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
-import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewUtil
-import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
@@ -39,11 +36,12 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class CommentCollection(
+    private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject
 ) : CommentCollectionUI, TreeCellRenderer {
     override val dispatcher = EventDispatcher.create(CommentCollectionUI.Listener::class.java)
 
-    private val projectService = ProjectService.getInstance(ideaProject)
+    private val projectService = applicationService.getProjectService(ideaProject)
     private var myProviderData: ProviderData? = null
     private var myMergeRequest: MergeRequest? = null
     private var myComments: List<Comment>? = null

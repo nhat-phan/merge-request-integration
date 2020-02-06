@@ -60,7 +60,7 @@ class MergeRequestCollection(
             override fun mergeRequestSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
             }
         })
-        ProjectService.getInstance(ideaProject).dispatcher.addListener(myProjectEventListener)
+        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
     override val eventDispatcher = myTree.eventDispatcher

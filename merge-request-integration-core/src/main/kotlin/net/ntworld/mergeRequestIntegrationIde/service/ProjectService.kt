@@ -67,9 +67,4 @@ interface ProjectService {
 
     fun notify(message: String, type: NotificationType)
 
-    companion object {
-        fun getInstance(ideaProject: IdeaProject): ProjectService {
-            return ServiceManager.getService(ideaProject, ProjectService::class.java)
-        }
-    }
 }
