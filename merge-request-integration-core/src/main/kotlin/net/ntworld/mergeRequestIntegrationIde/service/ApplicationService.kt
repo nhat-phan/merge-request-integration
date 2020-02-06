@@ -14,6 +14,8 @@ interface ApplicationService {
 
     fun getProjectService(project: Project): ProjectService
 
+    fun getChangesToolWindowId(): String
+
     fun supported(): List<ProviderInfo>
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)

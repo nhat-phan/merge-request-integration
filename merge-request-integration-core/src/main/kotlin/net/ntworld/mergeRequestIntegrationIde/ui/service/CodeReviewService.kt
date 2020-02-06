@@ -5,9 +5,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.CHANGES_TOOL_WINDOW_ID
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import kotlin.Exception
 import com.intellij.openapi.project.Project as IdeaProject
 
@@ -25,7 +23,9 @@ object CodeReviewService {
         val projectService = applicationService.getProjectService(ideaProject)
         projectService.setCodeReviewCommits(providerData, mergeRequest, commits)
         projectService.dispatcher.multicaster.startCodeReview(providerData, mergeRequest)
-        val toolWindow = ToolWindowManager.getInstance(ideaProject).getToolWindow(CHANGES_TOOL_WINDOW_ID)
+        val toolWindow = ToolWindowManager.getInstance(ideaProject).getToolWindow(
+            applicationService.getChangesToolWindowId()
+        )
         if (null !== toolWindow) {
             toolWindow.show(null)
         }
@@ -41,7 +41,9 @@ object CodeReviewService {
         applicationService.getProjectService(ideaProject).dispatcher.multicaster.stopCodeReview(
             providerData, mergeRequest
         )
-        val toolWindow = ToolWindowManager.getInstance(ideaProject).getToolWindow(CHANGES_TOOL_WINDOW_ID)
+        val toolWindow = ToolWindowManager.getInstance(ideaProject).getToolWindow(
+            applicationService.getChangesToolWindowId()
+        )
         if (null !== toolWindow) {
             toolWindow.hide(null)
         }

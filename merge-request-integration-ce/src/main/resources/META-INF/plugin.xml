@@ -10,10 +10,8 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ApplicationServiceImpl"/>
-
-        <projectService serviceInterface="net.ntworld.mergeRequestIntegrationIde.service.ProjectService"
-                        serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.ProjectServiceImpl"/>
+        <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityApplicationService"/>
+        <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityProjectService"/>
 
         <projectConfigurable id="merge-request-integration-ce"
                              displayName="Merge Request Integration CE"
@@ -30,7 +28,7 @@
                     canCloseContents="true"
                     factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.MainToolWindowFactory"/>
 
-        <toolWindow id="Merge Request's Changes"
+        <toolWindow id="Merge Request's Changes CE"
                     secondary="true"
                     anchor="left"
                     icon="/icons/compress-alt.svg"

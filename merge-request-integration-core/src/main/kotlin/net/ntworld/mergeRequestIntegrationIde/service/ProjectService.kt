@@ -23,6 +23,8 @@ interface ProjectService {
 
     val registeredProviders: List<ProviderData>
 
+    fun getApplicationService(): ApplicationService
+
     fun supported(): List<ProviderInfo>
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials, repository: String)

@@ -15,8 +15,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 
-open class ProjectServiceBase(
-    private val applicationService: ApplicationService,
+abstract class AbstractProjectService(
     private val ideaProject: IdeaProject
 ) : ProjectService, ServiceBase() {
     private var myIsInitialized = false
@@ -124,7 +123,7 @@ open class ProjectServiceBase(
         }
 
         val task = RegisterProviderTask(
-            applicationService = applicationService,
+            applicationService = getApplicationService(),
             ideaProject = ideaProject,
             id = UUIDGenerator.generate(),
             name = name,

@@ -5,11 +5,11 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.internal.ApplicationServiceBase
+import net.ntworld.mergeRequestIntegrationIde.internal.AbstractApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 @State(name = "MergeRequestIntegrationApplicationLevel", storages = [(Storage("merge-request-integration.xml"))])
-class ApplicationServiceImpl: ApplicationServiceBase() {
+class EnterpriseApplicationService: AbstractApplicationService() {
     override fun isLegal(providerData: ProviderData): Boolean {
         if (!super.isLegal(providerData)) {
             return CheckLicense.isLicensed
@@ -18,6 +18,10 @@ class ApplicationServiceImpl: ApplicationServiceBase() {
     }
 
     override fun getProjectService(project: Project): ProjectService {
-        return ServiceManager.getService(project, ProjectServiceImpl::class.java)
+        val tmp = ServiceManager.getService(project, EnterpriseProjectService::class.java)
+
+        return tmp
     }
+
+    override fun getChangesToolWindowId(): String = "Merge Request's Changes"
 }

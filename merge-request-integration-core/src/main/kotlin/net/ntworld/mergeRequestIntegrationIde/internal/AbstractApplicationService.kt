@@ -15,7 +15,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 import org.jdom.Element
 
-abstract class ApplicationServiceBase : ApplicationService, ServiceBase() {
+abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     private val legalGrantedDomains = listOf(
         "https://gitlab.personio-internal.de"
     )
