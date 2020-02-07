@@ -6,12 +6,13 @@ import net.ntworld.mergeRequest.UserStatus
 import net.ntworld.mergeRequestIntegration.internal.CommentImpl
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.internal.UserInfoImpl
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Transformer
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import org.gitlab4j.api.models.Discussion
 import org.gitlab4j.api.models.Note
 
-object GitlabDiscussionTransformer : Transformer<Discussion, List<Comment>> {
+object GitlabDiscussionTransformer :
+    Transformer<Discussion, List<Comment>> {
 
     override fun transform(input: Discussion): List<Comment> {
         return input.notes.filter { !it.system }.map {

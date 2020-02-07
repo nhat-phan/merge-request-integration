@@ -5,12 +5,13 @@ import net.ntworld.mergeRequest.UserInfo
 import net.ntworld.mergeRequestIntegration.internal.ApprovalImpl
 import net.ntworld.mergeRequestIntegration.internal.UserInfoImpl
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Transformer
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import net.ntworld.mergeRequestIntegration.provider.gitlab.model.ApprovalModel
 import net.ntworld.mergeRequestIntegration.provider.gitlab.model.ApproverModel
 import net.ntworld.mergeRequestIntegration.provider.gitlab.model.UserInfoModel
 
-object GitlabApprovalTransformer : Transformer<ApprovalModel, Approval> {
+object GitlabApprovalTransformer :
+    Transformer<ApprovalModel, Approval> {
     override fun transform(input: ApprovalModel): Approval = ApprovalImpl(
         approved = input.approved,
         approvalsRequired = input.approvalsRequired,

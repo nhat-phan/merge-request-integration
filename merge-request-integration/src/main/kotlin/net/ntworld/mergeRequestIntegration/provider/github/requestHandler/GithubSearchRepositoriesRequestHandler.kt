@@ -17,9 +17,8 @@ class GithubSearchRepositoriesRequestHandler : RequestHandler<GithubSearchReposi
             )
             .build()
         val search = github.searchRepositories().q(request.term)
-        val repositories = search.list()
-        val iterable = repositories.withPageSize(10)
-        val data = iterable.asList()
+        val iterable = search.list().withPageSize(10)
+        val data = iterable.iterator().nextPage()
         return GithubSearchRepositoriesResponse(
             error = null,
             repositories = data

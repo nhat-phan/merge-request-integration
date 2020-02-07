@@ -3,10 +3,11 @@ package net.ntworld.mergeRequestIntegration.provider.gitlab.transformer
 import net.ntworld.mergeRequest.User
 import net.ntworld.mergeRequestIntegration.internal.UserImpl
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Transformer
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import org.gitlab4j.api.models.User as UserModel
 
-object GitlabUserTransformer: Transformer<UserModel, User> {
+object GitlabUserTransformer:
+    Transformer<UserModel, User> {
     override fun transform(input: UserModel): User = UserImpl(
         id = input.id.toString(),
         name = input.name,

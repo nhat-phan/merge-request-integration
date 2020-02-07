@@ -6,10 +6,11 @@ import net.ntworld.mergeRequest.UserStatus
 import net.ntworld.mergeRequestIntegration.internal.CommentImpl
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.internal.UserInfoImpl
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Transformer
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import net.ntworld.mergeRequestIntegration.provider.gitlab.model.GetCommentsPayload
 
-object GitlabCommentTransformer : Transformer<GetCommentsPayload.Note, Comment> {
+object GitlabCommentTransformer :
+    Transformer<GetCommentsPayload.Note, Comment> {
 
     override fun transform(input: GetCommentsPayload.Note): Comment = CommentImpl(
         id = input.id,

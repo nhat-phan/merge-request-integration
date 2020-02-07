@@ -3,10 +3,12 @@ package net.ntworld.mergeRequestIntegration.provider.gitlab.transformer
 import net.ntworld.mergeRequest.Pipeline
 import net.ntworld.mergeRequest.PipelineStatus
 import net.ntworld.mergeRequestIntegration.internal.PipelineImpl
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import net.ntworld.mergeRequestIntegration.provider.gitlab.*
 import net.ntworld.mergeRequestIntegration.provider.gitlab.model.PipelineModel
 
-object GitlabPipelineTransformer : Transformer<PipelineModel, Pipeline> {
+object GitlabPipelineTransformer :
+    Transformer<PipelineModel, Pipeline> {
     override fun transform(input: PipelineModel): Pipeline = PipelineImpl(
         id = input.id.toString(),
         hash = input.sha,

@@ -3,11 +3,13 @@ package net.ntworld.mergeRequestIntegration.provider.gitlab.transformer
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.MergeRequestState
 import net.ntworld.mergeRequestIntegration.internal.MergeRequestInfoImpl
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import net.ntworld.mergeRequestIntegration.provider.gitlab.*
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import org.gitlab4j.api.models.MergeRequest
 
-object GitlabMRSimpleTransformer : Transformer<MergeRequest, MergeRequestInfo> {
+object GitlabMRSimpleTransformer :
+    Transformer<MergeRequest, MergeRequestInfo> {
     override fun transform(input: MergeRequest): MergeRequestInfo = MergeRequestInfoImpl(
         id = input.iid.toString(),
         provider = Gitlab.id,

@@ -4,10 +4,11 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.provider.github.Github
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Transformer
+import net.ntworld.mergeRequestIntegration.provider.Transformer
 import org.kohsuke.github.GHRepository
 
-object GithubRepositoryTransformer : Transformer<GHRepository, Project> {
+object GithubRepositoryTransformer :
+    Transformer<GHRepository, Project> {
     override fun transform(input: GHRepository): Project = ProjectImpl(
         id = input.id.toString(),
         provider = Github,
