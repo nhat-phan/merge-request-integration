@@ -7,9 +7,8 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiCredentials
-import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
-import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
-import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
+import net.ntworld.mergeRequestIntegration.provider.github.request.GithubSearchRepositoriesRequest
+import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubRepositoryTransformer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProjectPanel
 import java.awt.Component
@@ -21,15 +20,11 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import com.intellij.openapi.project.Project as IdeaProject
 
-class GitlabProjectFinder(
+class GithubProjectFinder(
     private val applicationService: ApplicationService,
     private val ideaProject: IdeaProject,
     private val myTerm: JTextField,
-    private val myProjectList: JList<Project>,
-    private val mySearchStarred: JCheckBox,
-    private val mySearchMembership: JCheckBox,
-    private val mySearchOwn: JCheckBox,
-    private val myMergeApprovalsFeature: JCheckBox
+    private val myProjectList: JList<Project>
 ) : ProjectFinderUI {
     private var myIsTermTouched: Boolean = false
     private var mySelectedProject: Project? = null
@@ -93,10 +88,6 @@ class GitlabProjectFinder(
                 }
             }
         })
-
-        mySearchOwn.addChangeListener { triggerSearchTask(myTerm.text) }
-        mySearchMembership.addChangeListener { triggerSearchTask(myTerm.text) }
-        mySearchStarred.addChangeListener { triggerSearchTask(myTerm.text) }
     }
 
     private fun triggerSearchTask(term: String) {
@@ -129,11 +120,6 @@ class GitlabProjectFinder(
     override fun setEnabled(value: Boolean, credentials: ApiCredentials) {
         myTerm.isEnabled = value
         myProjectList.isEnabled = value
-        mySearchStarred.isEnabled = value
-        mySearchMembership.isEnabled = value
-        mySearchOwn.isEnabled = value
-        myMergeApprovalsFeature.isEnabled = value
-        myMergeApprovalsFeature.isSelected = GitlabUtil.hasMergeApprovalFeature(credentials)
         myCredentials = credentials
     }
 
@@ -144,8 +130,8 @@ class GitlabProjectFinder(
     private class MySearchTask(
         private val applicationService: ApplicationService,
         private val term: String,
-        private val self: GitlabProjectFinder
-    ) : Task.Backgroundable(self.ideaProject, "Searching gitlab projects...", false) {
+        private val self: GithubProjectFinder
+    ) : Task.Backgroundable(self.ideaProject, "Searching github projects...", false) {
         fun start() {
             if (self.myIsTermTouched) {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(this, Indicator(this))
@@ -159,17 +145,14 @@ class GitlabProjectFinder(
                 return
             }
 
-            val out = applicationService.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
+            val out = applicationService.infrastructure.serviceBus() process GithubSearchRepositoriesRequest(
                 credentials = credentials,
-                term = term,
-                owner = self.mySearchOwn.isSelected,
-                membership = self.mySearchMembership.isSelected,
-                starred = self.mySearchStarred.isSelected
+                term = term
             )
 
             if (!out.hasError()) {
                 self.mySearchDispatcher.multicaster.searchFinished(
-                    term, out.getResponse().projects.map { GitlabProjectTransformer.transform(it) }
+                    term, out.getResponse().repositories.map { GithubRepositoryTransformer.transform(it) }
                 )
             }
         }

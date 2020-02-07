@@ -170,19 +170,25 @@ abstract class AbstractConnectionsConfigurable(
             return
         }
 
+        val currentProviderInfo = makeProviderInfo()
         myInitializedData.clear()
         val appConnections = applicationService.getProviderConfigurations()
         applicationService.getProjectService(ideaProject).getProviderConfigurations().forEach {
-            myInitializedData[it.id] = MyProviderSettings(
-                id = it.id,
-                info = it.info,
-                credentials = it.credentials,
-                repository = it.repository,
-                sharable = it.sharable,
-                deleted = false
-            )
+            if (it.info.id == currentProviderInfo.id) {
+                myInitializedData[it.id] = MyProviderSettings(
+                    id = it.id,
+                    info = it.info,
+                    credentials = it.credentials,
+                    repository = it.repository,
+                    sharable = it.sharable,
+                    deleted = false
+                )
+            }
         }
         for (appConnection in appConnections) {
+            if (appConnection.info.id != currentProviderInfo.id) {
+                continue
+            }
             if (myInitializedData.containsKey(appConnection.id)) {
                 myInitializedData[appConnection.id] = MyProviderSettings(
                     id = myInitializedData[appConnection.id]!!.id,

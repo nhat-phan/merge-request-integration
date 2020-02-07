@@ -6,13 +6,14 @@ import com.intellij.ide.passwordSafe.PasswordSafe
 import com.intellij.openapi.components.PersistentStateComponent
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 import org.jdom.Element
 
 open class ServiceBase : PersistentStateComponent<Element> {
     protected val myProvidersData = mutableMapOf<String, ProviderSettings>()
-    protected val supportedProviders: List<ProviderInfo> = listOf(Gitlab)
+    protected val supportedProviders: List<ProviderInfo> = listOf(Gitlab, Github)
 
     override fun getState(): Element? {
         val element = Element("Provider")
