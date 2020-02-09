@@ -78,8 +78,8 @@ object ApiProviderManager {
     ): ApiProvider {
         val created = when (info.id) {
             Gitlab.id -> GitlabApiProvider(
-                credentials = credentials,
                 infrastructure = infrastructure,
+                credentials = credentials,
                 cache = MemoryCache()
             )
             else -> throw Exception("Cannot create ApiProvider ${info.id}")

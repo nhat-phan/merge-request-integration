@@ -4,9 +4,11 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.github.Github
+import net.ntworld.mergeRequestIntegration.provider.github.GithubUtil
 import net.ntworld.mergeRequestIntegration.provider.github.request.GithubFindCurrentUserRequest
 import net.ntworld.mergeRequestIntegration.provider.github.request.GithubFindRepositoryRequest
 import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubRepositoryTransformer
+import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubProjectId
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
 import com.intellij.openapi.project.Project as IdeaProject
@@ -37,7 +39,7 @@ open class GithubConnectionsConfigurableBase(
     override fun findProject(credentials: ApiCredentials): Project? {
         val out = applicationService.infrastructure.serviceBus() process GithubFindRepositoryRequest(
             credentials = credentials,
-            repositoryId = credentials.projectId
+            repositoryId = GithubProjectId.parseId(credentials.projectId).toString()
         )
         val response = out.getResponse()
         return if (response.isSuccess) {

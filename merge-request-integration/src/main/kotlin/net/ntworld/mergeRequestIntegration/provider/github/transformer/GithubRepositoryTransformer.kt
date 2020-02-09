@@ -10,7 +10,10 @@ import org.kohsuke.github.GHRepository
 object GithubRepositoryTransformer :
     Transformer<GHRepository, Project> {
     override fun transform(input: GHRepository): Project = ProjectImpl(
-        id = input.id.toString(),
+        // Unlike gitlab, github works based on :owner/:repo rather than id
+        // So to keep everything works as expected, we have to add :owner/:repo information
+        // Then use GithubUtil to parse the components in id
+        id = "${input.id}:${input.fullName}",
         provider = Github,
         name = input.name,
         path = input.fullName,

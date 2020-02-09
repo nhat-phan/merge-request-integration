@@ -5,9 +5,9 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.*
 
 class GitlabApiProvider(
-    override val credentials: ApiCredentials,
-
     private val infrastructure: Infrastructure,
+
+    override val credentials: ApiCredentials,
 
     override val cache: Cache
 ) : ApiProvider {
