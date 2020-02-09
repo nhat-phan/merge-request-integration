@@ -15,12 +15,12 @@ object GithubUserTransformer : Transformer<GHUser, User> {
         // So to keep everything works as expected, we have to add username into id information
         // Please use GithubUserId value-object to work with generate/parsing user id
         id = GithubUserId(input.id, input.login).getValue(),
-        name = input.name,
+        name = if (input.name.isNullOrBlank()) input.login else input.name,
         username = input.login,
         avatarUrl = input.avatarUrl,
         url = input.htmlUrl.toString(),
         status = UserStatus.ACTIVE,
-        email = input.email,
+        email = if (input.email.isNullOrBlank()) "" else input.email,
         createdAt = if (null === input.createdAt) DEFAULT_DATETIME else DateTimeUtil.fromDate(input.createdAt)
     )
 }

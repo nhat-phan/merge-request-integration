@@ -9,12 +9,13 @@ class GithubApiProvider(
     override val credentials: ApiCredentials,
     override val cache: Cache
 ) : ApiProvider {
+    private val myMergeRequestApi = GithubMergeRequestApi(infrastructure, credentials)
+
     override val info: ProviderInfo = Github
 
     override val user: UserApi = GithubUserApi(infrastructure, credentials)
 
-    override val mergeRequest: MergeRequestApi
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override val mergeRequest: MergeRequestApi = myMergeRequestApi
 
     override val project: ProjectApi = GithubProjectApi(infrastructure, credentials)
 

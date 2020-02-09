@@ -5,6 +5,10 @@ data class GithubProjectId(
     val owner: String,
     val repo: String
 ) {
+    fun getValue() : String {
+        return "$id:$owner/$repo"
+    }
+
     companion object {
         fun parse(input: String): GithubProjectId {
             val parts = input.split(":")

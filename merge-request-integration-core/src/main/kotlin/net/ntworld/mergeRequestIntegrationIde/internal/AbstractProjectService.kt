@@ -10,9 +10,11 @@ import net.ntworld.mergeRequest.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
+import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 
 abstract class AbstractProjectService(
@@ -120,6 +122,9 @@ abstract class AbstractProjectService(
         var name = ""
         if (settings.info.id == Gitlab.id) {
             name = GitlabConnectionsConfigurableBase.findNameFromId(settings.id)
+        }
+        if (settings.info.id == Github.id) {
+            name = GithubConnectionsConfigurableBase.findNameFromId(settings.id)
         }
 
         val task = RegisterProviderTask(

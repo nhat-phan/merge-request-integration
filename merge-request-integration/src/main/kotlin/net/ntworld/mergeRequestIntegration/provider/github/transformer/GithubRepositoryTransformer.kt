@@ -5,6 +5,7 @@ import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.Transformer
+import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubProjectId
 import org.kohsuke.github.GHRepository
 
 object GithubRepositoryTransformer :
@@ -12,8 +13,8 @@ object GithubRepositoryTransformer :
     override fun transform(input: GHRepository): Project = ProjectImpl(
         // Unlike gitlab, github works based on :owner/:repo rather than id
         // So to keep everything works as expected, we have to add :owner/:repo information
-        // Then use GithubUtil to parse the components in id
-        id = "${input.id}:${input.fullName}",
+        // Please use GithubProjectId value-object to work with generate/parsing user id
+        id = GithubProjectId(id = input.id, owner = input.ownerName, repo = input.name).getValue(),
         provider = Github,
         name = input.name,
         path = input.fullName,

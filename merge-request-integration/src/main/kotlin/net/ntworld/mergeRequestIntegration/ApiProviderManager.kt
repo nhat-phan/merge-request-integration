@@ -9,6 +9,8 @@ import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.internal.ProviderDataImpl
 import net.ntworld.mergeRequestIntegration.internal.UserImpl
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
+import net.ntworld.mergeRequestIntegration.provider.github.Github
+import net.ntworld.mergeRequestIntegration.provider.github.GithubApiProvider
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabApiProvider
 
@@ -50,6 +52,7 @@ object ApiProviderManager {
                 return providerData
             }
         } catch (exception: Exception) {
+            println(exception)
         }
         val invalid = ProviderDataImpl(
             id = id,
@@ -78,6 +81,11 @@ object ApiProviderManager {
     ): ApiProvider {
         val created = when (info.id) {
             Gitlab.id -> GitlabApiProvider(
+                infrastructure = infrastructure,
+                credentials = credentials,
+                cache = MemoryCache()
+            )
+            Github.id -> GithubApiProvider(
                 infrastructure = infrastructure,
                 credentials = credentials,
                 cache = MemoryCache()
