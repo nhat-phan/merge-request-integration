@@ -14,6 +14,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeEE.EnterpriseApplicationService"/>
         <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeEE.EnterpriseProjectService"/>
+        <diff.DiffExtension implementation="net.ntworld.mergeRequestIntegrationIdeEE.DiffExtension"/>
 
         <projectConfigurable id="merge-request-integration-ee"
                              displayName="Merge Request Integration"
