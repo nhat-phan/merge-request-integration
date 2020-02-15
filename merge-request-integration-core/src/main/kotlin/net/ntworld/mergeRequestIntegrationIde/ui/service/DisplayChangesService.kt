@@ -171,11 +171,11 @@ object DisplayChangesService {
     ) {
         applicationService.getProjectService(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
         val limit = UISettings().editorTabLimit
-        changes.forEachIndexed { index, item ->
-            if (index < limit) {
-                openChange(ideaProject, fileEditorManagerEx, item)
-            }
-        }
+//        changes.forEachIndexed { index, item ->
+//            if (index < limit) {
+//                openChange(ideaProject, fileEditorManagerEx, item)
+//            }
+//        }
     }
 
     fun openChange(

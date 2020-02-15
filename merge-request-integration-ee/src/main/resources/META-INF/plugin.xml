@@ -15,6 +15,10 @@
         <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeEE.EnterpriseApplicationService"/>
         <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeEE.EnterpriseProjectService"/>
 
+        <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIde.comments.ReviewCommentsSupport"/>
+
+        <diff.DiffExtension implementation="net.ntworld.mergeRequestIntegrationIde.comments.DiffViewerCommentsExtension"/>
+
         <projectConfigurable id="merge-request-integration-ee"
                              displayName="Merge Request Integration"
                              instance="net.ntworld.mergeRequestIntegrationIdeEE.Configuration"/>
