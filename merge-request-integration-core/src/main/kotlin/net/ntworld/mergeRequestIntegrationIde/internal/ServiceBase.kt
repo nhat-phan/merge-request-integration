@@ -13,7 +13,10 @@ import org.jdom.Element
 
 open class ServiceBase : PersistentStateComponent<Element> {
     protected val myProvidersData = mutableMapOf<String, ProviderSettings>()
-    protected val supportedProviders: List<ProviderInfo> = listOf(Gitlab, Github)
+    protected val supportedProviders: List<ProviderInfo> = listOf(
+        Gitlab
+        // Gitlab, Github
+    )
 
     override fun getState(): Element? {
         val element = Element("Provider")

@@ -85,11 +85,11 @@ object ApiProviderManager {
                 credentials = credentials,
                 cache = MemoryCache()
             )
-            Github.id -> GithubApiProvider(
-                infrastructure = infrastructure,
-                credentials = credentials,
-                cache = MemoryCache()
-            )
+            // Github.id -> GithubApiProvider(
+            //     infrastructure = infrastructure,
+            //     credentials = credentials,
+            //     cache = MemoryCache()
+            // )
             else -> throw Exception("Cannot create ApiProvider ${info.id}")
         }
         api[id] = created

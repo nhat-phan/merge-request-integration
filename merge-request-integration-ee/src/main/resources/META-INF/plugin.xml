@@ -22,10 +22,12 @@
                              id="MRI:gitlab-ee"
                              displayName="Gitlab"
                              instance="net.ntworld.mergeRequestIntegrationIdeEE.GitlabConnectionsConfigurable"/>
+        <!--
         <projectConfigurable groupId="merge-request-integration-ee"
                              id="MRI:github-ee"
                              displayName="Github"
                              instance="net.ntworld.mergeRequestIntegrationIdeEE.GithubConnectionsConfigurable"/>
+        -->
 
         <toolWindow id="Merge Request Integration"
                     secondary="false"
