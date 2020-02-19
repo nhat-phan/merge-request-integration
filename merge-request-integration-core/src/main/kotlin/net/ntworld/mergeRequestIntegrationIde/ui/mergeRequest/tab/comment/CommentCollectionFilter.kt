@@ -31,6 +31,16 @@ class CommentCollectionFilter : CommentCollectionFilterUI {
             dispatcher.multicaster.onRefreshButtonClicked()
         }
     }
+    private val myAddGeneralComment = object : AnAction(
+        "General Comment", "Add a general comment", AllIcons.General.Add
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            dispatcher.multicaster.onAddGeneralCommentClicked()
+        }
+
+        override fun displayTextInToolbar(): Boolean = true
+        override fun useSmallerFontForTextInToolbar() = true
+    }
 
     private val myPanel by lazy {
         val panel = JPanel(MigLayout("ins 0, fill", "[left]push[right]", "center"))
@@ -44,6 +54,8 @@ class CommentCollectionFilter : CommentCollectionFilterUI {
 
         val rightCornerActionGroup = DefaultActionGroup()
         rightCornerActionGroup.add(myRefreshButton)
+        rightCornerActionGroup.addSeparator()
+        rightCornerActionGroup.add(myAddGeneralComment)
         val rightCornerToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentCollectionFilter::class.java.canonicalName}/toolbar-right",
             rightCornerActionGroup,

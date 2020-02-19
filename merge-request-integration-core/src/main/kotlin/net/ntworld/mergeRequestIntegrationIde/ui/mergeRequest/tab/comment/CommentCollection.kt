@@ -22,6 +22,7 @@ import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
+import net.ntworld.mergeRequestIntegrationIde.internal.CommentNodeDataImpl
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
@@ -124,6 +125,10 @@ class CommentCollection(
                 dispatcher.multicaster.refreshRequested(mr)
             }
         }
+
+        override fun onAddGeneralCommentClicked() {
+            createGeneralCommentNode()
+        }
     }
 
     init {
@@ -150,7 +155,7 @@ class CommentCollection(
         filterAndDisplayComments(providerData, comments, myShowResolved)
     }
 
-    override fun createReplyComment() {
+    override fun createReplyCommentNode() {
         val providerData = myProviderData
         val mergeRequest = myMergeRequest
         if (null === providerData || null === mergeRequest) {
@@ -181,6 +186,72 @@ class CommentCollection(
 
         appendEditorNode(storeItem, selectedNode.comment, parentTreeNode, true)
         myModel.nodeStructureChanged(parentTreeNode)
+    }
+
+    override fun createGeneralCommentNode() {
+        val providerData = myProviderData
+        val mergeRequest = myMergeRequest
+        if (null === providerData || null === mergeRequest) {
+            return
+        }
+
+        // find general item in tree
+        val parentTreeNode = findOrCreateGeneralGroupNode(providerData)
+        val parentNode = parentTreeNode.userObject
+        if (parentNode !is GroupNode) {
+            return
+        }
+
+        if (parentTreeNode.childCount > 0) {
+            val lastChild = parentTreeNode.lastChild
+            if (lastChild !is DefaultMutableTreeNode || lastChild.userObject is EditorNode) {
+                return
+            }
+        }
+
+        val storeItem = CommentStoreItem.createNewGeneralItem(providerData, mergeRequest, parentNode.data.nodeData)
+        projectService.commentStore.add(storeItem)
+
+        appendEditorNode(storeItem, null, parentTreeNode, true)
+        myModel.nodeStructureChanged(parentTreeNode)
+    }
+
+    private fun findOrCreateGeneralGroupNode(providerData: ProviderData) : DefaultMutableTreeNode {
+        val node = findGeneralGroupNode()
+        if (null !== node) {
+            return node
+        }
+        return createGeneralGroupNode(providerData)
+    }
+
+    private fun findGeneralGroupNode() : DefaultMutableTreeNode? {
+        val nodes = myRoot.children()
+        for (node in nodes) {
+            if (node !is DefaultMutableTreeNode) {
+                continue
+            }
+            val groupNodePresentation = node.userObject
+            if (groupNodePresentation !is GroupNode) {
+                continue
+            }
+
+            if (groupNodePresentation.isGeneral()) {
+                return node
+            }
+        }
+        return null
+    }
+
+    private fun createGeneralGroupNode(providerData: ProviderData) : DefaultMutableTreeNode {
+        val repository = RepositoryUtil.findRepository(ideaProject, providerData)
+        val groupNodePresentation = GroupNode(ideaProject, repository, GroupedComments(
+            comments = listOf(),
+            nodeData = CommentNodeDataImpl(isGeneral = true, fullPath = "", fileName = "General", line = 0)
+        ))
+        val groupNode = DefaultMutableTreeNode(groupNodePresentation)
+        myRoot.add(groupNode)
+        groupNodePresentation.update()
+        return groupNode
     }
 
     private fun appendEditorNode(
@@ -412,6 +483,8 @@ class CommentCollection(
         private val repository: GitRepository?,
         val data: GroupedComments
     ) : PresentableNodeDescriptor<GroupedComments>(ideaProject, null) {
+        fun isGeneral() = data.nodeData.isGeneral
+
         override fun update(presentation: PresentationData) {
             if (data.nodeData.isGeneral) {
                 presentation.addText(data.nodeData.fileName, SimpleTextAttributes.REGULAR_ATTRIBUTES)

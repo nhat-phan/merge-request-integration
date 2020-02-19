@@ -74,7 +74,13 @@ class CommentEditorPanel(
         }
         when (item.type) {
             CommentStore.ItemType.EDIT -> initUpdateComment()
-            CommentStore.ItemType.NEW -> initCreateComment()
+            CommentStore.ItemType.NEW -> {
+                if (null === item.position) {
+                    initCreateGeneralComment()
+                } else {
+                    initCreateComment()
+                }
+            }
             CommentStore.ItemType.REPLY -> initReplyComment()
         }
         myOkButton!!.addActionListener {
@@ -94,6 +100,14 @@ class CommentEditorPanel(
 
     private fun initUpdateComment() {}
     private fun updateComment() {}
+
+    private fun initCreateGeneralComment() {
+        myAddDiffComment!!.isVisible = false
+        myAddDiffComment!!.isSelected = false
+        myOkButton!!.text = "Create General Comment"
+        hideCreateNewCommentComponents()
+        hideDebugOfCreateNewCommentComponents()
+    }
 
     private fun initCreateComment() {
         val position = item.position

@@ -58,7 +58,7 @@ class MergeRequestCommentsTab(
         }
 
         override fun onReplyButtonClicked() {
-            myCollection.createReplyComment()
+            myCollection.createReplyCommentNode()
         }
     }
 

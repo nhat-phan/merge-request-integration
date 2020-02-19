@@ -11,5 +11,7 @@ interface CommentCollectionFilterUI : Component {
         fun onFiltersChanged(showResolved: Boolean)
 
         fun onRefreshButtonClicked()
+
+        fun onAddGeneralCommentClicked()
     }
 }

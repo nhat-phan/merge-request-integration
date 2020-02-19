@@ -13,7 +13,9 @@ interface CommentCollectionUI : Component {
 
     fun setComments(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>)
 
-    fun createReplyComment()
+    fun createReplyCommentNode()
+
+    fun createGeneralCommentNode()
 
     interface Listener : EventListener {
         fun commentUnselected() {}

@@ -103,6 +103,21 @@ class CommentStoreItem private constructor() : CommentStore.Item {
             return instance
         }
 
+        fun createNewGeneralItem(
+            providerData: ProviderData,
+            mergeRequest: MergeRequest,
+            nodeData: CodeReviewUtil.CommentNodeData
+        ): CommentStore.Item {
+            val instance = CommentStoreItem()
+            instance.type = CommentStore.ItemType.NEW
+            instance.groupNodePath = listOf(nodeData.getHash())
+            instance.projectId = providerData.project.id
+            instance.mergeRequestId = mergeRequest.id
+            instance.position = null
+
+            return instance
+        }
+
         fun createReplyItem(
             providerData: ProviderData,
             mergeRequest: MergeRequest,
