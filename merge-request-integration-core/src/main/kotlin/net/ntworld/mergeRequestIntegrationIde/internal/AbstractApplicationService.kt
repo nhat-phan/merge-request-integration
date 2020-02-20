@@ -8,7 +8,9 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
+import net.ntworld.mergeRequestIntegrationIde.internal.option.DisplayCommentsInDiffViewOption
 import net.ntworld.mergeRequestIntegrationIde.internal.option.EnableRequestCacheOption
+import net.ntworld.mergeRequestIntegrationIde.internal.option.GroupCommentsByThreadOption
 import net.ntworld.mergeRequestIntegrationIde.internal.option.SettingOption
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
@@ -20,7 +22,9 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         "https://gitlab.personio-internal.de"
     )
     private val myAllSettingOptions = listOf<SettingOption<*>>(
-        EnableRequestCacheOption
+        EnableRequestCacheOption,
+        GroupCommentsByThreadOption,
+        DisplayCommentsInDiffViewOption
     )
     private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
 
