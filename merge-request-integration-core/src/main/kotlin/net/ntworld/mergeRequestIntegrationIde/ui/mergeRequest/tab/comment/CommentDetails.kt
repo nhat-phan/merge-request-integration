@@ -27,12 +27,28 @@ class CommentDetails(
     private val myCommentEditorPanelComponentMap = mutableMapOf<CommentStore.Item, Component>()
     private val myWrapper = JPanel()
     private val myCommentEditorPanelListener = object : CommentEditorPanel.Listener {
-        override fun onDestroyRequested(
+        override fun onCancelButtonClicked(
             providerData: ProviderData,
             mergeRequest: MergeRequest,
             comment: Comment?,
             item: CommentStore.Item
         ) {
+            removeEditorPanelAndCommentInStore(item)
+            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest, null)
+        }
+
+        override fun onCommentCreated(
+            providerData: ProviderData,
+            mergeRequest: MergeRequest,
+            comment: Comment?,
+            item: CommentStore.Item,
+            createdCommentId: String?
+        ) {
+            removeEditorPanelAndCommentInStore(item)
+            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest, createdCommentId)
+        }
+
+        private fun removeEditorPanelAndCommentInStore(item: CommentStore.Item) {
             val component = myCommentEditorPanelComponentMap[item]
             if (null !== component) {
                 myWrapper.remove(component)
@@ -41,7 +57,6 @@ class CommentDetails(
             myCommentEditorPanelMap.remove(item)
             myCommentEditorPanelComponentMap.remove(item)
             applicationService.getProjectService(ideaProject).commentStore.remove(item.id)
-            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest)
         }
     }
     private val myCommentPanelListener = object : CommentPanel.Listener {
@@ -49,8 +64,14 @@ class CommentDetails(
             dispatcher.multicaster.onReplyButtonClicked()
         }
 
-        override fun onDestroyRequested(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) {
-            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest)
+        override fun onResolveButtonClicked(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) =
+            destroyCommentPanel(mergeRequest)
+
+        override fun onDeleteButtonClicked(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment) =
+            destroyCommentPanel(mergeRequest)
+
+        private fun destroyCommentPanel(mergeRequest: MergeRequest) {
+            dispatcher.multicaster.onRefreshCommentsRequested(mergeRequest, null)
             hide()
         }
     }

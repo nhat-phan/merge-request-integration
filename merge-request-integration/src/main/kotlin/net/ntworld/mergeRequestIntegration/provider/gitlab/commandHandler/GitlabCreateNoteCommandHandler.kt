@@ -13,13 +13,12 @@ class GitlabCreateNoteCommandHandler : CommandHandler<GitlabCreateNoteCommand> {
     override fun handle(command: GitlabCreateNoteCommand) = GitlabClient(
         credentials = command.credentials,
         execute = {
-            this.discussionsApi.createMergeRequestDiscussion(
+            val result = this.discussionsApi.createMergeRequestDiscussion(
                 command.credentials.projectId.toInt(),
                 command.mergeRequestInternalId,
                 command.body,
                 Date(),
-                // if (null === command.position) null else command.position.toString(),
-                null,
+                null, // This is a bug from the API client, null is okay
                 command.position
             )
             Unit

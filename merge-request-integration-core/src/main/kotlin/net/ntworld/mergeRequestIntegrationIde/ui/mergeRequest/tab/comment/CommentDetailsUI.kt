@@ -18,7 +18,7 @@ interface CommentDetailsUI : Component {
     fun showForm(providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment?, item: CommentStore.Item)
 
     interface Listener : EventListener {
-        fun onRefreshCommentsRequested(mergeRequest: MergeRequest)
+        fun onRefreshCommentsRequested(mergeRequest: MergeRequest, preselectedCommentId: String?)
 
         fun onReplyButtonClicked()
     }

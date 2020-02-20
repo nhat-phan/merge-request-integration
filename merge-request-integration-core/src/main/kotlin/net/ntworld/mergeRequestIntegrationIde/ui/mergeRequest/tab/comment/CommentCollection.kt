@@ -48,6 +48,8 @@ class CommentCollection(
     private var myComments: List<Comment>? = null
     private var mySelectedTreeNode: DefaultMutableTreeNode? = null
     private var myShowResolved = false
+    private var myPreselectedCommentId: String? = null
+
     private val myTree = Tree()
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
     private val myRoot = DefaultMutableTreeNode()
@@ -146,6 +148,10 @@ class CommentCollection(
 
         myFilterToolbar.dispatcher.addListener(myFilterToolbarEventListener)
         projectService.dispatcher.addListener(myProjectListener)
+    }
+
+    override fun setPreselectedCommentBeforeRefreshing(id: String?) {
+        myPreselectedCommentId = id
     }
 
     override fun setComments(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {

@@ -53,7 +53,8 @@ class MergeRequestCommentsTab(
     }
     private val myDetails: CommentDetailsUI = CommentDetails(applicationService, ideaProject)
     private val myDetailsEventListener = object: CommentDetailsUI.Listener {
-        override fun onRefreshCommentsRequested(mergeRequest: MergeRequest) {
+        override fun onRefreshCommentsRequested(mergeRequest: MergeRequest, preselectedCommentId: String?) {
+            myCollection.setPreselectedCommentBeforeRefreshing(preselectedCommentId)
             myCollection.dispatcher.multicaster.refreshRequested(mergeRequest)
         }
 

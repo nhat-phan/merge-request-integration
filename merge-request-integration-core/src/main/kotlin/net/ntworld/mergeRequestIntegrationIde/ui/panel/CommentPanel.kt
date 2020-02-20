@@ -19,7 +19,6 @@ import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.MergeRequestDescriptionTab
 import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
-import java.awt.Color
 import java.awt.ComponentOrientation
 import java.awt.Dimension
 import java.awt.event.ActionListener
@@ -73,7 +72,7 @@ class CommentPanel(
             )
         }
         applicationService.infrastructure.commandBus() process command
-        dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment)
+        dispatcher.multicaster.onResolveButtonClicked(providerData, mergeRequest, comment)
     }
     private val myDeleteButtonActionListener = ActionListener {
         val providerData = myProviderData
@@ -92,7 +91,7 @@ class CommentPanel(
                 mergeRequestId = mergeRequest.id,
                 comment = comment
             )
-            dispatcher.multicaster.onDestroyRequested(providerData, mergeRequest, comment)
+            dispatcher.multicaster.onDeleteButtonClicked(providerData, mergeRequest, comment)
         }
     }
 
@@ -166,7 +165,13 @@ class CommentPanel(
     interface Listener : EventListener {
         fun onReplyButtonClick()
 
-        fun onDestroyRequested(
+        fun onResolveButtonClicked(
+            providerData: ProviderData,
+            mergeRequest: MergeRequest,
+            comment: Comment
+        )
+
+        fun onDeleteButtonClicked(
             providerData: ProviderData,
             mergeRequest: MergeRequest,
             comment: Comment

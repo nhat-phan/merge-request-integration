@@ -15,7 +15,8 @@ class GitlabReplyNoteCommandHandler : CommandHandler<GitlabReplyNoteCommand> {
             val parameters = listOf(
                 Pair("body", command.body)
             )
-            this.postJson(url = url, parameters = parameters)
+            val result = this.postJson(url = url, parameters = parameters)
+            print(result)
         },
         failed = {
         }

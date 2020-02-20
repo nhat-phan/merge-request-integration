@@ -11,6 +11,8 @@ import java.util.*
 interface CommentCollectionUI : Component {
     val dispatcher: EventDispatcher<Listener>
 
+    fun setPreselectedCommentBeforeRefreshing(id: String?)
+
     fun setComments(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>)
 
     fun createReplyCommentNode()
