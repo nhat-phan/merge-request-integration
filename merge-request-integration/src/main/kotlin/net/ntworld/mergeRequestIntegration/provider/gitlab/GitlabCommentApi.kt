@@ -7,9 +7,11 @@ import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.CommentApi
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegration.provider.gitlab.command.*
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRCommentsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRDiscussionsRequest
+import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabReplyNoteRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabCommentTransformer
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabDiscussionTransformer
 import org.gitlab4j.api.models.Position
@@ -177,15 +179,19 @@ class GitlabCommentApi(
         }
     }
 
-    override fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String) {
-        val command = GitlabReplyNoteCommand(
+    override fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String) : String? {
+        val request = GitlabReplyNoteRequest(
             credentials = credentials,
             mergeRequestInternalId = mergeRequestId.toInt(),
             discussionId = repliedComment.parentId,
             noteId = repliedComment.id.toInt(),
             body = body
         )
-        infrastructure.commandBus() process command
+
+        val response = infrastructure.serviceBus() process request ifError {
+            throw ProviderException(it)
+        }
+        return response.createdCommentId.toString()
     }
 
     override fun delete(project: Project, mergeRequestId: String, comment: Comment) {

@@ -340,6 +340,7 @@ class CommentCollection(
         val repository = RepositoryUtil.findRepository(ideaProject, providerData)
         val grouped = groupCommentsByPathAndLine(comments)
         myRoot.removeAllChildren()
+        var preselectedNode: DefaultMutableTreeNode? = null
         for (item in grouped) {
             val groupNodePresentation = GroupNode(ideaProject, repository, item)
             val groupNode = DefaultMutableTreeNode(groupNodePresentation)
@@ -348,6 +349,9 @@ class CommentCollection(
                 val commentNode = DefaultMutableTreeNode(commentNodePresentation)
                 groupNode.add(commentNode)
                 commentNodePresentation.update()
+                if (null !== myPreselectedCommentId && myPreselectedCommentId == comment.id) {
+                    preselectedNode = commentNode
+                }
             }
             findAndAppendReplyNode(item.nodeData.getHash(), groupNode, item.comments)
             findAndAppendNewNode(item.nodeData.getHash(), groupNode)
@@ -355,7 +359,11 @@ class CommentCollection(
             groupNodePresentation.update()
         }
         dispatcher.multicaster.commentsDisplayed(comments.size)
-        myTree.selectionPath = TreeUtil.getPath(myRoot, myRoot)
+        myTree.selectionPath = if (null !== preselectedNode) {
+            TreeUtil.getPath(myRoot, preselectedNode)
+        } else {
+            TreeUtil.getPath(myRoot, myRoot)
+        }
         myModel.nodeStructureChanged(myRoot)
         TreeUtil.expandAll(myTree)
     }

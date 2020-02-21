@@ -11,6 +11,7 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.CreateCommentCommand
 import net.ntworld.mergeRequest.command.ReplyCommentCommand
+import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -208,14 +209,18 @@ class CommentEditorPanel(
     private fun replyComment() {
         val repliedComment = comment
         if (null !== repliedComment) {
-            applicationService.infrastructure.commandBus() process ReplyCommentCommand.make(
+            val response = applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id,
                 repliedComment = repliedComment,
                 body = myEditorTextField.text
-            )
-            // Fixme: change command to request and add created id to 5th param
-            dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, null)
+            ) ifError {
+                applicationService.getProjectService(ideaProject).notify(
+                    "There was an error from server. \n\n ${it.message}",
+                    NotificationType.ERROR
+                )
+            }
+            dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, response.createdCommentId)
         }
     }
 

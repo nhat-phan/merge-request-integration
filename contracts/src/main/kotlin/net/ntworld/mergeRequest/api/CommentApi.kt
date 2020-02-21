@@ -9,7 +9,7 @@ interface CommentApi {
 
     fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?)
 
-    fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String)
+    fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String): String?
 
     fun delete(project: Project, mergeRequestId: String, comment: Comment)
 
