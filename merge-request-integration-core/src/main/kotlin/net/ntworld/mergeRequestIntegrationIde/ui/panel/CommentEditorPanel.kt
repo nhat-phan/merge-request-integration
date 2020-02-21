@@ -9,14 +9,13 @@ import com.intellij.ui.EditorSettingsProvider
 import com.intellij.ui.EditorTextField
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
-import net.ntworld.mergeRequest.command.CreateCommentCommand
-import net.ntworld.mergeRequest.command.ReplyCommentCommand
+import net.ntworld.mergeRequest.request.CreateCommentRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
 import java.lang.Exception
@@ -133,39 +132,38 @@ class CommentEditorPanel(
     }
 
     private fun createGeneralComment() {
-        try {
-            applicationService.infrastructure.commandBus() process CreateCommentCommand.make(
-                providerId = providerData.id,
-                mergeRequestId = mergeRequest.id,
-                position = null,
-                body = myEditorTextField.text
+        val response = applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequest.id,
+            position = null,
+            body = myEditorTextField.text
+        ) ifError {
+            applicationService.getProjectService(ideaProject).notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
             )
-            // Fixme: change command to request and add created id to 5th param
-            dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, null)
-        } catch (exception: Exception) {
+            throw ProviderException(it)
         }
+        dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, response.createdCommentId)
     }
 
     private fun createCommentInPosition() {
         val position = item.position
         if (null !== position) {
-            try {
-                applicationService.infrastructure.commandBus() process CreateCommentCommand.make(
-                    providerId = providerData.id,
-                    mergeRequestId = mergeRequest.id,
-                    position = rebuildPosition(position),
-                    body = myEditorTextField.text
-                )
-                // Fixme: change command to request and add created id to 5th param
-                dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, null)
-            } catch (exception: Exception) {
+            val response = applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+                providerId = providerData.id,
+                mergeRequestId = mergeRequest.id,
+                position = rebuildPosition(position),
+                body = myEditorTextField.text
+            ) ifError {
                 applicationService.getProjectService(ideaProject).notify(
                     "There was an error from server. \n\n Please fill the line of old commit and new commit then try again.",
                     NotificationType.ERROR
                 )
                 showDebugOfCreateNewCommentComponents()
-                throw exception
+                throw ProviderException(it)
             }
+            dispatcher.multicaster.onCommentCreated(providerData, mergeRequest, comment, item, response.createdCommentId)
         }
     }
 

@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.CommentApi
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegration.provider.gitlab.command.*
+import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabCreateNoteRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRCommentsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabGetMRDiscussionsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabReplyNoteRequest
@@ -64,15 +65,18 @@ class GitlabCommentApi(
         return comments
     }
 
-    override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?) {
-        if (null === position) {
-            val command = GitlabCreateNoteCommand(
+    override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
+        val createdCommentId = if (null === position) {
+            val request = GitlabCreateNoteRequest(
                 credentials = credentials,
                 mergeRequestInternalId = mergeRequestId.toInt(),
                 body = body,
                 position = null
             )
-            infrastructure.commandBus() process command
+            val response = infrastructure.serviceBus() process request ifError {
+                throw ProviderException(it)
+            }
+            response.createdCommentId
         } else {
             tryCreateNoteCommand(
                 mergeRequestInternalId = mergeRequestId.toInt(),
@@ -94,9 +98,11 @@ class GitlabCommentApi(
                 }
             }
         }
+
+        return if (createdCommentId == 0) null else createdCommentId.toString()
     }
 
-    private fun buildFirstAttemptPosition(position: CommentPosition) : Position {
+    private fun buildFirstAttemptPosition(position: CommentPosition): Position {
         val model = makePosition(position)
         when (position.source) {
             CommentPositionSource.UNKNOWN -> {
@@ -119,14 +125,14 @@ class GitlabCommentApi(
         return model
     }
 
-    private fun buildSecondAttemptPosition(position: CommentPosition) : Position {
+    private fun buildSecondAttemptPosition(position: CommentPosition): Position {
         val model = makePosition(position)
         model.oldLine = position.oldLine
         model.newLine = position.newLine
         return model
     }
 
-    private fun buildThirdAttemptPosition(position: CommentPosition) : Position {
+    private fun buildThirdAttemptPosition(position: CommentPosition): Position {
         val model = makePosition(position)
         when (position.source) {
             CommentPositionSource.UNKNOWN -> {
@@ -149,7 +155,7 @@ class GitlabCommentApi(
         return model
     }
 
-    private fun makePosition(position: CommentPosition) : Position {
+    private fun makePosition(position: CommentPosition): Position {
         val model = Position()
         model.baseSha = position.baseHash
         model.headSha = position.headHash
@@ -164,22 +170,24 @@ class GitlabCommentApi(
         mergeRequestInternalId: Int,
         body: String,
         position: Position?,
-        failed: (exception: Exception) -> Unit
-    ) {
-        try {
-            val command = GitlabCreateNoteCommand(
-                credentials = credentials,
-                mergeRequestInternalId = mergeRequestInternalId,
-                body = body,
-                position = position
-            )
-            infrastructure.commandBus() process command
-        } catch (exception: Exception) {
-            failed(exception)
+        failed: (exception: Exception) -> Int
+    ): Int {
+        val request = GitlabCreateNoteRequest(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestInternalId,
+            body = body,
+            position = position
+        )
+        val out = infrastructure.serviceBus() process request
+
+        return if (out.hasError()) {
+            failed(ProviderException(out.getResponse().error!!))
+        } else {
+            out.getResponse().createdCommentId
         }
     }
 
-    override fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String) : String? {
+    override fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String): String? {
         val request = GitlabReplyNoteRequest(
             credentials = credentials,
             mergeRequestInternalId = mergeRequestId.toInt(),
