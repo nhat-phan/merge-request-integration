@@ -61,6 +61,10 @@ object CodeReviewService {
         mergeRequest: MergeRequest,
         commits: List<Commit>
     ) {
+        if (!applicationService.settings.checkoutTargetBranch) {
+            return checkoutSuccess(applicationService, ideaProject, providerData, mergeRequest, commits)
+        }
+
         CheckoutService.start(ideaProject, providerData, mergeRequest, object : CheckoutService.Listener {
             override fun onError(exception: Exception) {
                 applicationService.getProjectService(ideaProject).notify(
@@ -71,10 +75,20 @@ object CodeReviewService {
             }
 
             override fun onSuccess() {
-                checkedOut = true
-                EditorStateService.start(ideaProject, providerData, mergeRequest)
-                DisplayChangesService.start(applicationService, ideaProject, providerData, mergeRequest, commits)
+                checkoutSuccess(applicationService, ideaProject, providerData, mergeRequest, commits)
             }
         })
+    }
+
+    private fun checkoutSuccess(
+        applicationService: ApplicationService,
+        ideaProject: IdeaProject,
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        commits: List<Commit>
+    ) {
+        checkedOut = true
+        EditorStateService.start(ideaProject, providerData, mergeRequest)
+        DisplayChangesService.start(applicationService, ideaProject, providerData, mergeRequest, commits)
     }
 }

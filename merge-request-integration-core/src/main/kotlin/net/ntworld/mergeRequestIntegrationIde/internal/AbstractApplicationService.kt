@@ -18,11 +18,15 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     private val legalGrantedDomains = listOf(
         "https://gitlab.personio-internal.de"
     )
+    private val myOptionEnableRequestCache = EnableRequestCacheOption()
+    private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
+    private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
+    private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
-        EnableRequestCacheOption,
-        GroupCommentsByThreadOption,
-        DisplayCommentsInDiffViewOption,
-        CheckoutTargetBranchWhenDoingCodeReviewOption
+        myOptionEnableRequestCache,
+        myOptionGroupCommentsByThread,
+        myOptionDisplayCommentsInDiffView,
+        myOptionCheckoutTargetBranch
     )
     private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
 
@@ -37,7 +41,10 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         if (null === element) {
             return element
         }
-        writeSettingOption(element, EnableRequestCacheOption, myApplicationSettings.enableRequestCache)
+        writeSettingOption(element, myOptionEnableRequestCache, myApplicationSettings.enableRequestCache)
+        writeSettingOption(element, myOptionGroupCommentsByThread, myApplicationSettings.groupCommentsByThread)
+        writeSettingOption(element, myOptionDisplayCommentsInDiffView, myApplicationSettings.displayCommentsInDiffView)
+        writeSettingOption(element, myOptionCheckoutTargetBranch, myApplicationSettings.checkoutTargetBranch)
         return element
     }
 

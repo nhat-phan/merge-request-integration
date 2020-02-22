@@ -16,7 +16,7 @@ class SettingsConfiguration : SettingsUI {
     var myGroupCommentsByThread: JCheckBox? = null
 
     var myCodeReviewOptionsPanel: JPanel? = null
-    var myCheckoutTargetBranchWhenDoingCodeReview: JCheckBox? = null
+    var myCheckoutTargetBranch: JCheckBox? = null
 
     override val dispatcher = EventDispatcher.create(SettingsUI.Listener::class.java)
 
@@ -25,7 +25,7 @@ class SettingsConfiguration : SettingsUI {
         myEnableRequestCache!!.addActionListener { dispatchSettingsUpdated() }
         myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayCommentsInDiffView!!.addActionListener { dispatchSettingsUpdated() }
-        myCheckoutTargetBranchWhenDoingCodeReview!!.addActionListener { dispatchSettingsUpdated() }
+        myCheckoutTargetBranch!!.addActionListener { dispatchSettingsUpdated() }
     }
 
     private fun dispatchSettingsUpdated() {
@@ -33,7 +33,7 @@ class SettingsConfiguration : SettingsUI {
             enableRequestCache = myEnableRequestCache!!.isSelected,
             groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
             displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
-            checkoutTargetBranchWhenDoingCodeReview = myCheckoutTargetBranchWhenDoingCodeReview!!.isSelected
+            checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected
         )
         dispatcher.multicaster.change(settings)
     }
@@ -42,7 +42,7 @@ class SettingsConfiguration : SettingsUI {
         myEnableRequestCache!!.isSelected = settings.enableRequestCache
         myGroupCommentsByThread!!.isSelected = settings.groupCommentsByThread
         myDisplayCommentsInDiffView!!.isSelected = settings.displayCommentsInDiffView
-        myCheckoutTargetBranchWhenDoingCodeReview!!.isSelected = settings.checkoutTargetBranchWhenDoingCodeReview
+        myCheckoutTargetBranch!!.isSelected = settings.checkoutTargetBranch
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

@@ -10,7 +10,7 @@ interface ApplicationSettings {
 
     val displayCommentsInDiffView: Boolean
 
-    val checkoutTargetBranchWhenDoingCodeReview: Boolean
+    val checkoutTargetBranch: Boolean
 
     fun toApiOptions(): ApiOptions {
         return ApiOptionsImpl(

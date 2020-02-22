@@ -2,14 +2,14 @@ package net.ntworld.mergeRequestIntegrationIde.internal.option
 
 import net.ntworld.mergeRequestIntegrationIde.internal.ApplicationSettingsImpl
 
-class GroupCommentsByThreadOption : BooleanOption() {
-    override val name: String = "comments:group-comment-by-thread"
+class CheckoutTargetBranchOption : BooleanOption() {
+    override val name: String = "code-review:checkout-target-branch"
 
     override fun getOptionValueFromSettings(settings: ApplicationSettingsImpl): Boolean {
-        return settings.groupCommentsByThread
+        return settings.checkoutTargetBranch
     }
 
     override fun copySettings(settings: ApplicationSettingsImpl, value: Boolean): ApplicationSettingsImpl {
-        return settings.copy(groupCommentsByThread = value)
+        return settings.copy(checkoutTargetBranch = value)
     }
 }

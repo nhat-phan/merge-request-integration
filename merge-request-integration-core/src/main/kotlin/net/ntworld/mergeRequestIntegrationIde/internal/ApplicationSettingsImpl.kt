@@ -6,14 +6,14 @@ data class ApplicationSettingsImpl(
     override val enableRequestCache: Boolean,
     override val groupCommentsByThread: Boolean,
     override val displayCommentsInDiffView: Boolean,
-    override val checkoutTargetBranchWhenDoingCodeReview: Boolean
+    override val checkoutTargetBranch: Boolean
 ) : ApplicationSettings {
     companion object {
         val DEFAULT = ApplicationSettingsImpl(
             enableRequestCache = true,
             groupCommentsByThread = false,
             displayCommentsInDiffView = false,
-            checkoutTargetBranchWhenDoingCodeReview = true
+            checkoutTargetBranch = true
         )
     }
 }

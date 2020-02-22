@@ -2,18 +2,14 @@ package net.ntworld.mergeRequestIntegrationIde.internal.option
 
 import net.ntworld.mergeRequestIntegrationIde.internal.ApplicationSettingsImpl
 
-object EnableRequestCacheOption : SettingOption<Boolean> {
+class EnableRequestCacheOption : BooleanOption() {
     override val name: String = "enable-request-cache"
 
-    override fun writeValue(value: Boolean): String {
-        return if (value) "1" else "0"
+    override fun getOptionValueFromSettings(settings: ApplicationSettingsImpl): Boolean {
+        return settings.enableRequestCache
     }
 
-    override fun readValue(input: String, currentSettings: ApplicationSettingsImpl): ApplicationSettingsImpl {
-        val value = input.trim() == "1"
-        if (currentSettings.enableRequestCache != value) {
-            return currentSettings.copy(enableRequestCache = value)
-        }
-        return currentSettings
+    override fun copySettings(settings: ApplicationSettingsImpl, value: Boolean): ApplicationSettingsImpl {
+        return settings.copy(enableRequestCache = value)
     }
 }
