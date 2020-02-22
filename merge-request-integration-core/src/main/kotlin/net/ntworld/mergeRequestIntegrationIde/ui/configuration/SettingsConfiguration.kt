@@ -9,10 +9,15 @@ class SettingsConfiguration : SettingsUI {
     var myTabbedPane: JTabbedPane? = null
     var myWholePanel: JPanel? = null
     var myPerformancePanel: JPanel? = null
-    var myCommentOptionsPanel: JPanel? = null
     var myEnableRequestCache: JCheckBox? = null
+
+    var myCommentOptionsPanel: JPanel? = null
     var myDisplayCommentsInDiffView: JCheckBox? = null
     var myGroupCommentsByThread: JCheckBox? = null
+
+    var myCodeReviewOptionsPanel: JPanel? = null
+    var myCheckoutTargetBranchWhenDoingCodeReview: JCheckBox? = null
+
     override val dispatcher = EventDispatcher.create(SettingsUI.Listener::class.java)
 
     init {
@@ -20,13 +25,15 @@ class SettingsConfiguration : SettingsUI {
         myEnableRequestCache!!.addActionListener { dispatchSettingsUpdated() }
         myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayCommentsInDiffView!!.addActionListener { dispatchSettingsUpdated() }
+        myCheckoutTargetBranchWhenDoingCodeReview!!.addActionListener { dispatchSettingsUpdated() }
     }
 
     private fun dispatchSettingsUpdated() {
         val settings = ApplicationSettingsImpl(
             enableRequestCache = myEnableRequestCache!!.isSelected,
             groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
-            displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected
+            displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
+            checkoutTargetBranchWhenDoingCodeReview = myCheckoutTargetBranchWhenDoingCodeReview!!.isSelected
         )
         dispatcher.multicaster.change(settings)
     }
@@ -35,6 +42,7 @@ class SettingsConfiguration : SettingsUI {
         myEnableRequestCache!!.isSelected = settings.enableRequestCache
         myGroupCommentsByThread!!.isSelected = settings.groupCommentsByThread
         myDisplayCommentsInDiffView!!.isSelected = settings.displayCommentsInDiffView
+        myCheckoutTargetBranchWhenDoingCodeReview!!.isSelected = settings.checkoutTargetBranchWhenDoingCodeReview
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

@@ -5,13 +5,15 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 data class ApplicationSettingsImpl(
     override val enableRequestCache: Boolean,
     override val groupCommentsByThread: Boolean,
-    override val displayCommentsInDiffView: Boolean
+    override val displayCommentsInDiffView: Boolean,
+    override val checkoutTargetBranchWhenDoingCodeReview: Boolean
 ) : ApplicationSettings {
     companion object {
         val DEFAULT = ApplicationSettingsImpl(
             enableRequestCache = true,
             groupCommentsByThread = false,
-            displayCommentsInDiffView = false
+            displayCommentsInDiffView = false,
+            checkoutTargetBranchWhenDoingCodeReview = true
         )
     }
 }

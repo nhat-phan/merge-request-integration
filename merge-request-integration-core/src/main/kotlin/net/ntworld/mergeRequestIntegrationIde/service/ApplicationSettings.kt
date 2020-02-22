@@ -10,6 +10,8 @@ interface ApplicationSettings {
 
     val displayCommentsInDiffView: Boolean
 
+    val checkoutTargetBranchWhenDoingCodeReview: Boolean
+
     fun toApiOptions(): ApiOptions {
         return ApiOptionsImpl(
             enableRequestCache = this.enableRequestCache

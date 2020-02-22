@@ -8,10 +8,7 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
-import net.ntworld.mergeRequestIntegrationIde.internal.option.DisplayCommentsInDiffViewOption
-import net.ntworld.mergeRequestIntegrationIde.internal.option.EnableRequestCacheOption
-import net.ntworld.mergeRequestIntegrationIde.internal.option.GroupCommentsByThreadOption
-import net.ntworld.mergeRequestIntegrationIde.internal.option.SettingOption
+import net.ntworld.mergeRequestIntegrationIde.internal.option.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
@@ -24,7 +21,8 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     private val myAllSettingOptions = listOf<SettingOption<*>>(
         EnableRequestCacheOption,
         GroupCommentsByThreadOption,
-        DisplayCommentsInDiffViewOption
+        DisplayCommentsInDiffViewOption,
+        CheckoutTargetBranchWhenDoingCodeReviewOption
     )
     private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
 
