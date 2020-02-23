@@ -65,30 +65,9 @@ class DiffExtensionInstaller(
             val list = diffProvider.compare(viewer.content1.document.immutableCharSequence,
                     viewer.content2.document.immutableCharSequence, ProgressIndicatorBase())
 
-//            val patchReader = PatchVirtualFileReader.create((editor as EditorEx).virtualFile)
-//            patchReader.parseAllPatches()
-
-            //мы находимся в контексте двустороннего вьювера, поэтому у нас возможны следующие случаи
-            //1. комментарий на строке в которой не было изменений, и в таком случае нам нужно вычислить две стороны oldLine -> newLine
-            //2. комментарий на строке с новым кодом oldLine:null -> newLine
-            //3. комментарий на строке с удаленным кодом oldline -> newLine:null
-            //4. комментарий на строке которая не переехала, но при этом текст изменился
-
-            //calculate position
-            //call comment UI presenter
-            //another stuff
-
-            //I'm not sure is it good to create a lot of handlers, one for each editor
-            //but with current approach we can calculate position more accurate
-
 
             val originalFilePath = OutsidersPsiFileSupport.getOriginalFilePath((editor as EditorEx).virtualFile)
             val position = DiffUtil.getCaretPosition(editor)
-
-
-//            val lineNumber = viewer.currentSide.other()
-//                    .select(viewer.getContent(Side.LEFT).document, viewer.getContent(Side.RIGHT).document)
-//                    ?.getLineNumber(editor.caretModel.offset)
 
 
             val fragmentBuilder = UnifiedFragmentBuilder(list!!, viewer.content1.document, viewer.content2.document, Side.RIGHT)
