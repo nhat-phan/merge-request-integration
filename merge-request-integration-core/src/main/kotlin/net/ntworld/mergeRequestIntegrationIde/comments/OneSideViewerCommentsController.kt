@@ -35,6 +35,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.comments.ui.CommentsThreadComponent
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 import java.awt.*
@@ -51,10 +52,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 class OneSideViewerCommentsController(
+        private val applicationService: ApplicationService,
         private val viewer: SimpleOnesideDiffViewer,
         private val change: Change
 ) {
-
+    private val projectService = applicationService.getProjectService(viewer.project!!)
     private val commentsList: MutableList<Comment> = mutableListOf()
 
     private val editor: EditorImpl = viewer.editor as EditorImpl
@@ -63,7 +65,6 @@ class OneSideViewerCommentsController(
 
     init {
         val project = viewer.project!!
-        val projectService = ProjectService.getInstance(project)
 
         val virtualFile = viewer.editor.virtualFile
 
@@ -72,6 +73,7 @@ class OneSideViewerCommentsController(
         val repository = vcsRepositoryManager.repositories.first() as GitRepository
 
         projectService.codeReviewManager?.comments
+                ?.filter { null !== it.position }
                 ?.forEach { comment: Comment ->
                     if (change.type == Change.Type.NEW
                             && RepositoryUtil.findAbsolutePath(repository, comment.position!!.newPath!!)
@@ -98,8 +100,7 @@ class OneSideViewerCommentsController(
             markupModel.addLineHighlighter(line, HighlighterLayer.LAST, null)
                     .gutterIconRenderer = GutterCommentLineMarkerRenderer(line, object : DumbAwareAction() {
                 override fun actionPerformed(e: AnActionEvent) {
-                    ProjectService.getInstance(viewer.project!!)
-                            .notify("Click on comment ICON", NotificationType.INFORMATION)
+                    projectService.notify("Click on comment ICON", NotificationType.INFORMATION)
 
                     commentsList.takeIf { it.size > 0 }?.let {
                         val comment = it[0]
