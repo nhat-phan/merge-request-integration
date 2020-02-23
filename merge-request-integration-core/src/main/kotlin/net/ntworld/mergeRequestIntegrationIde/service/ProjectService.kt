@@ -1,5 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.service
 
+import com.intellij.diff.DiffContext
+import com.intellij.diff.FrameDiffTool
+import com.intellij.diff.requests.DiffRequest
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.ServiceManager
@@ -68,5 +71,4 @@ interface ProjectService {
     fun notify(message: String)
 
     fun notify(message: String, type: NotificationType)
-
 }

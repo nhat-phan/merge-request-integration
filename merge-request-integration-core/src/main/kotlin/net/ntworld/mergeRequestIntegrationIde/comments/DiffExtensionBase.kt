@@ -6,9 +6,11 @@ import com.intellij.diff.FrameDiffTool
 import com.intellij.diff.requests.ContentDiffRequest
 import com.intellij.diff.requests.DiffRequest
 import com.intellij.diff.tools.util.base.DiffViewerBase
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
-
-class DiffViewerCommentsExtension : DiffExtension() {
+open class DiffExtensionBase(
+    private val applicationService: ApplicationService
+) : DiffExtension() {
 
     override fun onViewerCreated(
             viewer: FrameDiffTool.DiffViewer,
@@ -16,9 +18,8 @@ class DiffViewerCommentsExtension : DiffExtension() {
             request: DiffRequest
     ) {
         context.project?.takeIf { viewer is DiffViewerBase && request is ContentDiffRequest }?.let {
-            ReviewCommentsSupport.getInstance(it)
-                    .installExtensions(viewer as DiffViewerBase, request as ContentDiffRequest)
-
+            DiffExtensionInstaller(applicationService, context, viewer, request).install()
         }
     }
+
 }
