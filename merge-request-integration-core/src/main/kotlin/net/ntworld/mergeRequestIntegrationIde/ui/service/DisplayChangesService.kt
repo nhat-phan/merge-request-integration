@@ -170,6 +170,11 @@ object DisplayChangesService {
         changes: Collection<Change>
     ) {
         applicationService.getProjectService(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
+
+        val max = applicationService.settings.maxDiffChangesOpenedAutomatically
+        if (max == 0 || changes.size > max) {
+            return
+        }
         val limit = UISettings().editorTabLimit
         changes.forEachIndexed { index, item ->
             if (index < limit) {

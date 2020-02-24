@@ -12,6 +12,8 @@ interface ApplicationSettings {
 
     val checkoutTargetBranch: Boolean
 
+    val maxDiffChangesOpenedAutomatically: Int
+
     fun toApiOptions(): ApiOptions {
         return ApiOptionsImpl(
             enableRequestCache = this.enableRequestCache

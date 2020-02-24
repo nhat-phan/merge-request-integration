@@ -22,11 +22,13 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
     private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
     private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
+    private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
         myOptionEnableRequestCache,
         myOptionGroupCommentsByThread,
         myOptionDisplayCommentsInDiffView,
-        myOptionCheckoutTargetBranch
+        myOptionCheckoutTargetBranch,
+        myOptionMaxDiffChangesOpenedAutomatically
     )
     private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
 
@@ -45,6 +47,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         writeSettingOption(element, myOptionGroupCommentsByThread, myApplicationSettings.groupCommentsByThread)
         writeSettingOption(element, myOptionDisplayCommentsInDiffView, myApplicationSettings.displayCommentsInDiffView)
         writeSettingOption(element, myOptionCheckoutTargetBranch, myApplicationSettings.checkoutTargetBranch)
+        writeSettingOption(element, myOptionMaxDiffChangesOpenedAutomatically, myApplicationSettings.maxDiffChangesOpenedAutomatically)
         return element
     }
 
