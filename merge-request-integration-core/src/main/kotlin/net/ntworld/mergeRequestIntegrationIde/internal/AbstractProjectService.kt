@@ -9,13 +9,18 @@ import net.ntworld.foundation.util.UUIDGenerator
 import net.ntworld.mergeRequest.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequest.api.MergeRequestOrdering
+import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequest.query.generated.GetMergeRequestFilterImpl
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
+import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
+import org.jdom.Element
 
 abstract class AbstractProjectService(
     private val ideaProject: IdeaProject
@@ -25,6 +30,7 @@ abstract class AbstractProjectService(
     private var myComments: Collection<Comment>? = null
     private var myCommits: Collection<Commit>? = null
     private var myChanges: Collection<Change>? = null
+    private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
 
     final override val dispatcher = EventDispatcher.create(ProjectEventListener::class.java)
 
@@ -65,10 +71,6 @@ abstract class AbstractProjectService(
         }
     }
 
-    init {
-        dispatcher.addListener(myProjectEventListener)
-    }
-
     override val registeredProviders: List<ProviderData>
         get() {
             if (!myIsInitialized) {
@@ -76,6 +78,51 @@ abstract class AbstractProjectService(
             }
             return ApiProviderManager.providerDataCollection
         }
+
+    init {
+        dispatcher.addListener(myProjectEventListener)
+    }
+
+    override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
+        val data = myFiltersData[id]
+        return if (null !== data) {
+            data
+        } else {
+            Pair(
+                GetMergeRequestFilterImpl(
+                    state = MergeRequestState.OPENED,
+                    search = "",
+                    authorId = "",
+                    assigneeId = "",
+                    approverIds = listOf("")
+                ),
+                MergeRequestOrdering.RECENTLY_UPDATED
+            )
+        }
+    }
+
+    override fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering) {
+        myFiltersData[id] = Pair(filters, ordering)
+    }
+
+    override fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
+        super.readStateItem(item, id, settings)
+        val attribute = item.getAttribute("savedFilter")
+        if (null !== attribute) {
+            val data = SavedFiltersUtil.parse(attribute.value)
+            if (null !== data) {
+                myFiltersData[id] = data
+            }
+        }
+    }
+
+    override fun writeStateItem(item: Element, id: String, settings: ProviderSettings) {
+        super.writeStateItem(item, id, settings)
+        val data = myFiltersData[id]
+        if (null !== data) {
+            item.setAttribute("savedFilters", SavedFiltersUtil.stringify(data.first, data.second))
+        }
+    }
 
     override fun supported(): List<ProviderInfo> = supportedProviders
 

@@ -8,6 +8,8 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequest.api.MergeRequestOrdering
+import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 
 interface ProjectService {
 
@@ -24,6 +26,10 @@ interface ProjectService {
     val registeredProviders: List<ProviderData>
 
     fun getApplicationService(): ApplicationService
+
+    fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering>
+
+    fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering)
 
     fun supported(): List<ProviderInfo>
 

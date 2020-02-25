@@ -23,17 +23,21 @@ open class ServiceBase : PersistentStateComponent<Element> {
         myProvidersData.values.map {
             val item = Element("Item")
             item.setAttribute("id", it.id)
-            item.setAttribute("providerId", it.info.id)
-            item.setAttribute("url", it.credentials.url)
-            item.setAttribute("login", it.credentials.login)
-            item.setAttribute("projectId", it.credentials.projectId)
-            item.setAttribute("version", it.credentials.version)
-            item.setAttribute("info", it.credentials.info)
-            item.setAttribute("ignoreSSLCertificateErrors", if (it.credentials.ignoreSSLCertificateErrors) "1" else "0")
-            item.setAttribute("repository", it.repository)
+            writeStateItem(item, it.id, it)
             element.addContent(item)
         }
         return element
+    }
+
+    protected open fun writeStateItem(item: Element, id: String, settings: ProviderSettings) {
+        item.setAttribute("providerId", settings.info.id)
+        item.setAttribute("url", settings.credentials.url)
+        item.setAttribute("login", settings.credentials.login)
+        item.setAttribute("projectId", settings.credentials.projectId)
+        item.setAttribute("version", settings.credentials.version)
+        item.setAttribute("info", settings.credentials.info)
+        item.setAttribute("ignoreSSLCertificateErrors", if (settings.credentials.ignoreSSLCertificateErrors) "1" else "0")
+        item.setAttribute("repository", settings.repository)
     }
 
     override fun loadState(state: Element) {
@@ -56,13 +60,18 @@ open class ServiceBase : PersistentStateComponent<Element> {
                 ignoreSSLCertificateErrors = shouldIgnoreSSLCertificateErrors(item)
             )
             val id = item.getAttribute("id").value
-            myProvidersData[id] = ProviderSettingsImpl(
+            val settings = ProviderSettingsImpl(
                 id = id.trim(),
                 info = info,
                 credentials = decryptCredentials(info, credentials),
                 repository = item.getAttribute("repository").value
             )
+            readStateItem(item, id, settings)
         }
+    }
+
+    protected open fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
+        myProvidersData[id] = settings
     }
 
     private fun shouldIgnoreSSLCertificateErrors(item: Element): Boolean {
