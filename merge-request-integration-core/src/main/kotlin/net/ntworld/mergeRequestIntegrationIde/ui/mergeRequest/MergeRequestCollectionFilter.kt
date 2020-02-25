@@ -13,7 +13,12 @@ import com.intellij.util.ui.JBUI
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
+import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegration.provider.github.Github
+import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
+import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestFilterPropertiesPanel
 import java.awt.Point
 import java.awt.event.KeyEvent
@@ -93,15 +98,41 @@ class MergeRequestCollectionFilter(
             if (null === e || (e.keyCode != 10 && e.keyCode != 13)) {
                 return
             }
-            eventDispatcher.multicaster.filterChanged(
-                myAdvanceFilterButton.buildFilter(mySearchField.text)
-            )
+            val filter = myAdvanceFilterButton.buildFilter(mySearchField.text)
+            eventDispatcher.multicaster.filterChanged(filter)
+            saveFilterAndOrdering(filter, null)
             mySearchField.addCurrentTextToHistory()
         }
     }
 
     init {
         mySearchField.addKeyboardListener(myKeyListener)
+        val pair = applicationService.getProjectService(ideaProject).findFiltersByProviderId(
+            getProviderIdForSavingFilter()
+        )
+        myOrdering = pair.second
+        mySearchField.text = pair.first.search
+        myAdvanceFilterButton.setPreselectedValues(pair.first)
+    }
+
+    private fun saveFilterAndOrdering(filter: GetMergeRequestFilter?, ordering: MergeRequestOrdering?) {
+        applicationService.getProjectService(
+            ideaProject
+        ).saveFiltersOfProvider(
+            getProviderIdForSavingFilter(),
+            if (null === filter) myAdvanceFilterButton.buildFilter(mySearchField.text) else filter,
+            if (null === ordering) myOrdering else ordering
+        )
+    }
+
+    private fun getProviderIdForSavingFilter() : String {
+        if (providerData.info.id == Gitlab.id) {
+            return GitlabConnectionsConfigurableBase.findIdFromName(providerData.name)
+        }
+        if (providerData.info.id == Github.id) {
+            return GithubConnectionsConfigurableBase.findIdFromName(providerData.name)
+        }
+        return providerData.name
     }
 
     override fun createComponent(): JComponent {
@@ -123,6 +154,7 @@ class MergeRequestCollectionFilter(
             if (state) {
                 self.myOrdering = order
                 self.eventDispatcher.multicaster.orderChanged(order)
+                self.saveFilterAndOrdering(null, order)
             }
         }
     }
@@ -133,9 +165,9 @@ class MergeRequestCollectionFilter(
         }
 
         override fun onFieldCleared() {
-            self.eventDispatcher.multicaster.filterChanged(
-                self.myAdvanceFilterButton.buildFilter(self.mySearchField.text)
-            )
+            val filter = self.myAdvanceFilterButton.buildFilter(self.mySearchField.text)
+            self.eventDispatcher.multicaster.filterChanged(filter)
+            self.saveFilterAndOrdering(filter, null)
         }
     }
 
@@ -147,8 +179,14 @@ class MergeRequestCollectionFilter(
         private val onChanged: (() -> Unit)
     ) : AnAction(null, null, AllIcons.Actions.Properties) {
         private var myIsReady = false
+        private var myPreselectedValue: GetMergeRequestFilter? = null
         private val myFilterPropertiesReady: (() -> Unit) = {
             myIsReady = true
+            val preselected = myPreselectedValue
+            if (null !== preselected) {
+                myFilterPropertiesPanel.setPreselectedValues(preselected)
+                myPreselectedValue = null
+            }
         }
         private val myFilterPropertiesPanel = MergeRequestFilterPropertiesPanel(
             applicationService, ideaProject, providerData, onChanged, myFilterPropertiesReady
@@ -188,5 +226,14 @@ class MergeRequestCollectionFilter(
         }
 
         fun buildFilter(search: String) = myFilterPropertiesPanel.buildFilter(search)
+
+        fun setPreselectedValues(value: GetMergeRequestFilter) {
+            if (myIsReady) {
+                myFilterPropertiesPanel.setPreselectedValues(value)
+                myPreselectedValue = null
+            } else {
+                myPreselectedValue = value
+            }
+        }
     }
 }

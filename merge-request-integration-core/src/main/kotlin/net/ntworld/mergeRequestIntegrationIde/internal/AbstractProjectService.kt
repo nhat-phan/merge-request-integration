@@ -107,7 +107,7 @@ abstract class AbstractProjectService(
 
     override fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
         super.readStateItem(item, id, settings)
-        val attribute = item.getAttribute("savedFilter")
+        val attribute = item.getAttribute("savedFilters")
         if (null !== attribute) {
             val data = SavedFiltersUtil.parse(attribute.value)
             if (null !== data) {

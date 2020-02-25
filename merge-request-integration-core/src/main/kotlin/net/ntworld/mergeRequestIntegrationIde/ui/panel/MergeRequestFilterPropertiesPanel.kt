@@ -110,6 +110,15 @@ class MergeRequestFilterPropertiesPanel(
         )
     }
 
+    fun setPreselectedValues(value: GetMergeRequestFilter) {
+        when (value.state) {
+            MergeRequestState.ALL -> myStateAll!!.isSelected = true
+            MergeRequestState.OPENED -> myStateOpened!!.isSelected = true
+            MergeRequestState.CLOSED -> myStateClosed!!.isSelected = true
+            MergeRequestState.MERGED -> myStateMerged!!.isSelected = true
+        }
+    }
+
     private fun findMemberInComboBox(comboBox: ComboBox<UserInfo>) : String {
         val selected = comboBox.selectedItem as UserInfo?
         if (!comboBox.isEnabled || null === selected) {
