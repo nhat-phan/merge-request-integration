@@ -6,6 +6,8 @@ import net.ntworld.mergeRequestIntegration.internal.ApiOptionsImpl
 interface ApplicationSettings {
     val enableRequestCache: Boolean
 
+    val saveMRFilterState: Boolean
+
     val groupCommentsByThread: Boolean
 
     val displayCommentsInDiffView: Boolean

@@ -5,6 +5,8 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 interface ProviderData {
     val id: String
 
+    val key: String
+
     val name: String
 
     val info: ProviderInfo

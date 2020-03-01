@@ -7,6 +7,7 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 
 data class ProviderDataImpl(
     override val id: String,
+    override val key: String,
     override val name: String,
     override val info: ProviderInfo,
     override val credentials: ApiCredentials,

@@ -13,6 +13,7 @@ class SettingsConfiguration : SettingsUI {
     var myWholePanel: JPanel? = null
     var myPerformancePanel: JPanel? = null
     var myEnableRequestCache: JCheckBox? = null
+    var mySaveMRFilterState: JCheckBox? = null
 
     var myCommentOptionsPanel: JPanel? = null
     var myDisplayCommentsInDiffView: JCheckBox? = null
@@ -28,6 +29,7 @@ class SettingsConfiguration : SettingsUI {
     init {
         // myPerformancePanel!!.border = BorderFactory.createTitledBorder("Performance")
         myEnableRequestCache!!.addActionListener { dispatchSettingsUpdated() }
+        mySaveMRFilterState!!.addActionListener { dispatchSettingsUpdated() }
         myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayCommentsInDiffView!!.addActionListener { dispatchSettingsUpdated() }
         myCheckoutTargetBranch!!.addActionListener { dispatchSettingsUpdated() }
@@ -44,6 +46,7 @@ class SettingsConfiguration : SettingsUI {
     private fun dispatchSettingsUpdated() {
         val settings = ApplicationSettingsImpl(
             enableRequestCache = myEnableRequestCache!!.isSelected,
+            saveMRFilterState = mySaveMRFilterState!!.isSelected,
             groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
             displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
             checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected,
@@ -56,6 +59,7 @@ class SettingsConfiguration : SettingsUI {
 
     override fun initialize(settings: ApplicationSettings) {
         myEnableRequestCache!!.isSelected = settings.enableRequestCache
+        mySaveMRFilterState!!.isSelected = settings.saveMRFilterState
         myGroupCommentsByThread!!.isSelected = settings.groupCommentsByThread
         myDisplayCommentsInDiffView!!.isSelected = settings.displayCommentsInDiffView
         myCheckoutTargetBranch!!.isSelected = settings.checkoutTargetBranch

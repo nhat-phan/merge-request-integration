@@ -85,7 +85,7 @@ abstract class AbstractProjectService(
 
     override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
         val data = myFiltersData[id]
-        return if (null !== data) {
+        return if (null !== data && getApplicationService().settings.saveMRFilterState) {
             data
         } else {
             Pair(
@@ -102,7 +102,9 @@ abstract class AbstractProjectService(
     }
 
     override fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering) {
-        myFiltersData[id] = Pair(filters, ordering)
+        if (getApplicationService().settings.saveMRFilterState) {
+            myFiltersData[id] = Pair(filters, ordering)
+        }
     }
 
     override fun readStateItem(item: Element, id: String, settings: ProviderSettings) {

@@ -25,6 +25,13 @@ class MergeRequestCollection(
     }
     private val myTree: MergeRequestCollectionUI by lazy {
         val tree = MergeRequestCollectionTree(applicationService, ideaProject, providerData)
+        if (applicationService.settings.saveMRFilterState) {
+            val projectService = applicationService.getProjectService(ideaProject)
+            val pair = projectService.findFiltersByProviderId(providerData.key)
+            tree.setFilter(pair.first)
+            tree.setOrder(pair.second)
+        }
+
         tree.fetchData()
         tree
     }

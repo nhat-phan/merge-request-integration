@@ -9,7 +9,7 @@ import kotlinx.serialization.list
 import java.util.*
 
 object UpdateManager {
-    private const val CURRENT_VERSION = "2019.3.5"
+    private const val CURRENT_VERSION = "2020.1.0"
     private const val METADATA_URL = "https://nhat-phan.github.io/updates/merge-request-integration/metadata.json"
     private const val CHECK_INTERVAL = 3600000 // Every 1 hour
 

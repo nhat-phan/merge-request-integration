@@ -31,6 +31,8 @@ class MergeRequestFilterPropertiesPanel(
     var myApprover: ComboBox<UserInfo>? = null
 
     private var isFetched = false
+    private var isReady = false
+    private var shouldDispatchChanges = true
     private val myData = mutableListOf<UserInfo>()
     private val myListener = object : FetchProjectMembersTask.Listener {
         override fun onError(exception: Exception) {
@@ -53,6 +55,7 @@ class MergeRequestFilterPropertiesPanel(
             if (providerData.hasApprovalFeature) {
                 myApprover!!.model = MyMemberModel(myData)
             }
+            isReady = true
             onReady()
         }
     }
@@ -66,7 +69,9 @@ class MergeRequestFilterPropertiesPanel(
         }
     }
     private val myActionListener = ActionListener {
-        onChanged()
+        if (isReady && shouldDispatchChanges) {
+            onChanged()
+        }
     }
 
     init {
@@ -111,12 +116,26 @@ class MergeRequestFilterPropertiesPanel(
     }
 
     fun setPreselectedValues(value: GetMergeRequestFilter) {
+        shouldDispatchChanges = false
         when (value.state) {
             MergeRequestState.ALL -> myStateAll!!.isSelected = true
             MergeRequestState.OPENED -> myStateOpened!!.isSelected = true
             MergeRequestState.CLOSED -> myStateClosed!!.isSelected = true
             MergeRequestState.MERGED -> myStateMerged!!.isSelected = true
         }
+
+        if (value.assigneeId.isNotBlank()) {
+            selectMemberInComboBox(myAssignee!!, value.assigneeId)
+        }
+
+        if (value.authorId.isNotBlank()) {
+            selectMemberInComboBox(myAuthor!!, value.authorId)
+        }
+
+        if (value.approverIds.isNotEmpty() && value.approverIds[0].isNotBlank()) {
+            selectMemberInComboBox(myApprover!!, value.approverIds[0])
+        }
+        shouldDispatchChanges = true
     }
 
     private fun findMemberInComboBox(comboBox: ComboBox<UserInfo>) : String {
@@ -125,6 +144,16 @@ class MergeRequestFilterPropertiesPanel(
             return ""
         }
         return selected.id
+    }
+
+    private fun selectMemberInComboBox(comboBox: ComboBox<UserInfo>, userId: String) {
+        for (i in 0 until comboBox.itemCount) {
+            val item = comboBox.getItemAt(i)
+            if (item.id == userId) {
+                comboBox.selectedItem = item
+                return
+            }
+        }
     }
 
     private fun findState(): MergeRequestState {

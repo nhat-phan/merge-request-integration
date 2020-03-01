@@ -31,6 +31,7 @@ class RegisterProviderTask(
             val providerData = ApiProviderManager.register(
                 infrastructure = applicationService.infrastructure,
                 id = id,
+                key = settings.id,
                 name = name,
                 info = settings.info,
                 credentials = settings.credentials,

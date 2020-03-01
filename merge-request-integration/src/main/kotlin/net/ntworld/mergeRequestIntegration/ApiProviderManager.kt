@@ -28,6 +28,7 @@ object ApiProviderManager {
     fun register(
         infrastructure: Infrastructure,
         id: String,
+        key: String,
         name: String,
         info: ProviderInfo,
         credentials: ApiCredentials,
@@ -40,6 +41,7 @@ object ApiProviderManager {
             if (null !== project) {
                 val providerData = ProviderDataImpl(
                     id = id,
+                    key = key,
                     name = name,
                     info = info,
                     credentials = credentials,
@@ -56,6 +58,7 @@ object ApiProviderManager {
         }
         val invalid = ProviderDataImpl(
             id = id,
+            key = key,
             name = name,
             info = info,
             credentials = credentials,

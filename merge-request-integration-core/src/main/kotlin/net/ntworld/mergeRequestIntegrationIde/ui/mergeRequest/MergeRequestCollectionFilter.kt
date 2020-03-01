@@ -37,7 +37,9 @@ class MergeRequestCollectionFilter(
     private var myOrdering = MergeRequestOrdering.RECENTLY_UPDATED
 
     private val myFilterPropertiesChanged: (() -> Unit) = {
-        eventDispatcher.multicaster.filterChanged(myAdvanceFilterButton.buildFilter(mySearchField.text))
+        val filter = myAdvanceFilterButton.buildFilter(mySearchField.text)
+        eventDispatcher.multicaster.filterChanged(filter)
+        saveFilterAndOrdering(filter, null)
     }
     private val mySearchField = MySearchTextField(this)
     private val myMainActionGroup = DefaultActionGroup()
@@ -107,9 +109,7 @@ class MergeRequestCollectionFilter(
 
     init {
         mySearchField.addKeyboardListener(myKeyListener)
-        val pair = applicationService.getProjectService(ideaProject).findFiltersByProviderId(
-            getProviderIdForSavingFilter()
-        )
+        val pair = applicationService.getProjectService(ideaProject).findFiltersByProviderId(providerData.key)
         myOrdering = pair.second
         mySearchField.text = pair.first.search
         myAdvanceFilterButton.setPreselectedValues(pair.first)
@@ -119,20 +119,10 @@ class MergeRequestCollectionFilter(
         applicationService.getProjectService(
             ideaProject
         ).saveFiltersOfProvider(
-            getProviderIdForSavingFilter(),
+            providerData.key,
             if (null === filter) myAdvanceFilterButton.buildFilter(mySearchField.text) else filter,
             if (null === ordering) myOrdering else ordering
         )
-    }
-
-    private fun getProviderIdForSavingFilter() : String {
-        if (providerData.info.id == Gitlab.id) {
-            return GitlabConnectionsConfigurableBase.findIdFromName(providerData.name)
-        }
-        if (providerData.info.id == Github.id) {
-            return GithubConnectionsConfigurableBase.findIdFromName(providerData.name)
-        }
-        return providerData.name
     }
 
     override fun createComponent(): JComponent {

@@ -19,12 +19,14 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         "https://gitlab.personio-internal.de"
     )
     private val myOptionEnableRequestCache = EnableRequestCacheOption()
+    private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
     private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
     private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
     private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
     private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
         myOptionEnableRequestCache,
+        myOptionSaveMRFilterState,
         myOptionGroupCommentsByThread,
         myOptionDisplayCommentsInDiffView,
         myOptionCheckoutTargetBranch,
@@ -44,6 +46,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
             return element
         }
         writeSettingOption(element, myOptionEnableRequestCache, myApplicationSettings.enableRequestCache)
+        writeSettingOption(element, myOptionSaveMRFilterState, myApplicationSettings.saveMRFilterState)
         writeSettingOption(element, myOptionGroupCommentsByThread, myApplicationSettings.groupCommentsByThread)
         writeSettingOption(element, myOptionDisplayCommentsInDiffView, myApplicationSettings.displayCommentsInDiffView)
         writeSettingOption(element, myOptionCheckoutTargetBranch, myApplicationSettings.checkoutTargetBranch)
