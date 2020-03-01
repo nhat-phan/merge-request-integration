@@ -49,6 +49,10 @@ open class GithubConnectionsConfigurableBase(
         }
     }
 
+    override fun findProjectByPath(credentials: ApiCredentials, path: String): Project? {
+        return null
+    }
+
     override fun assertConnectionIsValid(connection: ApiConnection) {
         val out = applicationService.infrastructure.serviceBus() process GithubFindCurrentUserRequest(
             credentials = ApiCredentialsImpl(

@@ -16,7 +16,7 @@ class GitlabProjectApi(
 ) : ProjectApi {
 
     override fun find(projectId: String): Project? {
-        val out = infrastructure.serviceBus() process GitlabFindProjectRequest(credentials, projectId)
+        val out = infrastructure.serviceBus() process GitlabFindProjectRequest(credentials, projectId.toInt())
 
         return if (out.hasError()) {
             null

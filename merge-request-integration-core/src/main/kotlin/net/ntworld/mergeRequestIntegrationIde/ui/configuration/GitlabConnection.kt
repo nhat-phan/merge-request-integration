@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.EventDispatcher
+import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
@@ -94,6 +95,7 @@ class GitlabConnection(
 
         myIgnoreSSLError!!.addChangeListener { updateConnectionData() }
         myRepository!!.addActionListener {
+            requestGuessProjectByCurrentRepository()
             updateConnectionData()
         }
         myProjectFinder.addProjectChangedListener(object: ProjectFinderUI.ProjectChangedListener {
@@ -131,8 +133,16 @@ class GitlabConnection(
     override fun onConnectionTested(name: String, connection: ApiConnection, shared: Boolean) {
         myIsTested = true
         myTestBtn!!.isEnabled = false
-        Messages.showInfoMessage("Successfully connected!", "Info")
         updateFieldsState()
+        requestGuessProjectByCurrentRepository()
+        Messages.showInfoMessage("Successfully connected!", "Info")
+    }
+
+    override fun onProjectGuessed(repository: GitRepository, project: Project?) {
+        if (null !== project && null === mySelectedProject) {
+            mySelectedProject = project
+            myProjectFinder.setSelectedProject(mySelectedProject)
+        }
     }
 
     override fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception) {
@@ -155,19 +165,33 @@ class GitlabConnection(
 
     override fun createComponent(): JComponent = myWholePanel!!
 
+    private fun requestGuessProjectByCurrentRepository() {
+        val repository = RepositoryUtil.findRepositoryByPath(
+            ideaProject,
+            myRepository!!.selectedItem as String? ?: ""
+        )
+        if (null !== repository) {
+            this.dispatcher.multicaster.guessProject(this, buildApiCredentials(), repository)
+        }
+    }
+
+    private fun buildApiCredentials(): ApiCredentials {
+        return ApiCredentialsImpl(
+            url = myUrl!!.text.trim(),
+            login = "",
+            token = getToken().trim(),
+            projectId = myProjectFinder.getSelectedProjectId(),
+            version = "v4",
+            info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
+            ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
+        )
+    }
+
     private fun updateConnectionData() {
         dispatcher.multicaster.update(
             this,
             myName!!.text.trim(),
-            ApiCredentialsImpl(
-                url = myUrl!!.text.trim(),
-                login = "",
-                token = getToken().trim(),
-                projectId = myProjectFinder.getSelectedProjectId(),
-                version = "v4",
-                info = if (myMergeApprovalsFeature!!.isSelected) GitlabUtil.getMergeApprovalFeatureInfo() else "",
-                ignoreSSLCertificateErrors = myIgnoreSSLError!!.isSelected
-            ),
+            buildApiCredentials(),
             myShared!!.isSelected,
             myRepository!!.selectedItem as String? ?: ""
         )

@@ -33,7 +33,21 @@ open class GitlabConnectionsConfigurableBase(
     override fun findProject(credentials: ApiCredentials): net.ntworld.mergeRequest.Project? {
         val out = applicationService.infrastructure.serviceBus() process GitlabFindProjectRequest(
             credentials = credentials,
-            projectId = credentials.projectId
+            projectId = credentials.projectId.toInt()
+        )
+        val response = out.getResponse()
+        return if (response.isSuccess) {
+            GitlabProjectTransformer.transform(response.project)
+        } else {
+            null
+        }
+    }
+
+    override fun findProjectByPath(credentials: ApiCredentials, path: String): net.ntworld.mergeRequest.Project? {
+        val out = applicationService.infrastructure.serviceBus() process GitlabFindProjectRequest(
+            credentials = credentials,
+            projectId = 0,
+            projectPath = path
         )
         val response = out.getResponse()
         return if (response.isSuccess) {

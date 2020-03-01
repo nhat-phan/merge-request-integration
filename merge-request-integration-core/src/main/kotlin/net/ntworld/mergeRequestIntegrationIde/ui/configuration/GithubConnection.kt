@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.EventDispatcher
+import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
@@ -130,6 +131,9 @@ class GithubConnection(
         myTestBtn!!.isEnabled = false
         Messages.showInfoMessage("Successfully connected!", "Info")
         updateFieldsState()
+    }
+
+    override fun onProjectGuessed(repository: GitRepository, project: Project?) {
     }
 
     override fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception) {

@@ -13,7 +13,11 @@ class GitlabFindProjectRequestHandler : RequestHandler<GitlabFindProjectRequest,
     override fun handle(request: GitlabFindProjectRequest): GitlabFindProjectResponse = GitlabClient(
         request = request,
         execute = {
-            val project = this.projectApi.getProject(request.projectId.toInt())
+            val project = if (request.projectPath.isNotBlank()) {
+                this.projectApi.getProject(request.projectPath)
+            } else {
+                this.projectApi.getProject(request.projectId)
+            }
 
             GitlabFindProjectResponse(error = null, project = project)
         },

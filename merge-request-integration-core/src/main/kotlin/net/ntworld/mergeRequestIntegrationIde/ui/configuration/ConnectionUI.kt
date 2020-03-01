@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.util.EventDispatcher
+import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
@@ -15,6 +16,8 @@ interface ConnectionUI : Component {
     fun setName(name: String)
 
     fun onConnectionTested(name: String, connection: ApiConnection, shared: Boolean)
+
+    fun onProjectGuessed(repository: GitRepository, project: Project?)
 
     fun onConnectionError(name: String, connection: ApiConnection, shared: Boolean, exception: Exception)
 
@@ -38,5 +41,7 @@ interface ConnectionUI : Component {
         )
 
         fun changeName(connectionUI: ConnectionUI, oldName: String, newName: String)
+
+        fun guessProject(connectionUI: ConnectionUI, credentials: ApiCredentials, repository: GitRepository)
     }
 }

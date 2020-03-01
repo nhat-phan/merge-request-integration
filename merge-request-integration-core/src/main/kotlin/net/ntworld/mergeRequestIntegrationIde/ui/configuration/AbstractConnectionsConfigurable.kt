@@ -5,19 +5,18 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.ui.tabs.TabInfo
+import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Project
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequestIntegrationIde.configuration.vos.GitRemotePathInfo
 import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
@@ -149,6 +148,34 @@ abstract class AbstractConnectionsConfigurable(
                 myTabInfos.remove(oldId)
             }
         }
+
+        override fun guessProject(connectionUI: ConnectionUI, credentials: ApiCredentials, repository: GitRepository) {
+            val remotes = mutableSetOf<String>()
+            repository.remotes.forEach { remote ->
+                remote.urls.forEach {
+                    val path = parseRemotePath(it)
+                    if (null !== path) {
+                        remotes.add(path)
+                    }
+                }
+                remote.pushUrls.forEach {
+                    val path = parseRemotePath(it)
+                    if (null !== path) {
+                        remotes.add(path)
+                    }
+                }
+            }
+
+            remotes.forEach {
+                val project = findProjectByPath(credentials, it)
+                connectionUI.onProjectGuessed(repository, project)
+            }
+        }
+
+        private fun parseRemotePath(input: String): String? {
+            val info = GitRemotePathInfo(input)
+            return if (info.isValid) info.toString() else null
+        }
     }
 
     abstract fun makeProviderInfo(): ProviderInfo
@@ -162,6 +189,8 @@ abstract class AbstractConnectionsConfigurable(
     abstract fun validateConnection(connection: ApiConnection): Boolean
 
     abstract fun findProject(credentials: ApiCredentials): Project?
+
+    abstract fun findProjectByPath(credentials: ApiCredentials, path: String): Project?
 
     abstract fun assertConnectionIsValid(connection: ApiConnection)
 
