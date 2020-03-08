@@ -9,6 +9,7 @@ import com.intellij.ui.tabs.*
 import com.intellij.ui.tabs.impl.*
 import com.intellij.ui.tabs.impl.singleRow.ScrollableSingleRowLayout
 import com.intellij.ui.tabs.impl.singleRow.SingleRowLayout
+import com.intellij.util.ui.JBUI
 import java.awt.*
 import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
@@ -48,7 +49,7 @@ class Tabs(
     private class MyTabs(
         private val ideaProject: IdeaProject,
         private val disposable: Disposable
-    ) : SingleHeightTabs(
+    ) : JBEditorTabs(
         ideaProject,
         ActionManager.getInstance(),
         IdeFocusManager.getInstance(ideaProject),
@@ -63,7 +64,7 @@ class Tabs(
         }
 
         override fun createTabBorder(): JBTabsBorder? {
-            return JBRunnerTabsBorder(this)
+            return MyTabsBorder(this)
         }
 
         override fun useSmallLabels(): Boolean {
@@ -103,7 +104,22 @@ class Tabs(
             }
         }
 
-        private class JBRunnerTabsBorder(private val jbTabs: JBTabsImpl) : JBTabsBorder(jbTabs) {
+        override fun createTabLabel(info: TabInfo): TabLabel {
+            return MyTabLabel(this, info)
+        }
+
+        private class MyTabLabel(tabs: JBTabsImpl, info: TabInfo) : TabLabel(tabs, info) {
+            override fun getPreferredSize(): Dimension {
+                val size = super.getPreferredSize()
+                return Dimension(size.width, getPreferredHeight())
+            }
+
+            private fun getPreferredHeight(): Int {
+                return JBUI.scale(28)
+            }
+        }
+
+        private class MyTabsBorder(private val jbTabs: JBTabsImpl) : JBTabsBorder(jbTabs) {
             override val effectiveBorder: Insets
                 get() = Insets(jbTabs.borderThickness, 0, 0, 0)
 
