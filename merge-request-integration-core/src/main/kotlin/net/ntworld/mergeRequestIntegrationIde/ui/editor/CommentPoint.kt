@@ -5,8 +5,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 
 data class CommentPoint(
     val line: Int,
-    val comment: Comment,
-    val changeInfo: CodeReviewManager.ChangeInfo
+    val comment: Comment
 ) {
     val id: String = comment.id
 }

@@ -252,11 +252,11 @@ internal class CodeReviewManagerImpl(
             val position = comment.position!!
             if (position.headHash == changeInfo.contentRevision.revisionNumber.asString()) {
                 if (changeInfo.before && null !== position.oldLine) {
-                    result.add(CommentPoint(position.oldLine!!, comment, changeInfo))
+                    result.add(CommentPoint(position.oldLine!!, comment))
                     continue
                 }
                 if (changeInfo.after && null !== position.newLine) {
-                    result.add(CommentPoint(position.newLine!!, comment, changeInfo))
+                    result.add(CommentPoint(position.newLine!!, comment))
                     continue
                 }
             }
