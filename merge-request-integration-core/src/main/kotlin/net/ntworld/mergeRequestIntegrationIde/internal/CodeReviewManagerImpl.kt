@@ -185,6 +185,8 @@ internal class CodeReviewManagerImpl(
 
         val gutter = editor.gutter
         val gutterMyLineNumberConvertor = gutter.javaClass.getDeclaredField("myLineNumberConvertor")
+        // TODO: myLineNumberConvertor -> myLineNumberConverter
+        // TODO: myAdditionalLineNumberConvertor -> myAdditionalLineNumberConverter
         val gutterMyAdditionalLineNumberConvertor = gutter.javaClass.getDeclaredField("myAdditionalLineNumberConvertor")
         gutterMyLineNumberConvertor.isAccessible = true
         gutterMyAdditionalLineNumberConvertor.isAccessible = true

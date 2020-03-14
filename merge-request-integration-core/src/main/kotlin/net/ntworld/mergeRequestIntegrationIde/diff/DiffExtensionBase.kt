@@ -51,10 +51,11 @@ open class DiffExtensionBase(
                 DiffModelImpl(null, change, listOf(), listOf())
             } else {
                 val changeInfo = when (change.type) {
-                    Change.Type.MODIFICATION -> throw Exception("Not supported")
                     Change.Type.NEW -> ChangeInfoImpl(change, change.afterRevision!!, before = false, after = true)
                     Change.Type.DELETED -> ChangeInfoImpl(change, change.afterRevision!!, before = true, after = false)
+                    Change.Type.MODIFICATION -> throw Exception("Not supported")
                     Change.Type.MOVED -> throw Exception("Not supported")
+                    else -> throw Exception("Not supported")
                 }
                 val commentPoints = codeReviewManager.findCommentPoints(
                     changeInfo.contentRevision.file.path,

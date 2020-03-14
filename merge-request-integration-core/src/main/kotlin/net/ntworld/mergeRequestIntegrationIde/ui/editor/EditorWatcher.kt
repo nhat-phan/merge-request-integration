@@ -88,6 +88,8 @@ class EditorWatcher private constructor(
         private var started: Boolean = false
 
         fun start(applicationService: ApplicationService, ideaProject: IdeaProject, toolWindow: ToolWindow) {
+            return
+            // TODO: Remove editor watcher completely
             if (!started) {
                 started = true
                 val instance = EditorWatcher(applicationService, ideaProject, toolWindow)
