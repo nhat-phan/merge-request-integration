@@ -22,6 +22,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
     private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
     private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
+    private val myOptionShowAddCommentIconsInDiffViewGutter = ShowAddCommentIconsInDiffViewGutterOption()
     private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
     private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
@@ -29,6 +30,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         myOptionSaveMRFilterState,
         myOptionGroupCommentsByThread,
         myOptionDisplayCommentsInDiffView,
+        myOptionShowAddCommentIconsInDiffViewGutter,
         myOptionCheckoutTargetBranch,
         myOptionMaxDiffChangesOpenedAutomatically
     )
@@ -49,6 +51,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         writeSettingOption(element, myOptionSaveMRFilterState, myApplicationSettings.saveMRFilterState)
         writeSettingOption(element, myOptionGroupCommentsByThread, myApplicationSettings.groupCommentsByThread)
         writeSettingOption(element, myOptionDisplayCommentsInDiffView, myApplicationSettings.displayCommentsInDiffView)
+        writeSettingOption(element, myOptionShowAddCommentIconsInDiffViewGutter, myApplicationSettings.showAddCommentIconsInDiffViewGutter)
         writeSettingOption(element, myOptionCheckoutTargetBranch, myApplicationSettings.checkoutTargetBranch)
         writeSettingOption(element, myOptionMaxDiffChangesOpenedAutomatically, myApplicationSettings.maxDiffChangesOpenedAutomatically)
         return element

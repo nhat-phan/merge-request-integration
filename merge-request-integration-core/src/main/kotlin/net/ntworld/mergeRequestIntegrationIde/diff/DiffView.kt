@@ -33,7 +33,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
         fun onRediffAborted()
 
-        fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent)
+        fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent?)
 
         fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent)
     }

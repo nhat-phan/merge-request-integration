@@ -12,6 +12,8 @@ interface ApplicationSettings {
 
     val displayCommentsInDiffView: Boolean
 
+    val showAddCommentIconsInDiffViewGutter: Boolean
+
     val checkoutTargetBranch: Boolean
 
     val maxDiffChangesOpenedAutomatically: Int

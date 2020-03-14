@@ -1,11 +1,13 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.editor
 
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import net.ntworld.mergeRequest.CommentPosition
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
@@ -50,10 +52,25 @@ open class AddCommentEditorActionBase(
 
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             super.doExecute(editor, caret, dataContext)
+            val logicalPosition = editor.caretModel.logicalPosition
+            val line = logicalPosition.line + 1
+            for (highlighter in editor.markupModel.allHighlighters) {
+                val gutterRenderer = highlighter.gutterIconRenderer
+                if (gutterRenderer !is AddGutterIconRenderer || gutterRenderer.visibleLine != line) {
+                    continue
+                }
+                gutterRenderer.invoke()
+            }
+
             val position = findPositionForCurrentCaret(editor, caret, dataContext)
             if (null === position) {
                 return
             }
+            println("-----------------")
+            println("newLine: ${position.newLine}")
+            println("oldLine: ${position.oldLine}")
+            println("oldPath: ${position.oldPath}")
+            println("newPath: ${position.newPath}")
 
             val projectService = applicationService.getProjectService(editor.project!!)
             val providerData = projectService.codeReviewManager!!.providerData

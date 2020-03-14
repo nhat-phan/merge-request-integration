@@ -17,6 +17,7 @@ class SettingsConfiguration : SettingsUI {
 
     var myCommentOptionsPanel: JPanel? = null
     var myDisplayCommentsInDiffView: JCheckBox? = null
+    var myShowAddCommentIconsInDiffViewGutter: JCheckBox? = null
     var myGroupCommentsByThread: JCheckBox? = null
 
     var myCodeReviewOptionsPanel: JPanel? = null
@@ -30,8 +31,13 @@ class SettingsConfiguration : SettingsUI {
         // myPerformancePanel!!.border = BorderFactory.createTitledBorder("Performance")
         myEnableRequestCache!!.addActionListener { dispatchSettingsUpdated() }
         mySaveMRFilterState!!.addActionListener { dispatchSettingsUpdated() }
-        myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayCommentsInDiffView!!.addActionListener { dispatchSettingsUpdated() }
+        myShowAddCommentIconsInDiffViewGutter!!.addActionListener { dispatchSettingsUpdated() }
+
+        // TODO: remove me when implement the feature
+        myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
+        myGroupCommentsByThread!!.isVisible = false
+
         myCheckoutTargetBranch!!.addActionListener { dispatchSettingsUpdated() }
         myMaxDiffChangesOpenedAutomatically!!.document.addDocumentListener(object : DocumentListener {
             override fun changedUpdate(e: DocumentEvent?) {
@@ -49,6 +55,7 @@ class SettingsConfiguration : SettingsUI {
             saveMRFilterState = mySaveMRFilterState!!.isSelected,
             groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
             displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
+            showAddCommentIconsInDiffViewGutter = myShowAddCommentIconsInDiffViewGutter!!.isSelected,
             checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected,
             maxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption.parse(
                 myMaxDiffChangesOpenedAutomatically!!.text
@@ -62,6 +69,7 @@ class SettingsConfiguration : SettingsUI {
         mySaveMRFilterState!!.isSelected = settings.saveMRFilterState
         myGroupCommentsByThread!!.isSelected = settings.groupCommentsByThread
         myDisplayCommentsInDiffView!!.isSelected = settings.displayCommentsInDiffView
+        myShowAddCommentIconsInDiffViewGutter!!.isSelected = settings.showAddCommentIconsInDiffViewGutter
         myCheckoutTargetBranch!!.isSelected = settings.checkoutTargetBranch
         myMaxDiffChangesOpenedAutomatically!!.text = settings.maxDiffChangesOpenedAutomatically.toString()
     }

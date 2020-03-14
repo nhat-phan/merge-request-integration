@@ -7,12 +7,9 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import javax.swing.Icon
 
 class AddGutterIconRenderer (
+    private val showIcon: Boolean,
     val visibleLine: Int,
-    val oldLine: Int?,
-    val oldPath: String?,
-    val newLine: Int?,
-    val newPath: String?,
-    private val action: ((AddGutterIconRenderer, AnActionEvent) -> Unit)
+    private val action: ((AddGutterIconRenderer, AnActionEvent?) -> Unit)
 ) : GutterIconRenderer() {
     private val clickAction = object : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
@@ -20,11 +17,15 @@ class AddGutterIconRenderer (
         }
     }
 
-    override fun isNavigateAction() = true
-    override fun getClickAction() = clickAction
+    fun invoke() {
+        action.invoke(this@AddGutterIconRenderer, null)
+    }
 
-    override fun getIcon(): Icon = Icons.AddCommentSmall
-    override fun getTooltipText() = "Add new comment"
+    override fun isNavigateAction() = showIcon
+    override fun getClickAction() = if (showIcon) clickAction else null
+
+    override fun getIcon(): Icon = if (showIcon) Icons.AddCommentSmall else Icons.OneTransparentPixel
+    override fun getTooltipText() = if (showIcon) "Add new comment" else null
 
     override fun hashCode(): Int = System.identityHashCode(this)
     override fun equals(other: Any?): Boolean = other == this

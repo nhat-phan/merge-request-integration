@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.util
 import com.intellij.openapi.util.IconLoader
 
 object Icons {
+    val OneTransparentPixel = IconLoader.getIcon("/icons/1px.svg", Icons::class.java)
     val Comments = IconLoader.getIcon("/icons/comments.svg", Icons::class.java)
     val ThumbsUp = IconLoader.getIcon("/icons/thumbs-up.svg", Icons::class.java)
     val ThumbsDown = IconLoader.getIcon("/icons/thumbs-down.svg", Icons::class.java)

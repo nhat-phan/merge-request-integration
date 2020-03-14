@@ -15,15 +15,7 @@ import java.lang.reflect.Field
 class UnifiedDiffView(
     private val applicationService: ApplicationService,
     override val viewer: UnifiedDiffViewer
-) : DiffView<UnifiedDiffViewer> {
-    override val dispatcher = EventDispatcher.create(DiffView.Action::class.java)
-    private val diffViewerListener = object : DiffViewerListener() {
-        override fun onInit() = dispatcher.multicaster.onInit()
-        override fun onDispose() = dispatcher.multicaster.onDispose()
-        override fun onBeforeRediff() = dispatcher.multicaster.onBeforeRediff()
-        override fun onAfterRediff() = dispatcher.multicaster.onAfterRediff()
-        override fun onRediffAborted() = dispatcher.multicaster.onRediffAborted()
-    }
+) : DiffViewBase<UnifiedDiffViewer>(viewer) {
     private val leftLineNumberConverter by lazy {
         try {
             val myLineNumberConvertor = viewer.editor.gutter.javaClass.getDeclaredField("myLineNumberConvertor")
@@ -51,10 +43,6 @@ class UnifiedDiffView(
         }
     }
 
-    init {
-        viewer.addListener(diffViewerListener)
-    }
-
     override fun displayAddGutterIcons() {
         for (line in 0 until viewer.editor.document.lineCount) {
             val left = leftLineNumberConverter.execute(line)
@@ -65,18 +53,15 @@ class UnifiedDiffView(
 
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(line, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
+                applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 line + 1,
-                null,
-                null,
-                null,
-                null,
                 this::onAddGutterIconClicked
             )
         }
     }
 
-    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent) {
-        println("onAddGutterIconClicked left: ${leftLineNumberConverter.execute(renderer.visibleLine)}, right: ${rightLineNumberConverter.execute(renderer.visibleLine)}")
+    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent?) {
+        println("onAddGutterIconClicked old: ${leftLineNumberConverter.execute(renderer.visibleLine)}, new: ${rightLineNumberConverter.execute(renderer.visibleLine)}")
     }
 
     override fun displayCommentsGutterIcon(line: Int, contentType: DiffView.ContentType, comments: List<Comment>) {

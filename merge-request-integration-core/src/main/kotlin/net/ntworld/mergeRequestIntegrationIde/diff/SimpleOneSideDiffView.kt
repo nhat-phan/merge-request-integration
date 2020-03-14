@@ -12,29 +12,13 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 class SimpleOneSideDiffView(
     private val applicationService: ApplicationService,
     override val viewer: SimpleOnesideDiffViewer
-) : DiffView<SimpleOnesideDiffViewer> {
-    override val dispatcher = EventDispatcher.create(DiffView.Action::class.java)
-    private val diffViewerListener = object : DiffViewerListener() {
-        override fun onInit() = dispatcher.multicaster.onInit()
-        override fun onDispose() = dispatcher.multicaster.onDispose()
-        override fun onBeforeRediff() = dispatcher.multicaster.onBeforeRediff()
-        override fun onAfterRediff() = dispatcher.multicaster.onAfterRediff()
-        override fun onRediffAborted() = dispatcher.multicaster.onRediffAborted()
-    }
-
-    init {
-        viewer.addListener(diffViewerListener)
-    }
-
+) : DiffViewBase<SimpleOnesideDiffViewer>(viewer) {
     override fun displayAddGutterIcons() {
         for (line in 0 until viewer.editor.document.lineCount) {
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(line, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
+                applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 line + 1,
-                null,
-                null,
-                null,
-                null,
                 dispatcher.multicaster::onAddGutterIconClicked
             )
         }

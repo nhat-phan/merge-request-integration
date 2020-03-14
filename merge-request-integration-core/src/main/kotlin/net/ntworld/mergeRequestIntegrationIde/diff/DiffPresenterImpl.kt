@@ -35,7 +35,7 @@ internal class DiffPresenterImpl(
     override fun onRediffAborted() {
     }
 
-    override fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent) {
+    override fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent?) {
         println("Request add a comment on line: ${renderer.visibleLine}")
     }
 
