@@ -4,6 +4,7 @@ import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.Side
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -11,7 +12,8 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class TwoSideTextDiffView(
     private val applicationService: ApplicationService,
-    override val viewer: TwosideTextDiffViewer
+    override val viewer: TwosideTextDiffViewer,
+    private val change: Change
 ) : AbstractDiffView<TwosideTextDiffViewer>(viewer) {
 
     override fun displayAddGutterIcons() {
@@ -38,12 +40,26 @@ class TwoSideTextDiffView(
 
     private fun onAddGutterIconInEditor1Clicked(renderer: AddGutterIconRenderer, e: AnActionEvent?) {
         val result = viewer.syncScrollSupport!!.scrollable.transfer(Side.LEFT, renderer.visibleLine)
-        println("onAddGutterIconInEditor1Clicked old: ${renderer.visibleLine}, new: $result")
+        dispatcher.multicaster.onAddGutterIconClicked(renderer, AddCommentRequestedPosition(
+            oldLine = renderer.visibleLine,
+            oldPath = change.beforeRevision!!.file.toString(),
+            newLine = result,
+            newPath = change.afterRevision!!.file.toString(),
+            baseHash = change.beforeRevision!!.revisionNumber.asString(),
+            headHash = change.afterRevision!!.revisionNumber.asString()
+        ))
     }
 
     private fun onAddGutterIconInEditor2Clicked(renderer: AddGutterIconRenderer, e: AnActionEvent?) {
         val result = viewer.syncScrollSupport!!.scrollable.transfer(Side.RIGHT, renderer.visibleLine)
-        println("onAddGutterIconInEditor2Clicked old: $result, new: ${renderer.visibleLine}")
+        dispatcher.multicaster.onAddGutterIconClicked(renderer, AddCommentRequestedPosition(
+            oldLine = result,
+            oldPath = change.beforeRevision!!.file.toString(),
+            newLine = renderer.visibleLine,
+            newPath = change.afterRevision!!.file.toString(),
+            baseHash = change.beforeRevision!!.revisionNumber.asString(),
+            headHash = change.afterRevision!!.revisionNumber.asString()
+        ))
     }
 
     override fun displayCommentsGutterIcon(line: Int, contentType: DiffView.ContentType, comments: List<Comment>) {

@@ -74,6 +74,7 @@ class GitlabCommentApi(
 
     override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
         // fixme: what a hell is going on here?
+        // TODO: Important to remove the 3-times retry
         val createdCommentId = if (null === position) {
             val request = GitlabCreateNoteRequest(
                 credentials = credentials,
@@ -86,83 +87,96 @@ class GitlabCommentApi(
             }
             response.createdCommentId
         } else {
-            tryCreateNoteCommand(
+            val request = GitlabCreateNoteRequest(
+                credentials = credentials,
                 mergeRequestInternalId = mergeRequestId.toInt(),
                 body = body,
-                position = buildFirstAttemptPosition(position)
-            ) {
-                log.log(Level.WARNING, "Error on creating new comment", it)
-                tryCreateNoteCommand(
-                    mergeRequestInternalId = mergeRequestId.toInt(),
-                    body = body,
-                    position = buildSecondAttemptPosition(position)
-                ) {
-                    tryCreateNoteCommand(
-                        mergeRequestInternalId = mergeRequestId.toInt(),
-                        body = body,
-                        position = buildThirdAttemptPosition(position)
-                    ) {
-                        throw it
-                    }
-                }
+                position = makePosition(position)
+            )
+            val out = infrastructure.serviceBus() process request
+            if (out.hasError()) {
+                throw ProviderException(out.getResponse().error!!)
+            } else {
+                out.getResponse().createdCommentId
             }
+//
+//            tryCreateNoteCommand(
+//                mergeRequestInternalId = mergeRequestId.toInt(),
+//                body = body,
+//                position = buildFirstAttemptPosition(position)
+//            ) {
+//                log.log(Level.WARNING, "Error on creating new comment", it)
+//                tryCreateNoteCommand(
+//                    mergeRequestInternalId = mergeRequestId.toInt(),
+//                    body = body,
+//                    position = buildSecondAttemptPosition(position)
+//                ) {
+//                    tryCreateNoteCommand(
+//                        mergeRequestInternalId = mergeRequestId.toInt(),
+//                        body = body,
+//                        position = buildThirdAttemptPosition(position)
+//                    ) {
+//                        throw it
+//                    }
+//                }
+//            }
         }
 
         return if (createdCommentId == 0) null else createdCommentId.toString()
     }
-
-    private fun buildFirstAttemptPosition(position: CommentPosition): Position {
-        val model = makePosition(position)
-        when (position.source) {
-            CommentPositionSource.UNKNOWN -> {
-                model.oldLine = null
-                model.newLine = position.newLine
-            }
-            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
-                model.oldLine = position.oldLine
-                model.newLine = null
-            }
-            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
-                model.oldLine = null
-                model.newLine = position.newLine
-            }
-            CommentPositionSource.UNIFIED -> {
-                model.oldLine = null
-                model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
-            }
-        }
-        return model
-    }
-
-    private fun buildSecondAttemptPosition(position: CommentPosition): Position {
-        val model = makePosition(position)
-        model.oldLine = position.oldLine
-        model.newLine = position.newLine
-        return model
-    }
-
-    private fun buildThirdAttemptPosition(position: CommentPosition): Position {
-        val model = makePosition(position)
-        when (position.source) {
-            CommentPositionSource.UNKNOWN -> {
-                model.oldLine = position.oldLine
-                model.newLine = null
-            }
-            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
-                model.oldLine = position.oldLine
-                model.newLine = null
-            }
-            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
-                model.oldLine = null
-                model.newLine = position.newLine
-            }
-            CommentPositionSource.UNIFIED -> {
-                model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
-                model.newLine = null
-            }
-        }
-        return model
-    }
+//
+//    private fun buildFirstAttemptPosition(position: CommentPosition): Position {
+//        val model = makePosition(position)
+//        when (position.source) {
+//            CommentPositionSource.UNKNOWN -> {
+//                model.oldLine = null
+//                model.newLine = position.newLine
+//            }
+//            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
+//                model.oldLine = position.oldLine
+//                model.newLine = null
+//            }
+//            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
+//                model.oldLine = null
+//                model.newLine = position.newLine
+//            }
+//            CommentPositionSource.UNIFIED -> {
+//                model.oldLine = null
+//                model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
+//            }
+//        }
+//        return model
+//    }
+//
+//    private fun buildSecondAttemptPosition(position: CommentPosition): Position {
+//        val model = makePosition(position)
+//        model.oldLine = position.oldLine
+//        model.newLine = position.newLine
+//        return model
+//    }
+//
+//    private fun buildThirdAttemptPosition(position: CommentPosition): Position {
+//        val model = makePosition(position)
+//        when (position.source) {
+//            CommentPositionSource.UNKNOWN -> {
+//                model.oldLine = position.oldLine
+//                model.newLine = null
+//            }
+//            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
+//                model.oldLine = position.oldLine
+//                model.newLine = null
+//            }
+//            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
+//                model.oldLine = null
+//                model.newLine = position.newLine
+//            }
+//            CommentPositionSource.UNIFIED -> {
+//                model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
+//                model.newLine = null
+//            }
+//        }
+//        return model
+//    }
 
     private fun makePosition(position: CommentPosition): Position {
         val model = Position()
@@ -171,6 +185,8 @@ class GitlabCommentApi(
         model.startSha = position.startHash
         model.oldPath = position.oldPath
         model.newPath = position.newPath
+        model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
+        model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
         model.positionType = Position.PositionType.TEXT
         return model
     }

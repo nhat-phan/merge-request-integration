@@ -1,20 +1,17 @@
 package net.ntworld.mergeRequestIntegrationIde.service
 
-import com.intellij.diff.DiffContext
-import com.intellij.diff.FrameDiffTool
-import com.intellij.diff.requests.DiffRequest
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import com.intellij.openapi.project.Project as IdeaProject
 
 interface ProjectService {
+    val project: IdeaProject
 
     val dispatcher: EventDispatcher<ProjectEventListener>
 

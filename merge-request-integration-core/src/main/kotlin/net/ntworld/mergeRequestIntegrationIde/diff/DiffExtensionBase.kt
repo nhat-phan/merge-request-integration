@@ -56,8 +56,13 @@ open class DiffExtensionBase(
     private fun makeDiffPresenterForSimpleOneSideDiffViewer(viewer: SimpleOnesideDiffViewer): DiffPresenter? {
         return assertViewerIsValid(viewer) { project, change ->
             DiffPresenterImpl(
+                projectService = applicationService.getProjectService(project),
                 model = buildDiffModel(project, change),
-                view = SimpleOneSideDiffView(applicationService, viewer)
+                view = SimpleOneSideDiffView(applicationService, viewer, change, when(change.type) {
+                    Change.Type.NEW -> DiffView.ContentType.AFTER
+                    Change.Type.DELETED -> DiffView.ContentType.BEFORE
+                    else -> throw Exception("Invalid change type")
+                })
             )
         }
     }
@@ -65,8 +70,9 @@ open class DiffExtensionBase(
     private fun makeDiffPresenterForTwoSideTextDiffViewer(viewer: TwosideTextDiffViewer): DiffPresenter? {
         return assertViewerIsValid(viewer) { project, change ->
             DiffPresenterImpl(
+                projectService = applicationService.getProjectService(project),
                 model = buildDiffModel(project, change),
-                view = TwoSideTextDiffView(applicationService, viewer)
+                view = TwoSideTextDiffView(applicationService, viewer, change)
             )
         }
     }
@@ -74,8 +80,9 @@ open class DiffExtensionBase(
     private fun makeDiffPresenterForUnifiedDiffViewer(viewer: UnifiedDiffViewer): DiffPresenter? {
         return assertViewerIsValid(viewer) { project, change ->
             DiffPresenterImpl(
+                projectService = applicationService.getProjectService(project),
                 model = buildDiffModel(project, change),
-                view = UnifiedDiffView(applicationService, viewer)
+                view = UnifiedDiffView(applicationService, viewer, change)
             )
         }
     }
@@ -83,7 +90,7 @@ open class DiffExtensionBase(
     private fun buildDiffModel(project: IdeaProject, change: Change): DiffModel {
         val codeReviewManager = applicationService.getProjectService(project).codeReviewManager
         if (null === codeReviewManager) {
-            return DiffModelImpl(null, null, change, listOf(), listOf())
+            return DiffModelImpl(null, null, listOf(), change, listOf(), listOf())
         }
         val afterRevision = change.afterRevision
         val beforeRevision = change.beforeRevision
@@ -94,6 +101,7 @@ open class DiffExtensionBase(
             return DiffModelImpl(
                 codeReviewManager.providerData,
                 codeReviewManager.mergeRequest,
+                codeReviewManager.commits.toList(),
                 change,
                 commentsOnBeforeSide = codeReviewManager.findCommentPoints(
                     beforeChangeInfo.contentRevision.file.path,
@@ -112,6 +120,7 @@ open class DiffExtensionBase(
             return DiffModelImpl(
                 codeReviewManager.providerData,
                 codeReviewManager.mergeRequest,
+                codeReviewManager.commits.toList(),
                 change,
                 commentsOnBeforeSide = codeReviewManager.findCommentPoints(
                     changeInfo.contentRevision.file.path,
@@ -126,6 +135,7 @@ open class DiffExtensionBase(
             return DiffModelImpl(
                 codeReviewManager.providerData,
                 codeReviewManager.mergeRequest,
+                codeReviewManager.commits.toList(),
                 change,
                 commentsOnBeforeSide = listOf(),
                 commentsOnAfterSide = codeReviewManager.findCommentPoints(
@@ -135,7 +145,7 @@ open class DiffExtensionBase(
             )
         }
 
-        return DiffModelImpl(null, null, change, listOf(), listOf())
+        return DiffModelImpl(null, null, listOf(), change, listOf(), listOf())
     }
 
     private data class ChangeInfoImpl(

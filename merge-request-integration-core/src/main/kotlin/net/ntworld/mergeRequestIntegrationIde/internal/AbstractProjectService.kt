@@ -23,7 +23,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnections
 import org.jdom.Element
 
 abstract class AbstractProjectService(
-    private val ideaProject: IdeaProject
+    override val project: IdeaProject
 ) : ProjectService, ServiceBase() {
     private var myIsInitialized = false
     private var myCodeReviewManager : CodeReviewManager? = null
@@ -46,7 +46,7 @@ abstract class AbstractProjectService(
     private val myProjectEventListener = object : ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             val service = CodeReviewManagerImpl(
-                ideaProject, providerData, mergeRequest, codeReviewUtil
+                project, providerData, mergeRequest, codeReviewUtil
             )
             val comments = myComments
             if (null !== comments) {
@@ -178,7 +178,7 @@ abstract class AbstractProjectService(
 
         val task = RegisterProviderTask(
             applicationService = getApplicationService(),
-            ideaProject = ideaProject,
+            ideaProject = project,
             id = UUIDGenerator.generate(),
             name = name,
             settings = settings,
@@ -264,6 +264,6 @@ abstract class AbstractProjectService(
 
     override fun notify(message: String, type: NotificationType) {
         val notification = notification.createNotification(message, type)
-        notification.notify(ideaProject)
+        notification.notify(project)
     }
 }
