@@ -18,22 +18,19 @@ internal class DiffPresenterImpl(
         view.dispatcher.addListener(this)
     }
 
-    override fun onInit() {
-    }
+    override fun onInit() {}
 
-    override fun onDispose() {
-    }
+    override fun onDispose() {}
 
-    override fun onBeforeRediff() {
-    }
+    override fun onBeforeRediff() {}
 
-    override fun onAfterRediff() {
-        view.displayAddGutterIcons()
+    override fun onAfterRediff() = assertDoingCodeReview {
+        view.initialize()
         displayGutterIcons()
+        view.displayAddGutterIcons()
     }
 
-    override fun onRediffAborted() {
-    }
+    override fun onRediffAborted() {}
 
     override fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, e: AnActionEvent?) {
         println("Request add a comment on line: ${renderer.visibleLine}")
@@ -68,4 +65,9 @@ internal class DiffPresenterImpl(
         return result
     }
 
+    private fun assertDoingCodeReview(invoker: (() -> Unit)) {
+        if (null !== model.mergeRequest && null !== model.providerData) {
+            invoker.invoke()
+        }
+    }
 }

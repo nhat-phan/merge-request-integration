@@ -6,28 +6,31 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class TwoSideTextDiffView(
     private val applicationService: ApplicationService,
     override val viewer: TwosideTextDiffViewer
-) : DiffViewBase<TwosideTextDiffViewer>(viewer) {
+) : AbstractDiffView<TwosideTextDiffViewer>(viewer) {
 
     override fun displayAddGutterIcons() {
         println("displayAddGutterIcons")
-        for (line in 0 until viewer.editor1.document.lineCount) {
-            val lineHighlighter = viewer.editor1.markupModel.addLineHighlighter(line, HighlighterLayer.LAST, null)
+        for (logicalLine in 0 until viewer.editor1.document.lineCount) {
+            val lineHighlighter = viewer.editor1.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                applicationService.settings.showAddCommentIconsInDiffViewGutter,
-                line + 1,
+                applicationService.settings.showAddCommentIconsInDiffViewGutter && !hasCommentsGutter(logicalLine, DiffView.ContentType.BEFORE),
+                logicalLine + 1,
+                logicalLine,
                 this::onAddGutterIconInEditor1Clicked
             )
         }
-        for (line in 0 until viewer.editor2.document.lineCount) {
-            val lineHighlighter = viewer.editor2.markupModel.addLineHighlighter(line, HighlighterLayer.LAST, null)
+        for (logicalLine in 0 until viewer.editor2.document.lineCount) {
+            val lineHighlighter = viewer.editor2.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                applicationService.settings.showAddCommentIconsInDiffViewGutter,
-                line + 1,
+                applicationService.settings.showAddCommentIconsInDiffViewGutter && !hasCommentsGutter(logicalLine, DiffView.ContentType.AFTER),
+                logicalLine + 1,
+                logicalLine,
                 this::onAddGutterIconInEditor2Clicked
             )
         }
@@ -44,7 +47,20 @@ class TwoSideTextDiffView(
     }
 
     override fun displayCommentsGutterIcon(line: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        println("displayCommentsGutterIcon")
+        val editor = if (contentType == DiffView.ContentType.BEFORE) {
+            viewer.editor1
+        } else {
+            viewer.editor2
+        }
+
+        val logicalLine = line - 1
+        if (!hasCommentsGutter(logicalLine, contentType)) {
+            val lineHighlighter = editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
+            lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
+                line, logicalLine, dispatcher.multicaster::onCommentsGutterIconClicked
+            )
+        }
+        registerCommentsGutter(logicalLine, contentType, comments)
     }
 
     override fun hideComments() {

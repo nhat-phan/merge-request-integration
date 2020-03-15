@@ -252,12 +252,16 @@ internal class CodeReviewManagerImpl(
         val result = mutableListOf<CommentPoint>()
         for (comment in comments) {
             val position = comment.position!!
-            if (position.headHash == changeInfo.contentRevision.revisionNumber.asString()) {
-                if (changeInfo.before && null !== position.oldLine) {
+            if (changeInfo.before && null !== position.oldLine) {
+                val revision = changeInfo.contentRevision.revisionNumber.asString()
+                if (position.startHash == revision || position.baseHash == revision) {
                     result.add(CommentPoint(position.oldLine!!, comment))
                     continue
                 }
-                if (changeInfo.after && null !== position.newLine) {
+            }
+            if (changeInfo.after && null !== position.newLine) {
+                val revision = changeInfo.contentRevision.revisionNumber.asString()
+                if (position.headHash == revision || position.baseHash == revision) {
                     result.add(CommentPoint(position.newLine!!, comment))
                     continue
                 }

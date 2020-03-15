@@ -9,6 +9,7 @@ import javax.swing.Icon
 class AddGutterIconRenderer (
     private val showIcon: Boolean,
     val visibleLine: Int,
+    val logicalLine: Int,
     private val action: ((AddGutterIconRenderer, AnActionEvent?) -> Unit)
 ) : GutterIconRenderer() {
     private val clickAction = object : AnAction() {

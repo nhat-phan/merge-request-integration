@@ -9,7 +9,7 @@ import javax.swing.Icon
 
 class CommentsGutterIconRenderer (
     val visibleLine: Int,
-    val comments: List<Comment>,
+    val logicalLine: Int,
     private val action: ((CommentsGutterIconRenderer, AnActionEvent) -> Unit)
 ) : GutterIconRenderer() {
     private val clickAction = object : AnAction() {

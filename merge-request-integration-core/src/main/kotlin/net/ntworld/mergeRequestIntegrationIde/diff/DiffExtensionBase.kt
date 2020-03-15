@@ -8,22 +8,31 @@ import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
 import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
+import com.intellij.diff.util.DiffUserDataKeys
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ContentRevision
 import com.intellij.openapi.vcs.changes.actions.diff.ChangeDiffRequestProducer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
+import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 
 open class DiffExtensionBase(
     private val applicationService: ApplicationService
 ) : DiffExtension() {
 
     override fun onViewerCreated(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest) {
+        context.putUserData(
+            DiffUserDataKeys.CONTEXT_ACTIONS, listOf(
+                TestAction
+            )
+        )
         makePresenter(viewer)
     }
 
-    internal fun makePresenter(viewer: FrameDiffTool.DiffViewer): DiffPresenter? {
+    private fun makePresenter(viewer: FrameDiffTool.DiffViewer): DiffPresenter? {
         return when (viewer) {
             is SimpleOnesideDiffViewer -> makeDiffPresenterForSimpleOneSideDiffViewer(viewer)
             is TwosideTextDiffViewer -> makeDiffPresenterForTwoSideTextDiffViewer(viewer)
@@ -46,71 +55,87 @@ open class DiffExtensionBase(
 
     private fun makeDiffPresenterForSimpleOneSideDiffViewer(viewer: SimpleOnesideDiffViewer): DiffPresenter? {
         return assertViewerIsValid(viewer) { project, change ->
-            val codeReviewManager = applicationService.getProjectService(project).codeReviewManager
-            val model = if (null === codeReviewManager) {
-                DiffModelImpl(null, change, listOf(), listOf())
-            } else {
-                val changeInfo = when (change.type) {
-                    Change.Type.NEW -> ChangeInfoImpl(change, change.afterRevision!!, before = false, after = true)
-                    Change.Type.DELETED -> ChangeInfoImpl(change, change.afterRevision!!, before = true, after = false)
-                    Change.Type.MODIFICATION -> throw Exception("Not supported")
-                    Change.Type.MOVED -> throw Exception("Not supported")
-                    else -> throw Exception("Not supported")
-                }
-                val commentPoints = codeReviewManager.findCommentPoints(
-                    changeInfo.contentRevision.file.path,
-                    changeInfo
-                )
-                DiffModelImpl(
-                    codeReviewManager.mergeRequest,
-                    change,
-                    commentsOnAfterSide = if (changeInfo.after) commentPoints else listOf(),
-                    commentsOnBeforeSide = if (changeInfo.before) commentPoints else listOf()
-                )
-            }
-
             DiffPresenterImpl(
-                model = model,
+                model = buildDiffModel(project, change),
                 view = SimpleOneSideDiffView(applicationService, viewer)
             )
         }
     }
 
-    // Fixme: Remove after implement for each type of diff viewer
-    private fun makeDiffPresenterForTwoSideTextDiffViewer(viewer: TwosideTextDiffViewer): DiffPresenterImpl? {
-        val project = viewer.project
-        val change = viewer.request.getUserData(ChangeDiffRequestProducer.CHANGE_KEY)
-        return if (null !== change && null !== project) {
+    private fun makeDiffPresenterForTwoSideTextDiffViewer(viewer: TwosideTextDiffViewer): DiffPresenter? {
+        return assertViewerIsValid(viewer) { project, change ->
             DiffPresenterImpl(
-                model = makeModel(project, change),
+                model = buildDiffModel(project, change),
                 view = TwoSideTextDiffView(applicationService, viewer)
             )
-        } else {
-            null
         }
     }
 
-    // Fixme: Remove after implement for each type of diff viewer
-    private fun makeDiffPresenterForUnifiedDiffViewer(viewer: UnifiedDiffViewer): DiffPresenterImpl? {
-        val project = viewer.project
-        val change = viewer.request.getUserData(ChangeDiffRequestProducer.CHANGE_KEY)
-        return if (null !== change && null !== project) {
+    private fun makeDiffPresenterForUnifiedDiffViewer(viewer: UnifiedDiffViewer): DiffPresenter? {
+        return assertViewerIsValid(viewer) { project, change ->
             DiffPresenterImpl(
-                model = makeModel(project, change),
+                model = buildDiffModel(project, change),
                 view = UnifiedDiffView(applicationService, viewer)
             )
-        } else {
-            null
         }
     }
 
-    // Fixme: Remove after implement for each type of diff viewer
-    private fun makeModel(project: IdeaProject, change: Change): DiffModel {
+    private fun buildDiffModel(project: IdeaProject, change: Change): DiffModel {
         val codeReviewManager = applicationService.getProjectService(project).codeReviewManager
         if (null === codeReviewManager) {
-            return DiffModelImpl(null, change, listOf(), listOf())
+            return DiffModelImpl(null, null, change, listOf(), listOf())
         }
-        return DiffModelImpl(codeReviewManager.mergeRequest, change, listOf(), listOf())
+        val afterRevision = change.afterRevision
+        val beforeRevision = change.beforeRevision
+
+        if (null !== beforeRevision && null !== afterRevision) {
+            val beforeChangeInfo = ChangeInfoImpl(change, beforeRevision, before = true, after = false)
+            val afterChangeInfo = ChangeInfoImpl(change, afterRevision, before = false, after = true)
+            return DiffModelImpl(
+                codeReviewManager.providerData,
+                codeReviewManager.mergeRequest,
+                change,
+                commentsOnBeforeSide = codeReviewManager.findCommentPoints(
+                    beforeChangeInfo.contentRevision.file.path,
+                    beforeChangeInfo
+                ),
+                commentsOnAfterSide = codeReviewManager.findCommentPoints(
+                    afterChangeInfo.contentRevision.file.path,
+                    afterChangeInfo
+                )
+            )
+
+        }
+
+        if (null !== beforeRevision && null === afterRevision) {
+            val changeInfo = ChangeInfoImpl(change, beforeRevision, before = true, after = false)
+            return DiffModelImpl(
+                codeReviewManager.providerData,
+                codeReviewManager.mergeRequest,
+                change,
+                commentsOnBeforeSide = codeReviewManager.findCommentPoints(
+                    changeInfo.contentRevision.file.path,
+                    changeInfo
+                ),
+                commentsOnAfterSide = listOf()
+            )
+        }
+
+        if (null === beforeRevision && null !== afterRevision) {
+            val changeInfo = ChangeInfoImpl(change, afterRevision, before = false, after = true)
+            return DiffModelImpl(
+                codeReviewManager.providerData,
+                codeReviewManager.mergeRequest,
+                change,
+                commentsOnBeforeSide = listOf(),
+                commentsOnAfterSide = codeReviewManager.findCommentPoints(
+                    changeInfo.contentRevision.file.path,
+                    changeInfo
+                )
+            )
+        }
+
+        return DiffModelImpl(null, null, change, listOf(), listOf())
     }
 
     private data class ChangeInfoImpl(
@@ -119,4 +144,9 @@ open class DiffExtensionBase(
         override val before: Boolean,
         override val after: Boolean
     ) : CodeReviewManager.ChangeInfo
+
+    private object TestAction : AnAction(null, null, Icons.Comments) {
+        override fun actionPerformed(e: AnActionEvent) {
+        }
+    }
 }

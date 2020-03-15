@@ -11,6 +11,8 @@ import java.util.*
 interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
     val viewer: V
 
+    fun initialize()
+
     fun displayAddGutterIcons()
 
     fun displayCommentsGutterIcon(line: Int, contentType: ContentType, comments: List<Comment>)
