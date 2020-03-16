@@ -4,7 +4,6 @@ import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -21,7 +20,6 @@ class SimpleOneSideDiffView(
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
 
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                viewer.editor,
                 applicationService.settings.showAddCommentIconsInDiffViewGutter && !hasCommentsGutter(
                     logicalLine,
                     contentType
@@ -33,28 +31,11 @@ class SimpleOneSideDiffView(
         }
     }
 
-    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType) {
-        val position = if (contentType == DiffView.ContentType.BEFORE) {
-            AddCommentRequestedPosition(
-                editorType = DiffView.EditorType.SINGLE_SIDE,
-                changeType = changeType,
-                oldLine = renderer.visibleLine,
-                oldPath = change.beforeRevision!!.file.toString(),
-                newLine = null,
-                newPath = null,
-                baseHash = change.beforeRevision!!.revisionNumber.asString()
-            )
-        } else {
-            AddCommentRequestedPosition(
-                editorType = DiffView.EditorType.SINGLE_SIDE,
-                changeType = changeType,
-                newLine = renderer.visibleLine,
-                newPath = change.afterRevision!!.file.toString(),
-                oldLine = null,
-                oldPath = null,
-                headHash = change.afterRevision!!.revisionNumber.asString()
-            )
-        }
+    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType?) {
+        val position = calcPosition(
+            renderer.visibleLine,
+            if (null !== changeType) changeType else findChangeType(viewer.editor, renderer.logicalLine)
+        )
         dispatcher.multicaster.onAddGutterIconClicked(renderer, position)
     }
 
@@ -75,11 +56,42 @@ class SimpleOneSideDiffView(
 
     override fun displayCommentsOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
         visibleLine: Int,
+        logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
-        displayCommentsOnLine(providerData, mergeRequest, viewer.editor, visibleLine - 1, comments)
+        toggleCommentsOnLine(
+            providerData,
+            viewer.editor,
+            calcPosition(visibleLine, findChangeType(viewer.editor, logicalLine)),
+            logicalLine,
+            contentType,
+            comments
+        )
+    }
+
+    private fun calcPosition(visibleLine: Int, changeType: DiffView.ChangeType): AddCommentRequestedPosition {
+        return if (contentType == DiffView.ContentType.BEFORE) {
+            AddCommentRequestedPosition(
+                editorType = DiffView.EditorType.SINGLE_SIDE,
+                changeType = changeType,
+                oldLine = visibleLine,
+                oldPath = change.beforeRevision!!.file.toString(),
+                newLine = null,
+                newPath = null,
+                baseHash = change.beforeRevision!!.revisionNumber.asString()
+            )
+        } else {
+            AddCommentRequestedPosition(
+                editorType = DiffView.EditorType.SINGLE_SIDE,
+                changeType = changeType,
+                newLine = visibleLine,
+                newPath = change.afterRevision!!.file.toString(),
+                oldLine = null,
+                oldPath = null,
+                headHash = change.afterRevision!!.revisionNumber.asString()
+            )
+        }
     }
 }

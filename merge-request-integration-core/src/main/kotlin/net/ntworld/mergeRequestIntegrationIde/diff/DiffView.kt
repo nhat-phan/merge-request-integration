@@ -21,8 +21,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
     fun displayCommentsOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
         visibleLine: Int,
+        logicalLine: Int,
         contentType: ContentType,
         comments: List<Comment>
     )

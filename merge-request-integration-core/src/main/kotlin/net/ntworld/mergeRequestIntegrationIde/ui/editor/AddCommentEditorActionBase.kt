@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
+import net.ntworld.mergeRequestIntegrationIde.diff.AbstractDiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -35,7 +36,7 @@ open class AddCommentEditorActionBase(
             val logicalPosition = editor.caretModel.logicalPosition
             val offset = editor.caretModel.offset
             val line = logicalPosition.line + 1
-            val guessChangeTypeByColorFunction = AddGutterIconRenderer.makeGuessChangeTypeByColorFunction(editor)
+            val guessChangeTypeByColorFunction = AbstractDiffView.makeGuessChangeTypeByColorFunction(editor)
 
             val highlighters = editor.markupModel.allHighlighters
             var gutterRenderer : AddGutterIconRenderer? = null

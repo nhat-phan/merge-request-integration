@@ -67,8 +67,8 @@ internal class DiffPresenterImpl(
 
             view.displayCommentsOnLine(
                 model.providerData!!,
-                model.mergeRequest!!,
                 renderer.visibleLine,
+                renderer.logicalLine,
                 renderer.contentType,
                 comments
             )

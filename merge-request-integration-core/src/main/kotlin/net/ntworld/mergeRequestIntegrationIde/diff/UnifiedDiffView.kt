@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import gnu.trove.TIntFunction
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -64,7 +63,6 @@ class UnifiedDiffView(
 
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                viewer.editor,
                 applicationService.settings.showAddCommentIconsInDiffViewGutter &&
                     !hasCommentsGutter(logicalLine, DiffView.ContentType.BEFORE) &&
                     !hasCommentsGutter(logicalLine, DiffView.ContentType.AFTER),
@@ -75,16 +73,9 @@ class UnifiedDiffView(
         }
     }
 
-    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType) {
-        dispatcher.multicaster.onAddGutterIconClicked(renderer, AddCommentRequestedPosition(
-            editorType = DiffView.EditorType.UNIFIED,
-            changeType = changeType,
-            oldLine = myLeftLineNumberConverter.execute(renderer.visibleLine),
-            oldPath = change.beforeRevision!!.file.toString(),
-            newLine = myRightLineNumberConverter.execute(renderer.visibleLine),
-            newPath = change.afterRevision!!.file.toString(),
-            baseHash = change.beforeRevision!!.revisionNumber.asString(),
-            headHash = change.afterRevision!!.revisionNumber.asString()
+    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType?) {
+        dispatcher.multicaster.onAddGutterIconClicked(renderer, calcPosition(
+            renderer.visibleLine, renderer.logicalLine, changeType
         ))
     }
 
@@ -107,17 +98,38 @@ class UnifiedDiffView(
 
     override fun displayCommentsOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
         visibleLine: Int,
+        logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
-        val logicalLine = map[visibleLine - 1]
-        if (null === logicalLine) {
-            return
-        }
+        // Note that do not use visibleLine because it's not correct for unified view,
+        // it should be logicalLine + 1
+        toggleCommentsOnLine(
+            providerData,
+            viewer.editor,
+            calcPosition(logicalLine + 1, logicalLine, null),
+            logicalLine,
+            contentType,
+            comments
+        )
+    }
 
-        displayCommentsOnLine(providerData, mergeRequest, viewer.editor, logicalLine, comments)
+    private fun calcPosition(visibleLine: Int, logicalLine: Int, changeTypeInput: DiffView.ChangeType?): AddCommentRequestedPosition {
+        val changeType = if (null !== changeTypeInput) {
+            changeTypeInput
+        } else {
+            findChangeType(viewer.editor, logicalLine)
+        }
+        return AddCommentRequestedPosition(
+            editorType = DiffView.EditorType.UNIFIED,
+            changeType = changeType,
+            oldLine = myLeftLineNumberConverter.execute(visibleLine),
+            oldPath = change.beforeRevision!!.file.toString(),
+            newLine = myRightLineNumberConverter.execute(visibleLine),
+            newPath = change.afterRevision!!.file.toString(),
+            baseHash = change.beforeRevision!!.revisionNumber.asString(),
+            headHash = change.afterRevision!!.revisionNumber.asString()
+        )
     }
 }
