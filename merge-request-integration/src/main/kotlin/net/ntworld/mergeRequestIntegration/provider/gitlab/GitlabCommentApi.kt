@@ -1,10 +1,7 @@
 package net.ntworld.mergeRequestIntegration.provider.gitlab
 
 import net.ntworld.foundation.Infrastructure
-import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.CommentPosition
-import net.ntworld.mergeRequest.CommentPositionSource
-import net.ntworld.mergeRequest.Project
+import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.CommentApi
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
@@ -73,110 +70,51 @@ class GitlabCommentApi(
     }
 
     override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
-        // fixme: what a hell is going on here?
-        // TODO: Important to remove the 3-times retry
         val createdCommentId = if (null === position) {
-            val request = GitlabCreateNoteRequest(
-                credentials = credentials,
-                mergeRequestInternalId = mergeRequestId.toInt(),
-                body = body,
-                position = null
-            )
-            val response = infrastructure.serviceBus() process request ifError {
-                throw ProviderException(it)
-            }
-            response.createdCommentId
+            createGeneralComment(mergeRequestId, body)
         } else {
-            val request = GitlabCreateNoteRequest(
-                credentials = credentials,
-                mergeRequestInternalId = mergeRequestId.toInt(),
-                body = body,
-                position = makePosition(position)
-            )
-            val out = infrastructure.serviceBus() process request
-            if (out.hasError()) {
-                throw ProviderException(out.getResponse().error!!)
-            } else {
-                out.getResponse().createdCommentId
-            }
-//
-//            tryCreateNoteCommand(
-//                mergeRequestInternalId = mergeRequestId.toInt(),
-//                body = body,
-//                position = buildFirstAttemptPosition(position)
-//            ) {
-//                log.log(Level.WARNING, "Error on creating new comment", it)
-//                tryCreateNoteCommand(
-//                    mergeRequestInternalId = mergeRequestId.toInt(),
-//                    body = body,
-//                    position = buildSecondAttemptPosition(position)
-//                ) {
-//                    tryCreateNoteCommand(
-//                        mergeRequestInternalId = mergeRequestId.toInt(),
-//                        body = body,
-//                        position = buildThirdAttemptPosition(position)
-//                    ) {
-//                        throw it
-//                    }
-//                }
-//            }
+            createPositionComment(mergeRequestId, body, position)
         }
-
         return if (createdCommentId == 0) null else createdCommentId.toString()
     }
-//
-//    private fun buildFirstAttemptPosition(position: CommentPosition): Position {
-//        val model = makePosition(position)
-//        when (position.source) {
-//            CommentPositionSource.UNKNOWN -> {
-//                model.oldLine = null
-//                model.newLine = position.newLine
-//            }
-//            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
-//                model.oldLine = position.oldLine
-//                model.newLine = null
-//            }
-//            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
-//                model.oldLine = null
-//                model.newLine = position.newLine
-//            }
-//            CommentPositionSource.UNIFIED -> {
-//                model.oldLine = null
-//                model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
-//            }
-//        }
-//        return model
-//    }
-//
-//    private fun buildSecondAttemptPosition(position: CommentPosition): Position {
-//        val model = makePosition(position)
-//        model.oldLine = position.oldLine
-//        model.newLine = position.newLine
-//        return model
-//    }
-//
-//    private fun buildThirdAttemptPosition(position: CommentPosition): Position {
-//        val model = makePosition(position)
-//        when (position.source) {
-//            CommentPositionSource.UNKNOWN -> {
-//                model.oldLine = position.oldLine
-//                model.newLine = null
-//            }
-//            CommentPositionSource.SIDE_BY_SIDE_LEFT -> {
-//                model.oldLine = position.oldLine
-//                model.newLine = null
-//            }
-//            CommentPositionSource.SIDE_BY_SIDE_RIGHT -> {
-//                model.oldLine = null
-//                model.newLine = position.newLine
-//            }
-//            CommentPositionSource.UNIFIED -> {
-//                model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
-//                model.newLine = null
-//            }
-//        }
-//        return model
-//    }
+
+    private fun createGeneralComment(mergeRequestId: String, body: String): Int {
+        val request = GitlabCreateNoteRequest(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            body = body,
+            position = null
+        )
+        val response = infrastructure.serviceBus() process request ifError {
+            throw ProviderException(it)
+        }
+        return response.createdCommentId
+    }
+
+    private fun createPositionComment(mergeRequestId: String, body: String, commentPosition: CommentPosition) : Int {
+        val position = makePosition(commentPosition)
+        if (commentPosition.changeType != CommentPositionChangeType.UNKNOWN) {
+            if (commentPosition.source == CommentPositionSource.SIDE_BY_SIDE_LEFT) {
+                position.newLine = null
+                position.newPath = null
+            }
+            if (commentPosition.source == CommentPositionSource.SIDE_BY_SIDE_RIGHT) {
+                position.oldLine = null
+                position.oldPath = null
+            }
+        }
+        val request = GitlabCreateNoteRequest(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            body = body,
+            position = position
+        )
+        val out = infrastructure.serviceBus() process request
+        if (out.hasError()) {
+            throw ProviderException(out.getResponse().error!!)
+        }
+        return out.getResponse().createdCommentId
+    }
 
     private fun makePosition(position: CommentPosition): Position {
         val model = Position()
@@ -189,27 +127,6 @@ class GitlabCommentApi(
         model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
         model.positionType = Position.PositionType.TEXT
         return model
-    }
-
-    private fun tryCreateNoteCommand(
-        mergeRequestInternalId: Int,
-        body: String,
-        position: Position?,
-        failed: (exception: Exception) -> Int
-    ): Int {
-        val request = GitlabCreateNoteRequest(
-            credentials = credentials,
-            mergeRequestInternalId = mergeRequestInternalId,
-            body = body,
-            position = position
-        )
-        val out = infrastructure.serviceBus() process request
-
-        return if (out.hasError()) {
-            failed(ProviderException(out.getResponse().error!!))
-        } else {
-            out.getResponse().createdCommentId
-        }
     }
 
     override fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String): String? {

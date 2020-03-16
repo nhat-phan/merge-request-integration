@@ -3,6 +3,8 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 import com.intellij.diff.FrameDiffTool
 import com.intellij.openapi.actionSystem.AnActionEvent
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -15,13 +17,33 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
     fun displayAddGutterIcons()
 
-    fun displayCommentsGutterIcon(line: Int, contentType: ContentType, comments: List<Comment>)
+    fun displayCommentsGutterIcon(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
-    fun hideComments()
+    fun displayCommentsOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        visibleLine: Int,
+        contentType: ContentType,
+        comments: List<Comment>
+    )
+
+    enum class EditorType {
+        SINGLE_SIDE,
+        TWO_SIDE_LEFT,
+        TWO_SIDE_RIGHT,
+        UNIFIED
+    }
 
     enum class ContentType {
         BEFORE,
         AFTER
+    }
+
+    enum class ChangeType {
+        UNKNOWN,
+        INSERTED,
+        DELETED,
+        MODIFIED
     }
 
     interface Action : EventListener {

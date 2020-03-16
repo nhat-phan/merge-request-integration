@@ -17,5 +17,7 @@ interface CommentPosition {
 
     val source: CommentPositionSource
 
+    val changeType: CommentPositionChangeType
+
     companion object
 }

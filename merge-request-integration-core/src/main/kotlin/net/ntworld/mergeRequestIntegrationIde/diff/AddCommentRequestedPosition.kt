@@ -1,6 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 data class AddCommentRequestedPosition(
+    val editorType: DiffView.EditorType,
+    val changeType: DiffView.ChangeType,
     val oldLine: Int?,
     val newLine: Int?,
     val oldPath: String?,

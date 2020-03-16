@@ -24,8 +24,6 @@ interface CodeReviewManager : CodeReviewUtil {
 
     // fun getCommentsForChange(change: Change)
 
-    fun findCommentPosition(editor: Editor, caret: Caret?, dataContext: DataContext?) : CommentPosition?
-
     interface ChangeInfo {
         val change: Change
 

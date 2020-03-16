@@ -193,7 +193,8 @@ class CommentEditorPanel(
                 newPath = currentPosition.newPath,
                 oldLine = oldLine,
                 newLine = newLine,
-                source = currentPosition.source
+                source = currentPosition.source,
+                changeType = currentPosition.changeType
             )
         }
         return currentPosition

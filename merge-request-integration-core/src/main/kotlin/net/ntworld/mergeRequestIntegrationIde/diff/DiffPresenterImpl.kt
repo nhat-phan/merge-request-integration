@@ -5,6 +5,7 @@ import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
+import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
@@ -58,7 +59,20 @@ internal class DiffPresenterImpl(
     }
 
     override fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent) {
-        println("Display comments on line: ${renderer.visibleLine}")
+        assertDoingCodeReview {
+            val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
+            val comments = bucket
+                .filter { it.line == renderer.visibleLine }
+                .map { it.comment }
+
+            view.displayCommentsOnLine(
+                model.providerData!!,
+                model.mergeRequest!!,
+                renderer.visibleLine,
+                renderer.contentType,
+                comments
+            )
+        }
     }
 
     private fun displayGutterIcons() {
@@ -103,7 +117,18 @@ internal class DiffPresenterImpl(
             baseHash = if (input.baseHash.isNullOrEmpty()) findBaseHash() else input.baseHash,
             headHash = if (input.headHash.isNullOrEmpty()) findHeadHash() else input.headHash,
             startHash = if (input.startHash.isNullOrEmpty()) findStartHash() else input.startHash,
-            source = CommentPositionSource.UNKNOWN
+            source = when (input.editorType) {
+                DiffView.EditorType.SINGLE_SIDE -> CommentPositionSource.SINGLE_SIDE
+                DiffView.EditorType.TWO_SIDE_LEFT -> CommentPositionSource.SIDE_BY_SIDE_LEFT
+                DiffView.EditorType.TWO_SIDE_RIGHT -> CommentPositionSource.SIDE_BY_SIDE_RIGHT
+                DiffView.EditorType.UNIFIED -> CommentPositionSource.UNIFIED
+            },
+            changeType = when (input.changeType) {
+                DiffView.ChangeType.UNKNOWN -> CommentPositionChangeType.UNKNOWN
+                DiffView.ChangeType.INSERTED -> CommentPositionChangeType.INSERTED
+                DiffView.ChangeType.DELETED -> CommentPositionChangeType.DELETED
+                DiffView.ChangeType.MODIFIED -> CommentPositionChangeType.MODIFIED
+            }
         )
     }
 

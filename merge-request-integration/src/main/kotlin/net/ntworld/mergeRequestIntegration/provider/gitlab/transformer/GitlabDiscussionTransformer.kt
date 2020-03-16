@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegration.provider.gitlab.transformer
 
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequest.UserStatus
 import net.ntworld.mergeRequestIntegration.internal.CommentImpl
@@ -56,7 +57,8 @@ object GitlabDiscussionTransformer :
                 newPath = input.position.newPath,
                 oldLine = input.position.oldLine,
                 newLine = input.position.newLine,
-                source = CommentPositionSource.UNKNOWN
+                source = CommentPositionSource.SERVER,
+                changeType = CommentPositionChangeType.UNKNOWN
             )
         } else null
     )
