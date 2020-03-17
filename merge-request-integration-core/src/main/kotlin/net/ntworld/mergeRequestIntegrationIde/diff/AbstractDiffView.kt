@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
@@ -56,6 +57,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     protected fun toggleCommentsOnLine(
         providerData: ProviderData,
+        mergeRequest: MergeRequest,
         editor: EditorEx,
         position: AddCommentRequestedPosition,
         logicalLine: Int,
@@ -65,7 +67,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
-            val view = ThreadFactory.makeView(editor, providerData, logicalLine, position)
+            val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, position)
             val presenter = ThreadFactory.makePresenter(model, view)
 
             map[logicalLine] = model

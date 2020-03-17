@@ -1,8 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIdeEE
 
-import com.intellij.openapi.components.ServiceManager
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.AddCommentEditorActionBase
+import net.ntworld.mergeRequestIntegrationIde.diff.AddCommentEditorActionBase
 
-class AddCommentEditorAction : AddCommentEditorActionBase(
-    ServiceManager.getService(EnterpriseApplicationService::class.java)
-)
+class AddCommentEditorAction : AddCommentEditorActionBase()

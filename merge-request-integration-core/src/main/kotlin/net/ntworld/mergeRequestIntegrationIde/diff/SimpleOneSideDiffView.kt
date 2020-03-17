@@ -4,6 +4,7 @@ import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -56,6 +57,7 @@ class SimpleOneSideDiffView(
 
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
+        mergeRequest: MergeRequest,
         visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
@@ -63,6 +65,7 @@ class SimpleOneSideDiffView(
     ) {
         toggleCommentsOnLine(
             providerData,
+            mergeRequest,
             viewer.editor,
             calcPosition(visibleLine, findChangeType(viewer.editor, logicalLine)),
             logicalLine,

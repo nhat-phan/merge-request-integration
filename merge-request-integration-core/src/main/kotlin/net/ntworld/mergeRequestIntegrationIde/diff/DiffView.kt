@@ -21,6 +21,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
     fun toggleCommentsOnLine(
         providerData: ProviderData,
+        mergeRequest: MergeRequest,
         visibleLine: Int,
         logicalLine: Int,
         contentType: ContentType,
@@ -59,6 +60,6 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
         fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, position: AddCommentRequestedPosition)
 
-        fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent)
+        fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent?)
     }
 }

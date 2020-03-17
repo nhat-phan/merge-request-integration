@@ -11,6 +11,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.EventDispatcher
 import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.AddCommentRequestedPosition
 import java.awt.Dimension
@@ -26,6 +27,7 @@ import kotlin.math.min
 class ThreadViewImpl(
     private val editor: EditorEx,
     private val providerData: ProviderData,
+    private val mergeRequest: MergeRequest,
     private val logicalLine: Int,
     private val position: AddCommentRequestedPosition
 ) : ThreadView {
@@ -75,7 +77,7 @@ class ThreadViewImpl(
     }
 
     override fun addCommentPanel(comment: Comment) {
-        val commentComponent = makeCommentComponent(providerData, comment)
+        val commentComponent = makeCommentComponent(providerData, mergeRequest, comment)
 
         myThreadPanel.addToBottom(commentComponent.createComponent())
     }
@@ -90,8 +92,10 @@ class ThreadViewImpl(
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
-    private fun makeCommentComponent(providerData: ProviderData, comment: Comment): CommentComponent {
-        return CommentComponentImpl(providerData, comment, 0)
+    private fun makeCommentComponent(
+        providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment
+    ): CommentComponent {
+        return CommentComponentImpl(providerData, mergeRequest, comment, 0)
     }
 
     private inner class ComponentWrapper(private val component: JComponent) : JBScrollPane(component) {
@@ -107,7 +111,9 @@ class ThreadViewImpl(
             setViewportView(component)
 
             component.addComponentListener(object : ComponentAdapter() {
-                override fun componentResized(e: ComponentEvent) = dispatchEvent(ComponentEvent(component, ComponentEvent.COMPONENT_RESIZED))
+                override fun componentResized(e: ComponentEvent) {
+                    return dispatchEvent(ComponentEvent(component, ComponentEvent.COMPONENT_RESIZED))
+                }
             })
         }
 
@@ -131,7 +137,8 @@ class ThreadViewImpl(
             maximumEditorTextWidth = ceil(spaceWidth * (editor.settings.getRightMargin(editor.project)) - 1).toInt()
 
             val scrollbarFlip = editor.scrollPane.getClientProperty(JBScrollPane.Flip::class.java)
-            verticalScrollbarFlipped = scrollbarFlip == JBScrollPane.Flip.HORIZONTAL || scrollbarFlip == JBScrollPane.Flip.BOTH
+            verticalScrollbarFlipped = scrollbarFlip == JBScrollPane.Flip.HORIZONTAL ||
+                scrollbarFlip == JBScrollPane.Flip.BOTH
         }
 
         override fun componentResized(e: ComponentEvent) = updateWidthForAllInlays()
@@ -160,11 +167,9 @@ class ThreadViewImpl(
             return if (verticalScrollbarFlipped) {
                 val gutter = (editor as EditorEx).gutterComponentEx
                 gutter.width - gutter.whitespaceSeparatorOffset
-            }
-            else 0
+            } else 0
         }
     }
-
 
 
 }

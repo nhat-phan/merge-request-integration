@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
+import net.ntworld.mergeRequestIntegrationIde.GENERAL_NAME
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -13,7 +14,7 @@ class CommentNodeDataImplTest {
             Item(false, "CodeReviewService.kt", 20, "CodeReviewService.kt-0000000020-app/impl/CodeReviewService.kt"),
             Item(false, "CommentNodeData.kt", 165, "CommentNodeData.kt-0000000165-app/impl/CommentNodeData.kt"),
             Item(false, "CommentNodeData.kt", 2020, "CommentNodeData.kt-0000002020-app/impl/CommentNodeData.kt"),
-            Item(true, "CommentNodeData.kt", 2020, "__________GENERAL")
+            Item(true, "CommentNodeData.kt", 2020, GENERAL_NAME)
         )
         for (item in dataset) {
             val commentNodeData = CommentNodeDataImpl(

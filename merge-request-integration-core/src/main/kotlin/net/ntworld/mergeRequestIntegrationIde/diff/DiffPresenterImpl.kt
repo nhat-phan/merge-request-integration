@@ -56,7 +56,7 @@ internal class DiffPresenterImpl(
         )
     }
 
-    override fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent) {
+    override fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent?) {
         assertDoingCodeReview {
             val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
             val comments = bucket
@@ -65,6 +65,7 @@ internal class DiffPresenterImpl(
 
             view.toggleCommentsOnLine(
                 model.providerData!!,
+                model.mergeRequest!!,
                 renderer.visibleLine,
                 renderer.logicalLine,
                 renderer.contentType,

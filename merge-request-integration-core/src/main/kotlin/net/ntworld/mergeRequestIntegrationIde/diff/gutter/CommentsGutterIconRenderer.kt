@@ -12,12 +12,16 @@ class CommentsGutterIconRenderer (
     val visibleLine: Int,
     val logicalLine: Int,
     val contentType: DiffView.ContentType,
-    private val action: ((CommentsGutterIconRenderer, AnActionEvent) -> Unit)
+    private val action: ((CommentsGutterIconRenderer, AnActionEvent?) -> Unit)
 ) : GutterIconRenderer() {
     private val clickAction = object : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
             action.invoke(this@CommentsGutterIconRenderer, e)
         }
+    }
+
+    fun invoke() {
+        action.invoke(this@CommentsGutterIconRenderer, null)
     }
 
     override fun isNavigateAction() = true

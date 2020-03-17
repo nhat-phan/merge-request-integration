@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import gnu.trove.TIntFunction
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -98,6 +99,7 @@ class UnifiedDiffView(
 
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
+        mergeRequest: MergeRequest,
         visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
@@ -107,6 +109,7 @@ class UnifiedDiffView(
         // it should be logicalLine + 1
         toggleCommentsOnLine(
             providerData,
+            mergeRequest,
             viewer.editor,
             calcPosition(logicalLine + 1, logicalLine, null),
             logicalLine,

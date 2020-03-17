@@ -5,6 +5,7 @@ import com.intellij.diff.util.Side
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
@@ -68,6 +69,7 @@ class TwoSideTextDiffView(
 
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
+        mergeRequest: MergeRequest,
         visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
@@ -75,11 +77,11 @@ class TwoSideTextDiffView(
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             toggleCommentsOnLine(
-                providerData, viewer.editor1, calcPositionEditor1(visibleLine, null), logicalLine, contentType, comments
+                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine, null), logicalLine, contentType, comments
             )
         } else {
             toggleCommentsOnLine(
-                providerData, viewer.editor2, calcPositionEditor2(visibleLine, null), logicalLine, contentType, comments
+                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(visibleLine, null), logicalLine, contentType, comments
             )
         }
     }

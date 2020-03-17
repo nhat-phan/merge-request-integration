@@ -1,23 +1,15 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.editor
+package net.ntworld.mergeRequestIntegrationIde.diff
 
-import com.intellij.diff.util.TextDiffType
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import net.ntworld.mergeRequestIntegrationIde.diff.AbstractDiffView
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
-open class AddCommentEditorActionBase(
-    private val applicationService: ApplicationService
-) : EditorAction(MyHandler(applicationService)) {
+open class AddCommentEditorActionBase : EditorAction(MyHandler()) {
 
-    private class MyHandler(
-        private val applicationService: ApplicationService
-    ) : EditorActionHandler() {
+    private class MyHandler : EditorActionHandler() {
         override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
             val logicalPosition = editor.caretModel.logicalPosition
             val line = logicalPosition.line + 1
