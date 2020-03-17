@@ -54,7 +54,7 @@ class SimpleOneSideDiffView(
         registerCommentsGutter(logicalLine, contentType, comments)
     }
 
-    override fun displayCommentsOnLine(
+    override fun toggleCommentsOnLine(
         providerData: ProviderData,
         visibleLine: Int,
         logicalLine: Int,

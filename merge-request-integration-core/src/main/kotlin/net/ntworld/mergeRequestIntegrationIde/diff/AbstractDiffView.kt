@@ -69,10 +69,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             val presenter = ThreadFactory.makePresenter(model, view)
 
             map[logicalLine] = model
+        } else {
+            val model = map[logicalLine]!!
+            model.visible = !model.visible
         }
-
-        val model = map[logicalLine]!!
-        model.visible = !model.visible
     }
 
     protected fun findChangeType(editor: EditorEx, logicalLine: Int): DiffView.ChangeType {
@@ -120,8 +120,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
                     if (null === bgColor) {
                         DiffView.ChangeType.UNKNOWN
                     } else {
-                        val color = bgColor.rgb
-                        when (color) {
+                        when (bgColor.rgb) {
                             insertedColor, insertedIgnoredColor -> DiffView.ChangeType.INSERTED
                             modifiedColor, modifiedIgnoredColor -> DiffView.ChangeType.MODIFIED
                             deletedColor, deletedIgnoredColor -> DiffView.ChangeType.DELETED

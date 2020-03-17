@@ -19,7 +19,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
 
     fun displayCommentsGutterIcon(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
-    fun displayCommentsOnLine(
+    fun toggleCommentsOnLine(
         providerData: ProviderData,
         visibleLine: Int,
         logicalLine: Int,

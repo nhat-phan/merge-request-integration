@@ -11,11 +11,9 @@ import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
-import com.intellij.openapi.project.Project as IdeaProject
 import java.util.*
 
 internal class DiffPresenterImpl(
@@ -65,7 +63,7 @@ internal class DiffPresenterImpl(
                 .filter { it.line == renderer.visibleLine }
                 .map { it.comment }
 
-            view.displayCommentsOnLine(
+            view.toggleCommentsOnLine(
                 model.providerData!!,
                 renderer.visibleLine,
                 renderer.logicalLine,

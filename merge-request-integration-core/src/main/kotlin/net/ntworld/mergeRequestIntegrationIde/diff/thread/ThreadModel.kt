@@ -9,5 +9,9 @@ interface ThreadModel : Model<ThreadModel.Change> {
 
     var visible: Boolean
 
-    interface Change : EventListener
+    interface Change : EventListener {
+        fun onCommentsChanged(comments: List<Comment>)
+
+        fun onVisibilityChanged(visibility: Boolean)
+    }
 }

@@ -1,13 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.View
 import java.util.*
 
-interface ThreadView : View<ThreadView.Action> {
+interface ThreadView : View<ThreadView.Action>, Disposable {
     fun initialize()
-
-    fun dispose()
 
     fun addCommentPanel(comment: Comment)
 
