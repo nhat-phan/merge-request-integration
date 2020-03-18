@@ -10,6 +10,7 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -25,6 +26,9 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         override fun onAfterRediff() = dispatcher.multicaster.onAfterRediff()
         override fun onRediffAborted() = dispatcher.multicaster.onRediffAborted()
     }
+    private val myGutterIconRenderersOfBefore = mutableMapOf<Int, GutterIconRenderer>()
+    private val myGutterIconRenderersOfAfter = mutableMapOf<Int, GutterIconRenderer>()
+
     private val myCommentsGutterOfBefore = mutableMapOf<Int, MutableSet<String>>()
     private val myCommentsGutterOfAfter = mutableMapOf<Int, MutableSet<String>>()
     private val myThreadModelOfBefore = mutableMapOf<Int, ThreadModel>()
@@ -37,6 +41,20 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     }
 
     override fun initialize() {
+    }
+
+    protected fun registerGutterIconRenderer(gutterIconRenderer: GutterIconRenderer) {
+        val map = if (gutterIconRenderer.contentType == DiffView.ContentType.BEFORE)
+            myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+
+        map[gutterIconRenderer.logicalLine] = gutterIconRenderer
+    }
+
+    protected fun findGutterIconRenderer(logicalLine: Int, contentType: DiffView.ContentType): GutterIconRenderer {
+        val map = if (contentType == DiffView.ContentType.BEFORE)
+            myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+
+        return map[logicalLine]!!
     }
 
     protected fun registerCommentsGutter(line: Int, contentType: DiffView.ContentType, comments: List<Comment>) {

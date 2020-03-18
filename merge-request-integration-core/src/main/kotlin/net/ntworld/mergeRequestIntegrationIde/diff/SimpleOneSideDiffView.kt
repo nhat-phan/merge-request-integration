@@ -6,8 +6,7 @@ import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class SimpleOneSideDiffView(
@@ -16,31 +15,33 @@ class SimpleOneSideDiffView(
     private val change: Change,
     private val contentType: DiffView.ContentType
 ) : AbstractDiffView<SimpleOnesideDiffViewer>(applicationService, viewer) {
-    override fun displayAddGutterIcons() {
-        for (logicalLine in 0 until viewer.editor.document.lineCount) {
-            val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
 
-            lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                applicationService.settings.showAddCommentIconsInDiffViewGutter && !hasCommentsGutter(
-                    logicalLine,
-                    contentType
-                ),
-                logicalLine + 1,
+    override fun createGutterIcons() {
+        for (logicalLine in 0 until viewer.editor.document.lineCount) {
+            registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
+                viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 logicalLine,
-                this::onAddGutterIconClicked
-            )
+                visibleLine = logicalLine + 1,
+                contentType = contentType,
+                action = this::onGutterIconActionTriggered
+            ))
         }
     }
 
-    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType?) {
-        val position = calcPosition(
-            renderer.visibleLine,
-            if (null !== changeType) changeType else findChangeType(viewer.editor, renderer.logicalLine)
-        )
-        dispatcher.multicaster.onAddGutterIconClicked(renderer, position)
+    private fun onGutterIconActionTriggered(renderer: GutterIconRenderer, actionType: GutterActionType) {
+        when (actionType) {
+            GutterActionType.ADD -> {
+                val position = calcPosition(renderer.logicalLine)
+                dispatcher.multicaster.onAddGutterIconClicked(renderer, position)
+            }
+            GutterActionType.TOGGLE -> {
+                dispatcher.multicaster.onCommentsGutterIconClicked(renderer)
+            }
+        }
     }
 
-    override fun displayCommentsGutterIcon(
+    override fun changeGutterIconsByComments(
         visibleLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
@@ -49,10 +50,13 @@ class SimpleOneSideDiffView(
         if (!hasCommentsGutter(logicalLine, contentType)) {
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
-                visibleLine, logicalLine, contentType, dispatcher.multicaster::onCommentsGutterIconClicked
+                visibleLine, logicalLine, contentType, dispatcher.multicaster::legacyOnCommentsGutterIconClicked
             )
         }
         registerCommentsGutter(logicalLine, contentType, comments)
+
+        val gutterIconRenderer = findGutterIconRenderer(logicalLine, contentType)
+        gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
     }
 
     override fun toggleCommentsOnLine(
@@ -67,19 +71,19 @@ class SimpleOneSideDiffView(
             providerData,
             mergeRequest,
             viewer.editor,
-            calcPosition(visibleLine, findChangeType(viewer.editor, logicalLine)),
+            calcPosition(logicalLine),
             logicalLine,
             contentType,
             comments
         )
     }
 
-    private fun calcPosition(visibleLine: Int, changeType: DiffView.ChangeType): AddCommentRequestedPosition {
+    private fun calcPosition(logicalLine: Int): AddCommentRequestedPosition {
         return if (contentType == DiffView.ContentType.BEFORE) {
             AddCommentRequestedPosition(
                 editorType = DiffView.EditorType.SINGLE_SIDE,
-                changeType = changeType,
-                oldLine = visibleLine,
+                changeType = findChangeType(viewer.editor, logicalLine),
+                oldLine = logicalLine + 1,
                 oldPath = change.beforeRevision!!.file.toString(),
                 newLine = null,
                 newPath = null,
@@ -88,8 +92,8 @@ class SimpleOneSideDiffView(
         } else {
             AddCommentRequestedPosition(
                 editorType = DiffView.EditorType.SINGLE_SIDE,
-                changeType = changeType,
-                newLine = visibleLine,
+                changeType = findChangeType(viewer.editor, logicalLine),
+                newLine = logicalLine + 1,
                 newPath = change.afterRevision!!.file.toString(),
                 oldLine = null,
                 oldPath = null,

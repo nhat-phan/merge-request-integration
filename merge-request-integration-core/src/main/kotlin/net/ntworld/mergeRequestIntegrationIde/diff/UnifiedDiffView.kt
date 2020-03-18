@@ -7,8 +7,7 @@ import gnu.trove.TIntFunction
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class UnifiedDiffView(
@@ -54,33 +53,38 @@ class UnifiedDiffView(
         }
     }
 
-    override fun displayAddGutterIcons() {
+    override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             val left = myLeftLineNumberConverter.execute(logicalLine)
             val right = myRightLineNumberConverter.execute(logicalLine)
-            if (-1 == left && -1 == right) {
-                continue
-            }
 
-            val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
-            lineHighlighter.gutterIconRenderer = AddGutterIconRenderer(
-                applicationService.settings.showAddCommentIconsInDiffViewGutter &&
-                    !hasCommentsGutter(logicalLine, DiffView.ContentType.BEFORE) &&
-                    !hasCommentsGutter(logicalLine, DiffView.ContentType.AFTER),
-                logicalLine + 1,
+            registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
+                viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                applicationService.settings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
                 logicalLine,
-                this::onAddGutterIconClicked
-            )
+                // TODO: calculate visible line for both side based on logical line and cache
+                visibleLine = logicalLine + 1,
+                // Doesn't matter, unified view only have 1 side
+                contentType = DiffView.ContentType.BEFORE,
+                action = this::onGutterIconActionTriggered
+            ))
         }
     }
 
-    private fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, changeType: DiffView.ChangeType?) {
-        dispatcher.multicaster.onAddGutterIconClicked(renderer, calcPosition(
-            renderer.visibleLine, renderer.logicalLine, changeType
-        ))
+    private fun onGutterIconActionTriggered(renderer: GutterIconRenderer, actionType: GutterActionType) {
+        when (actionType) {
+            GutterActionType.ADD -> {
+                dispatcher.multicaster.onAddGutterIconClicked(renderer, calcPosition(
+                    renderer.visibleLine, renderer.logicalLine
+                ))
+            }
+            GutterActionType.TOGGLE -> {
+                dispatcher.multicaster.onCommentsGutterIconClicked(renderer)
+            }
+        }
     }
 
-    override fun displayCommentsGutterIcon(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
+    override fun changeGutterIconsByComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
         val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
         val logicalLine = map[visibleLine - 1]
         if (null === logicalLine) {
@@ -91,10 +95,15 @@ class UnifiedDiffView(
         if (!hasCommentsGutter(logicalLine, contentType) && !hasCommentsGutter(logicalLine, oppositeContentType)) {
             val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
             lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
-                visibleLine, logicalLine, contentType, dispatcher.multicaster::onCommentsGutterIconClicked
+                visibleLine, logicalLine, contentType, dispatcher.multicaster::legacyOnCommentsGutterIconClicked
             )
         }
         registerCommentsGutter(logicalLine, contentType, comments)
+
+        // Doesn't matter, unified view only have 1 side
+        // see exact comment above
+        val gutterIconRenderer = findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE)
+        gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
     }
 
     override fun toggleCommentsOnLine(
@@ -111,22 +120,17 @@ class UnifiedDiffView(
             providerData,
             mergeRequest,
             viewer.editor,
-            calcPosition(logicalLine + 1, logicalLine, null),
+            calcPosition(logicalLine + 1, logicalLine),
             logicalLine,
             contentType,
             comments
         )
     }
 
-    private fun calcPosition(visibleLine: Int, logicalLine: Int, changeTypeInput: DiffView.ChangeType?): AddCommentRequestedPosition {
-        val changeType = if (null !== changeTypeInput) {
-            changeTypeInput
-        } else {
-            findChangeType(viewer.editor, logicalLine)
-        }
+    private fun calcPosition(visibleLine: Int, logicalLine: Int): AddCommentRequestedPosition {
         return AddCommentRequestedPosition(
             editorType = DiffView.EditorType.UNIFIED,
-            changeType = changeType,
+            changeType = findChangeType(viewer.editor, logicalLine),
             oldLine = myLeftLineNumberConverter.execute(visibleLine),
             oldPath = change.beforeRevision!!.file.toString(),
             newLine = myRightLineNumberConverter.execute(visibleLine),

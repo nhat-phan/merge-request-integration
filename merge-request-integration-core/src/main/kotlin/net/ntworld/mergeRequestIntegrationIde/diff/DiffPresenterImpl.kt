@@ -8,8 +8,8 @@ import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.AddGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
@@ -35,13 +35,14 @@ internal class DiffPresenterImpl(
 
     override fun onAfterRediff() = assertDoingCodeReview {
         view.initialize()
+        view.createGutterIcons()
         displayGutterIcons()
-        view.displayAddGutterIcons()
     }
 
     override fun onRediffAborted() {}
 
-    override fun onAddGutterIconClicked(renderer: AddGutterIconRenderer, position: AddCommentRequestedPosition) {
+    override fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: AddCommentRequestedPosition) {
+        println("New $position")
         val commentPosition = convertAddCommentRequestedPositionToCommentPosition(position)
         val providerData = model.providerData!!
         val mergeRequest = model.mergeRequest!!
@@ -56,7 +57,25 @@ internal class DiffPresenterImpl(
         )
     }
 
-    override fun onCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent?) {
+    override fun onCommentsGutterIconClicked(renderer: GutterIconRenderer) {
+        assertDoingCodeReview {
+            val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
+            val comments = bucket
+                .filter { it.line == renderer.visibleLine }
+                .map { it.comment }
+
+            view.toggleCommentsOnLine(
+                model.providerData!!,
+                model.mergeRequest!!,
+                renderer.visibleLine,
+                renderer.logicalLine,
+                renderer.contentType,
+                comments
+            )
+        }
+    }
+
+    override fun legacyOnCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent?) {
         assertDoingCodeReview {
             val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
             val comments = bucket
@@ -77,12 +96,12 @@ internal class DiffPresenterImpl(
     private fun displayGutterIcons() {
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
         for (item in before) {
-            view.displayCommentsGutterIcon(item.key, DiffView.ContentType.BEFORE, item.value)
+            view.changeGutterIconsByComments(item.key, DiffView.ContentType.BEFORE, item.value)
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
         for (item in after) {
-            view.displayCommentsGutterIcon(item.key, DiffView.ContentType.AFTER, item.value)
+            view.changeGutterIconsByComments(item.key, DiffView.ContentType.AFTER, item.value)
         }
     }
 
