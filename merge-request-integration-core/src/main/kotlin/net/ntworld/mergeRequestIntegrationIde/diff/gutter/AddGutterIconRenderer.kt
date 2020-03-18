@@ -30,7 +30,7 @@ class AddGutterIconRenderer (
     override fun isNavigateAction() = showIcon
     override fun getClickAction() = if (showIcon) clickAction else null
 
-    override fun getIcon(): Icon = if (showIcon) Icons.AddCommentSmall else Icons.OneTransparentPixel
+    override fun getIcon(): Icon = if (showIcon) Icons.Gutter.AddComment else Icons.Gutter.Empty
     override fun getTooltipText() = if (showIcon) "Add new comment" else null
 
     override fun hashCode(): Int = System.identityHashCode(this)

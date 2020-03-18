@@ -27,7 +27,7 @@ class CommentsGutterIconRenderer (
     override fun isNavigateAction() = true
     override fun getClickAction() = clickAction
 
-    override fun getIcon(): Icon = Icons.Comments
+    override fun getIcon(): Icon = Icons.Gutter.Comments
     override fun getTooltipText() = "Show comments"
 
     override fun hashCode(): Int = System.identityHashCode(this)

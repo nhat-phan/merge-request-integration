@@ -23,11 +23,10 @@ open class ToggleCommentsEditorActionBase : EditorAction(MyHandler()) {
         }
 
         private fun findGutterIconRenderer(editor: Editor): CommentsGutterIconRenderer? {
-            val logicalPosition = editor.caretModel.logicalPosition
-            val line = logicalPosition.line + 1
+            val logicalLine = editor.caretModel.logicalPosition.line
             for (highlighter in editor.markupModel.allHighlighters) {
                 val gutterRenderer = highlighter.gutterIconRenderer
-                if (gutterRenderer !is CommentsGutterIconRenderer || gutterRenderer.visibleLine != line) {
+                if (gutterRenderer !is CommentsGutterIconRenderer || gutterRenderer.logicalLine != logicalLine) {
                     continue
                 }
                 return gutterRenderer

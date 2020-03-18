@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.util
 import com.intellij.openapi.util.IconLoader
 
 object Icons {
-    val OneTransparentPixel = IconLoader.getIcon("/icons/1px.svg", Icons::class.java)
+
     val Comments = IconLoader.getIcon("/icons/comments.svg", Icons::class.java)
     val ThumbsUp = IconLoader.getIcon("/icons/thumbs-up.svg", Icons::class.java)
     val ThumbsDown = IconLoader.getIcon("/icons/thumbs-down.svg", Icons::class.java)
@@ -24,5 +24,13 @@ object Icons {
     val Trash = IconLoader.getIcon("/icons/trash.svg", Icons::class.java)
     val Resolve = IconLoader.getIcon("/icons/check-circle-gray.svg", Icons::class.java)
     val Resolved = IconLoader.getIcon("/icons/check-circle.svg", Icons::class.java)
-    val AddCommentSmall = IconLoader.getIcon("/icons/plus-small.svg", Icons::class.java)
+
+    object Gutter {
+        val Empty = IconLoader.getIcon("/icons/1px.svg", Icons::class.java)
+        val Comment = IconLoader.getIcon("/icons/gutter-comment.svg", Icons::class.java)
+        val Comments = IconLoader.getIcon("/icons/gutter-comments.svg", Icons::class.java)
+        val AddComment = IconLoader.getIcon("/icons/gutter-plus-small.svg", Icons::class.java)
+        val WritingComment = IconLoader.getIcon("/icons/gutter-writing-comment.svg", Icons::class.java)
+    }
+
 }
