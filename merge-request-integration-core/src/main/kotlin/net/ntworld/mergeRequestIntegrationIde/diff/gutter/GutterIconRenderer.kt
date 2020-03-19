@@ -3,8 +3,9 @@ package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 
 interface GutterIconRenderer {
-    // TODO: Should be rename to visibleLineLeft + visibleLineRight
-    val visibleLine: Int
+    val visibleLineLeft: Int?
+
+    val visibleLineRight: Int?
 
     val logicalLine: Int
 

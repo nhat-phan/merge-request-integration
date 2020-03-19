@@ -22,7 +22,8 @@ class SimpleOneSideDiffView(
                 viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
                 applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 logicalLine,
-                visibleLine = logicalLine + 1,
+                visibleLineLeft = if (contentType == DiffView.ContentType.BEFORE) logicalLine + 1 else null,
+                visibleLineRight = if (contentType == DiffView.ContentType.AFTER) logicalLine + 1 else null,
                 contentType = contentType,
                 action = this::onGutterIconActionTriggered
             ))
@@ -46,23 +47,13 @@ class SimpleOneSideDiffView(
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
-        val logicalLine = visibleLine - 1
-        if (!hasCommentsGutter(logicalLine, contentType)) {
-            val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
-            lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
-                visibleLine, logicalLine, contentType, dispatcher.multicaster::legacyOnCommentsGutterIconClicked
-            )
-        }
-        registerCommentsGutter(logicalLine, contentType, comments)
-
-        val gutterIconRenderer = findGutterIconRenderer(logicalLine, contentType)
+        val gutterIconRenderer = findGutterIconRenderer(visibleLine - 1, contentType)
         gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
     }
 
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
-        visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>

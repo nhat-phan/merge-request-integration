@@ -29,8 +29,6 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     private val myGutterIconRenderersOfBefore = mutableMapOf<Int, GutterIconRenderer>()
     private val myGutterIconRenderersOfAfter = mutableMapOf<Int, GutterIconRenderer>()
 
-    private val myCommentsGutterOfBefore = mutableMapOf<Int, MutableSet<String>>()
-    private val myCommentsGutterOfAfter = mutableMapOf<Int, MutableSet<String>>()
     private val myThreadModelOfBefore = mutableMapOf<Int, ThreadModel>()
     private val myThreadModelOfAfter = mutableMapOf<Int, ThreadModel>()
 
@@ -38,9 +36,6 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     init {
         viewerBase.addListener(diffViewerListener)
-    }
-
-    override fun initialize() {
     }
 
     protected fun registerGutterIconRenderer(gutterIconRenderer: GutterIconRenderer) {
@@ -55,22 +50,6 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
 
         return map[logicalLine]!!
-    }
-
-    protected fun registerCommentsGutter(line: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCommentsGutterOfBefore else myCommentsGutterOfAfter
-        val ids = map[line]
-        if (null === ids) {
-            map[line] = collectThreadIds(comments).toMutableSet()
-        } else {
-            ids.addAll(collectThreadIds(comments))
-        }
-    }
-
-    protected fun hasCommentsGutter(line: Int, contentType: DiffView.ContentType): Boolean {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCommentsGutterOfBefore else myCommentsGutterOfAfter
-
-        return map.containsKey(line)
     }
 
     protected fun toggleCommentsOnLine(
@@ -122,34 +101,30 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         return result
     }
 
-    companion object {
-        @JvmStatic
-        fun makeGuessChangeTypeByColorFunction(editor: Editor): ((TextAttributes?) -> DiffView.ChangeType) {
-            val insertedColor = TextDiffType.INSERTED.getColor(editor).rgb
-            val insertedIgnoredColor = TextDiffType.INSERTED.getIgnoredColor(editor).rgb
-            val deletedColor = TextDiffType.DELETED.getColor(editor).rgb
-            val deletedIgnoredColor = TextDiffType.DELETED.getIgnoredColor(editor).rgb
-            val modifiedColor = TextDiffType.MODIFIED.getColor(editor).rgb
-            val modifiedIgnoredColor = TextDiffType.MODIFIED.getIgnoredColor(editor).rgb
+    private fun makeGuessChangeTypeByColorFunction(editor: Editor): ((TextAttributes?) -> DiffView.ChangeType) {
+        val insertedColor = TextDiffType.INSERTED.getColor(editor).rgb
+        val insertedIgnoredColor = TextDiffType.INSERTED.getIgnoredColor(editor).rgb
+        val deletedColor = TextDiffType.DELETED.getColor(editor).rgb
+        val deletedIgnoredColor = TextDiffType.DELETED.getIgnoredColor(editor).rgb
+        val modifiedColor = TextDiffType.MODIFIED.getColor(editor).rgb
+        val modifiedIgnoredColor = TextDiffType.MODIFIED.getIgnoredColor(editor).rgb
 
-            return {
-                if (null === it) {
+        return {
+            if (null === it) {
+                DiffView.ChangeType.UNKNOWN
+            } else {
+                val bgColor = it.backgroundColor
+                if (null === bgColor) {
                     DiffView.ChangeType.UNKNOWN
                 } else {
-                    val bgColor = it.backgroundColor
-                    if (null === bgColor) {
-                        DiffView.ChangeType.UNKNOWN
-                    } else {
-                        when (bgColor.rgb) {
-                            insertedColor, insertedIgnoredColor -> DiffView.ChangeType.INSERTED
-                            modifiedColor, modifiedIgnoredColor -> DiffView.ChangeType.MODIFIED
-                            deletedColor, deletedIgnoredColor -> DiffView.ChangeType.DELETED
-                            else -> DiffView.ChangeType.UNKNOWN
-                        }
+                    when (bgColor.rgb) {
+                        insertedColor, insertedIgnoredColor -> DiffView.ChangeType.INSERTED
+                        modifiedColor, modifiedIgnoredColor -> DiffView.ChangeType.MODIFIED
+                        deletedColor, deletedIgnoredColor -> DiffView.ChangeType.DELETED
+                        else -> DiffView.ChangeType.UNKNOWN
                     }
                 }
             }
         }
-
     }
 }

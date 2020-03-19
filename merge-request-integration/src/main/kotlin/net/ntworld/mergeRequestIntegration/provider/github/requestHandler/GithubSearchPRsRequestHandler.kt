@@ -9,7 +9,7 @@ import net.ntworld.mergeRequestIntegration.provider.github.request.GithubSearchP
 import net.ntworld.mergeRequestIntegration.provider.github.response.GithubSearchPRsResponse
 
 @Handler
-class GithubSearchPRsRequestHandler() : RequestHandler<GithubSearchPRsRequest, GithubSearchPRsResponse> {
+class GithubSearchPRsRequestHandler : RequestHandler<GithubSearchPRsRequest, GithubSearchPRsResponse> {
 
     /**
      * Because there is no way to do pagination manually with the library https://github.com/github-api/github-api/

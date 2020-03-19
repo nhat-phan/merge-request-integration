@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Comment
@@ -8,7 +7,6 @@ import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.CommentsGutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
@@ -34,7 +32,6 @@ internal class DiffPresenterImpl(
     override fun onBeforeRediff() {}
 
     override fun onAfterRediff() = assertDoingCodeReview {
-        view.initialize()
         view.createGutterIcons()
         displayGutterIcons()
     }
@@ -42,7 +39,6 @@ internal class DiffPresenterImpl(
     override fun onRediffAborted() {}
 
     override fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: AddCommentRequestedPosition) {
-        println("New $position")
         val commentPosition = convertAddCommentRequestedPositionToCommentPosition(position)
         val providerData = model.providerData!!
         val mergeRequest = model.mergeRequest!!
@@ -59,33 +55,18 @@ internal class DiffPresenterImpl(
 
     override fun onCommentsGutterIconClicked(renderer: GutterIconRenderer) {
         assertDoingCodeReview {
-            val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
-            val comments = bucket
-                .filter { it.line == renderer.visibleLine }
-                .map { it.comment }
+            val result = mutableMapOf<String, CommentPoint>()
+            model.commentsOnBeforeSide
+                .filter { it.line == renderer.visibleLineLeft }
+                .forEach { result[it.id] = it }
+            model.commentsOnAfterSide
+                .filter { it.line == renderer.visibleLineRight }
+                .forEach { result[it.id] = it }
 
+            val comments = result.values.map { it.comment }
             view.toggleCommentsOnLine(
                 model.providerData!!,
                 model.mergeRequest!!,
-                renderer.visibleLine,
-                renderer.logicalLine,
-                renderer.contentType,
-                comments
-            )
-        }
-    }
-
-    override fun legacyOnCommentsGutterIconClicked(renderer: CommentsGutterIconRenderer, e: AnActionEvent?) {
-        assertDoingCodeReview {
-            val bucket = if (renderer.contentType == DiffView.ContentType.BEFORE) model.commentsOnBeforeSide else model.commentsOnAfterSide
-            val comments = bucket
-                .filter { it.line == renderer.visibleLine }
-                .map { it.comment }
-
-            view.toggleCommentsOnLine(
-                model.providerData!!,
-                model.mergeRequest!!,
-                renderer.visibleLine,
                 renderer.logicalLine,
                 renderer.contentType,
                 comments

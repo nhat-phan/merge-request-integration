@@ -8,7 +8,8 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer as GutterIconRender
 
 class GutterIconRendererImpl(
     private val showAddIcon: Boolean,
-    override val visibleLine: Int,
+    override val visibleLineLeft: Int?,
+    override val visibleLineRight: Int?,
     override val logicalLine: Int,
     override val contentType: DiffView.ContentType,
     private val action: ((GutterIconRenderer, GutterActionType) -> Unit)

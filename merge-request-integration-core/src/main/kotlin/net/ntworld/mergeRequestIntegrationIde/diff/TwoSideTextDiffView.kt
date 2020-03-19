@@ -22,7 +22,8 @@ class TwoSideTextDiffView(
                 viewer.editor1.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
                 applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 logicalLine,
-                visibleLine = logicalLine + 1,
+                visibleLineLeft = logicalLine + 1,
+                visibleLineRight = null,
                 contentType = DiffView.ContentType.BEFORE,
                 action = this::onGutterIconActionTriggered
             ))
@@ -32,7 +33,8 @@ class TwoSideTextDiffView(
                 viewer.editor2.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
                 applicationService.settings.showAddCommentIconsInDiffViewGutter,
                 logicalLine,
-                visibleLine = logicalLine + 1,
+                visibleLineLeft = null,
+                visibleLineRight = logicalLine + 1,
                 contentType = DiffView.ContentType.AFTER,
                 action = this::onGutterIconActionTriggered
             ))
@@ -55,40 +57,26 @@ class TwoSideTextDiffView(
     }
 
     override fun changeGutterIconsByComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        val editor = if (contentType == DiffView.ContentType.BEFORE) {
-            viewer.editor1
-        } else {
-            viewer.editor2
-        }
-
-        val logicalLine = visibleLine - 1
-        if (!hasCommentsGutter(logicalLine, contentType)) {
-            val lineHighlighter = editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
-            lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
-                visibleLine, logicalLine, contentType, dispatcher.multicaster::legacyOnCommentsGutterIconClicked
-            )
-        }
-        registerCommentsGutter(logicalLine, contentType, comments)
-
-        val gutterIconRenderer = findGutterIconRenderer(logicalLine, contentType)
+        val gutterIconRenderer = findGutterIconRenderer(visibleLine - 1, contentType)
         gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
     }
 
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
-        visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             toggleCommentsOnLine(
-                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine), logicalLine, contentType, comments
+                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine),
+                logicalLine, contentType, comments
             )
         } else {
             toggleCommentsOnLine(
-                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine), logicalLine, contentType, comments
+                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine),
+                logicalLine, contentType, comments
             )
         }
     }

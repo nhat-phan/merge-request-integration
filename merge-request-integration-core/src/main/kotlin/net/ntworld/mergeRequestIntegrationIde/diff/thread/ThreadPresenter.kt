@@ -8,6 +8,5 @@ interface ThreadPresenter : Presenter<ThreadPresenter.Event> {
 
     val view: ThreadView
 
-    interface Event: EventListener {
-    }
+    interface Event: EventListener
 }

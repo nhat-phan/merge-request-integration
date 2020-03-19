@@ -44,26 +44,19 @@ class UnifiedDiffView(
     private val myCachedLeftLineNumbers = mutableMapOf<Int, Int>()
     private val myCachedRightLineNumbers = mutableMapOf<Int, Int>()
 
-    override fun initialize() {
-        for (line in 0 until viewer.editor.document.lineCount) {
-            val left = myLeftLineNumberConverter.execute(line)
-            val right = myRightLineNumberConverter.execute(line)
-            myCachedLeftLineNumbers[left] = line
-            myCachedRightLineNumbers[right] = line
-        }
-    }
-
     override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             val left = myLeftLineNumberConverter.execute(logicalLine)
             val right = myRightLineNumberConverter.execute(logicalLine)
+            myCachedLeftLineNumbers[left] = logicalLine
+            myCachedRightLineNumbers[right] = logicalLine
 
             registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
                 viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
                 applicationService.settings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
                 logicalLine,
-                // TODO: calculate visible line for both side based on logical line and cache
-                visibleLine = logicalLine + 1,
+                visibleLineLeft = left + 1,
+                visibleLineRight = right + 1,
                 // Doesn't matter, unified view only have 1 side
                 contentType = DiffView.ContentType.BEFORE,
                 action = this::onGutterIconActionTriggered
@@ -75,7 +68,7 @@ class UnifiedDiffView(
         when (actionType) {
             GutterActionType.ADD -> {
                 dispatcher.multicaster.onAddGutterIconClicked(renderer, calcPosition(
-                    renderer.visibleLine, renderer.logicalLine
+                    renderer.logicalLine
                 ))
             }
             GutterActionType.TOGGLE -> {
@@ -91,15 +84,6 @@ class UnifiedDiffView(
             return
         }
 
-        val oppositeContentType = if (contentType == DiffView.ContentType.BEFORE) DiffView.ContentType.AFTER else DiffView.ContentType.BEFORE
-        if (!hasCommentsGutter(logicalLine, contentType) && !hasCommentsGutter(logicalLine, oppositeContentType)) {
-            val lineHighlighter = viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null)
-            lineHighlighter.gutterIconRenderer = CommentsGutterIconRenderer(
-                visibleLine, logicalLine, contentType, dispatcher.multicaster::legacyOnCommentsGutterIconClicked
-            )
-        }
-        registerCommentsGutter(logicalLine, contentType, comments)
-
         // Doesn't matter, unified view only have 1 side
         // see exact comment above
         val gutterIconRenderer = findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE)
@@ -109,31 +93,28 @@ class UnifiedDiffView(
     override fun toggleCommentsOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
-        visibleLine: Int,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
-        // Note that do not use visibleLine because it's not correct for unified view,
-        // it should be logicalLine + 1
         toggleCommentsOnLine(
             providerData,
             mergeRequest,
             viewer.editor,
-            calcPosition(logicalLine + 1, logicalLine),
+            calcPosition(logicalLine),
             logicalLine,
             contentType,
             comments
         )
     }
 
-    private fun calcPosition(visibleLine: Int, logicalLine: Int): AddCommentRequestedPosition {
+    private fun calcPosition(logicalLine: Int): AddCommentRequestedPosition {
         return AddCommentRequestedPosition(
             editorType = DiffView.EditorType.UNIFIED,
             changeType = findChangeType(viewer.editor, logicalLine),
-            oldLine = myLeftLineNumberConverter.execute(visibleLine),
+            oldLine = myLeftLineNumberConverter.execute(logicalLine + 1),
             oldPath = change.beforeRevision!!.file.toString(),
-            newLine = myRightLineNumberConverter.execute(visibleLine),
+            newLine = myRightLineNumberConverter.execute(logicalLine + 1),
             newPath = change.afterRevision!!.file.toString(),
             baseHash = change.beforeRevision!!.revisionNumber.asString(),
             headHash = change.afterRevision!!.revisionNumber.asString()

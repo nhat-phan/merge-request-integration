@@ -14,5 +14,5 @@ interface ThreadView : View<ThreadView.Action>, Disposable {
 
     fun hide()
 
-    interface Action : EventListener {}
+    interface Action : EventListener
 }

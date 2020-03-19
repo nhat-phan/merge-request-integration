@@ -165,7 +165,7 @@ class ThreadViewImpl(
 
         private fun getGutterTextGap(): Int {
             return if (verticalScrollbarFlipped) {
-                val gutter = (editor as EditorEx).gutterComponentEx
+                val gutter = editor.gutterComponentEx
                 gutter.width - gutter.whitespaceSeparatorOffset
             } else 0
         }
