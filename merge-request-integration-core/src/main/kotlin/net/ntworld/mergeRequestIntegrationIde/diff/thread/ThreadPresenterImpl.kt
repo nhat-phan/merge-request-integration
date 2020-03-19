@@ -12,19 +12,25 @@ class ThreadPresenterImpl(
     init {
         model.dispatcher.addListener(this)
         view.dispatcher.addListener(this)
-
         view.initialize()
+        onCommentsChanged(model.comments)
+    }
+
+    override fun onCommentsChanged(comments: List<Comment>) {
+        val groups = mutableMapOf<String, MutableList<Comment>>()
         for (comment in model.comments) {
-            view.addCommentPanel(comment)
+            if (!groups.containsKey(comment.parentId)) {
+                groups[comment.parentId] = mutableListOf()
+            }
+            groups[comment.parentId]!!.add(comment)
         }
+        groups.forEach { (id, items) -> view.addGroupOfComments(id, items) }
+        view.showEditor()
         if (model.visible) {
             view.show()
         } else {
             view.hide()
         }
-    }
-
-    override fun onCommentsChanged(comments: List<Comment>) {
     }
 
     override fun onVisibilityChanged(visibility: Boolean) {

@@ -23,6 +23,8 @@ class ThreadModelImpl(
             dispatcher.multicaster.onVisibilityChanged(value)
         }
 
+    override var writingBody: String? = null
+
     override val dispatcher = EventDispatcher.create(ThreadModel.Change::class.java)
 
 }

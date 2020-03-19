@@ -27,7 +27,9 @@ internal class DiffPresenterImpl(
 
     override fun onInit() {}
 
-    override fun onDispose() {}
+    override fun onDispose() {
+        view.dispose()
+    }
 
     override fun onBeforeRediff() {}
 

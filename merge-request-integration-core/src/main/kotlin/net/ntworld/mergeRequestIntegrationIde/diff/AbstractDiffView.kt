@@ -6,6 +6,7 @@ import com.intellij.diff.util.TextDiffType
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.util.Disposer
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
@@ -38,6 +39,11 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         viewerBase.addListener(diffViewerListener)
     }
 
+    override fun dispose() {
+        myGutterIconRenderersOfBefore.clear()
+        myGutterIconRenderersOfAfter.clear()
+    }
+
     protected fun registerGutterIconRenderer(gutterIconRenderer: GutterIconRenderer) {
         val map = if (gutterIconRenderer.contentType == DiffView.ContentType.BEFORE)
             myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
@@ -61,17 +67,32 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
+        val model = findThreadModelOnLine(
+            providerData, mergeRequest, editor, position, logicalLine, contentType, comments
+        )
+        model.visible = !model.visible
+    }
+
+    protected fun findThreadModelOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        editor: EditorEx,
+        position: AddCommentRequestedPosition,
+        logicalLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment> = listOf()
+    ) : ThreadModel {
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
             val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, position)
+            Disposer.register(this, view)
+
             val presenter = ThreadFactory.makePresenter(model, view)
 
             map[logicalLine] = model
-        } else {
-            val model = map[logicalLine]!!
-            model.visible = !model.visible
         }
+        return map[logicalLine]!!
     }
 
     protected fun findChangeType(editor: EditorEx, logicalLine: Int): DiffView.ChangeType {

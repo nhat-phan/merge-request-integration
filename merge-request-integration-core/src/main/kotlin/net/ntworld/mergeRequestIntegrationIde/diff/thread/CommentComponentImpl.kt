@@ -21,6 +21,7 @@ import java.awt.Color
 import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.border.Border
 
 class CommentComponentImpl(
     private val providerData: ProviderData,
@@ -68,7 +69,7 @@ class CommentComponentImpl(
         myPanel.toolbar = createToolbar()
         myPanel.setContent(myWebView.component)
 
-        myPanel.border = BorderFactory.createMatteBorder(1, indent * 30 + 1, 1, 1, JBColor.border())
+        myPanel.border = BorderFactory.createMatteBorder(0, indent * 40 + 1, 1, 1, JBColor.border())
     }
 
     override fun createComponent(): JComponent = myPanel

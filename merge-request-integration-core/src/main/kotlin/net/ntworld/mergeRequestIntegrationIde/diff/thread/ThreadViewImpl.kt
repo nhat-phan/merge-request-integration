@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.Panel
 import com.intellij.util.EventDispatcher
 import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
@@ -18,6 +19,7 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.ScrollPaneConstants
 import kotlin.math.ceil
@@ -30,10 +32,10 @@ class ThreadViewImpl(
     private val mergeRequest: MergeRequest,
     private val logicalLine: Int,
     private val position: AddCommentRequestedPosition
-) : ThreadView {
+) : ThreadView, EditorComponent.Event {
     override val dispatcher = EventDispatcher.create(ThreadView.Action::class.java)
 
-    private val myThreadPanel = JBUI.Panels.simplePanel()
+    private val myThreadPanel = Panel()
     private val myWrapper = ComponentWrapper(myThreadPanel)
     private val myEditorWidthWatcher = EditorTextWidthWatcher()
     private val resizePolicy by lazy {
@@ -44,10 +46,26 @@ class ThreadViewImpl(
         }
         return@lazy EditorEmbeddedComponentManager.ResizePolicy.any()
     }
+    private val myCreatedEditors = mutableMapOf<String, EditorComponent>()
+    private val myGroups = mutableMapOf<String, GroupComponent>()
+    private val myEditor by lazy {
+        val editorComponent = ComponentFactory.makeEditor(editor.project!!, 0)
+        editorComponent.isVisible = false
+        editorComponent.dispatcher.addListener(this)
+
+        myCreatedEditors[""] = editorComponent
+        myThreadPanel.add(editorComponent.createComponent())
+        editorComponent
+    }
+
 
     init {
+        myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)
+
         myWrapper.isVisible = false
     }
+
+    override val isEditorDisplayed: Boolean = myEditor.isVisible
 
     override fun initialize() {
         editor.scrollPane.viewport.addComponentListener(myEditorWidthWatcher)
@@ -74,12 +92,21 @@ class ThreadViewImpl(
 
     override fun dispose() {
         editor.scrollPane.viewport.removeComponentListener(myEditorWidthWatcher)
+        myCreatedEditors.values.forEach { it.dispose() }
     }
 
-    override fun addCommentPanel(comment: Comment) {
-        val commentComponent = makeCommentComponent(providerData, mergeRequest, comment)
+    override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
+        val group = ComponentFactory.makeGroup(
+            providerData, mergeRequest, myGroups.isEmpty(), groupId, comments
+        )
 
-        myThreadPanel.addToBottom(commentComponent.createComponent())
+        myGroups[groupId] = group
+        myThreadPanel.add(group.createComponent())
+    }
+
+    override fun showEditor() {
+        myEditor.isVisible = true
+        myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
     override fun show() {
@@ -92,10 +119,8 @@ class ThreadViewImpl(
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
-    private fun makeCommentComponent(
-        providerData: ProviderData, mergeRequest: MergeRequest, comment: Comment
-    ): CommentComponent {
-        return CommentComponentImpl(providerData, mergeRequest, comment, 0)
+    override fun onEditorResized() {
+        myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
     private inner class ComponentWrapper(private val component: JComponent) : JBScrollPane(component) {
@@ -154,7 +179,8 @@ class ThreadViewImpl(
         }
 
         private fun calcWidth(): Int {
-            val visibleEditorTextWidth = editor.scrollPane.viewport.width - getVerticalScrollbarWidth() - getGutterTextGap()
+            val visibleEditorTextWidth =
+                editor.scrollPane.viewport.width - getVerticalScrollbarWidth() - getGutterTextGap()
             return min(max(visibleEditorTextWidth, 0), maximumEditorTextWidth)
         }
 
@@ -170,6 +196,4 @@ class ThreadViewImpl(
             } else 0
         }
     }
-
-
 }

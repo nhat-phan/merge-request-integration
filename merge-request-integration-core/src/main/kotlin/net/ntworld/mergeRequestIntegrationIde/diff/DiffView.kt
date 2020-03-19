@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.FrameDiffTool
+import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
@@ -8,7 +9,7 @@ import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import java.util.*
 
-interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action> {
+interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Disposable {
     val viewer: V
 
     fun createGutterIcons()

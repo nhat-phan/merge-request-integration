@@ -9,6 +9,8 @@ interface ThreadModel : Model<ThreadModel.Change> {
 
     var visible: Boolean
 
+    var writingBody: String?
+
     interface Change : EventListener {
         fun onCommentsChanged(comments: List<Comment>)
 

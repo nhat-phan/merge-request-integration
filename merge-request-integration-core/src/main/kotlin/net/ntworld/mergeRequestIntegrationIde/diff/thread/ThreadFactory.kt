@@ -8,7 +8,7 @@ import net.ntworld.mergeRequestIntegrationIde.diff.AddCommentRequestedPosition
 
 object ThreadFactory {
     fun makeModel(comments: List<Comment>): ThreadModel {
-        return ThreadModelImpl(comments, true)
+        return ThreadModelImpl(comments, false)
     }
 
     fun makeView(
