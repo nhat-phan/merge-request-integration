@@ -24,6 +24,7 @@ import javax.swing.JPanel
 import javax.swing.border.Border
 
 class CommentComponentImpl(
+    private val groupComponent: GroupComponent,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
     private val comment: Comment,
@@ -62,6 +63,13 @@ class CommentComponentImpl(
             BrowserUtil.open(providerData.info.createCommentUrl(mergeRequest.url, comment))
         }
     }
+    private val myReplyAction = object : AnAction(
+        "Reply", "Reply this comment", Icons.ReplyComment
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            groupComponent.showReplyEditor()
+        }
+    }
 
     init {
         myUsernameLabel.foreground = Color(153, 153, 153)
@@ -72,13 +80,15 @@ class CommentComponentImpl(
         myPanel.border = BorderFactory.createMatteBorder(0, indent * 40 + 1, 1, 1, JBColor.border())
     }
 
-    override fun createComponent(): JComponent = myPanel
+    override val component: JComponent = myPanel
 
     private fun createToolbar(): JComponent {
         val panel = JPanel(MigLayout("ins 0, fill", "5[left]5[left]5[left]0[left, fill]push[right]", "center"))
 
         val leftActionGroup = DefaultActionGroup()
         leftActionGroup.add(myTimeAction)
+        leftActionGroup.addSeparator()
+        leftActionGroup.add(myOpenInBrowserAction)
         val leftToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-left",
             leftActionGroup,
@@ -86,9 +96,9 @@ class CommentComponentImpl(
         )
 
         val rightActionGroup = DefaultActionGroup()
-        rightActionGroup.add(myOpenInBrowserAction)
+        rightActionGroup.add(myReplyAction)
         val rightToolbar = ActionManager.getInstance().createActionToolbar(
-            "${CommentComponentImpl::class.java.canonicalName}/toolbar-left",
+            "${CommentComponentImpl::class.java.canonicalName}/toolbar-right",
             rightActionGroup,
             true
         )

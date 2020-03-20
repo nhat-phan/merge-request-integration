@@ -12,6 +12,8 @@ interface ThreadView : View<ThreadView.Action>, Disposable {
 
     fun addGroupOfComments(groupId: String, comments: List<Comment>)
 
+//    fun showReplyEditorForGroup(groupId: String)
+
     fun showEditor()
 
     fun show()

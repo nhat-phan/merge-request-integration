@@ -13,12 +13,15 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
 import java.awt.Dimension
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.JPanel
 
 class EditorComponentImpl(
     private val ideaProject: IdeaProject,
+    private val type: EditorComponent.Type,
     val indent: Int
 ) : EditorComponent {
     private val myPanel = CustomSimpleToolWindowPanel(vertical = true, borderless = false)
@@ -57,21 +60,62 @@ class EditorComponentImpl(
         override fun actionPerformed(e: AnActionEvent) {
         }
 
+        override fun update(e: AnActionEvent) {
+            when (type) {
+                EditorComponent.Type.NEW_DISCUSSION -> {
+                    e.presentation.text = "Add comment"
+                    e.presentation.description = "Add comment to the current position"
+                }
+                EditorComponent.Type.REPLY -> {
+                    e.presentation.text = "Add reply comment"
+                    e.presentation.description = "Add reply comment to current discussion thread"
+                }
+            }
+        }
+
         override fun useSmallerFontForTextInToolbar(): Boolean = false
         override fun displayTextInToolbar() = true
     }
+    private val myEditorFocusListener = object: FocusListener {
+        override fun focusLost(e: FocusEvent?) {
+            val editor = myEditorTextField.editor
+            if (null === editor) {
+                return
+            }
+            if (myEditorTextField.text.isBlank() || myEditorTextField.text == EMPTY_TEXT_REPLACED) {
+                myEditorTextField.text = ""
+                myPanel.toolbar!!.isVisible = false
+                dispatcher.multicaster.onEditorResized()
+            }
+        }
+
+        override fun focusGained(e: FocusEvent?) {
+            if (myEditorTextField.text.isBlank()) {
+                myEditorTextField.text = EMPTY_TEXT_REPLACED
+            }
+            myPanel.toolbar!!.isVisible = true
+            dispatcher.multicaster.onEditorResized()
+        }
+    }
 
     init {
-        myEditorTextField.text = "\n\n"
+        when(type) {
+            EditorComponent.Type.NEW_DISCUSSION -> myEditorTextField.setPlaceholder("Start a new discussion...")
+            EditorComponent.Type.REPLY -> myEditorTextField.setPlaceholder("Reply...")
+        }
 
         myPanel.setContent(myEditorTextField)
         myPanel.toolbar = createToolbar()
+        myPanel.toolbar!!.isVisible = false
 
         myPanel.border = BorderFactory.createMatteBorder(0, indent * 40 + 1, 1, 1, JBColor.border())
         myEditorTextField.addComponentListener(myComponentListener)
+        myEditorTextField.addFocusListener(myEditorFocusListener)
     }
 
     override val dispatcher = EventDispatcher.create(EditorComponent.Event::class.java)
+
+    override val component: JComponent = myPanel
 
     override var isVisible: Boolean
         get() = myPanel.isVisible
@@ -79,7 +123,9 @@ class EditorComponentImpl(
             myPanel.isVisible = value
         }
 
-    override fun createComponent(): JComponent = myPanel
+    override fun focus() {
+        myEditorTextField.grabFocus()
+    }
 
     override fun dispose() {
         dispatcher.listeners.clear()
@@ -109,5 +155,9 @@ class EditorComponentImpl(
         panel.add(leftToolbar.component)
         panel.add(rightToolbar.component)
         return panel
+    }
+
+    companion object {
+        const val EMPTY_TEXT_REPLACED = "\n\n"
     }
 }

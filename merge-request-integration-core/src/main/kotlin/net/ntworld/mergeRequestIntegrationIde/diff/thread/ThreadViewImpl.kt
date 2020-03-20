@@ -36,7 +36,8 @@ class ThreadViewImpl(
     override val dispatcher = EventDispatcher.create(ThreadView.Action::class.java)
 
     private val myThreadPanel = Panel()
-    private val myWrapper = ComponentWrapper(myThreadPanel)
+    private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
+    private val myWrapper = ComponentWrapper(myBoxLayoutPanel)
     private val myEditorWidthWatcher = EditorTextWidthWatcher()
     private val resizePolicy by lazy {
         val constructors = EditorEmbeddedComponentManager.ResizePolicy::class.java.declaredConstructors
@@ -49,23 +50,37 @@ class ThreadViewImpl(
     private val myCreatedEditors = mutableMapOf<String, EditorComponent>()
     private val myGroups = mutableMapOf<String, GroupComponent>()
     private val myEditor by lazy {
-        val editorComponent = ComponentFactory.makeEditor(editor.project!!, 0)
+        val editorComponent = ComponentFactory.makeEditor(editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0)
         editorComponent.isVisible = false
         editorComponent.dispatcher.addListener(this)
+        Disposer.register(this@ThreadViewImpl, editorComponent)
 
         myCreatedEditors[""] = editorComponent
-        myThreadPanel.add(editorComponent.createComponent())
+        myBoxLayoutPanel.addToBottom(editorComponent.component)
         editorComponent
     }
+    private val myGroupComponentEventListener = object : GroupComponent.Event {
+        override fun onEditorCreated(groupId: String, editor: EditorComponent) {
+            editor.dispatcher.addListener(this@ThreadViewImpl)
+            Disposer.register(this@ThreadViewImpl, editor)
 
+            myCreatedEditors[groupId] = editor
+        }
+
+        override fun onEditorDestroyed(groupId: String, editor: EditorComponent) {
+            myCreatedEditors.remove(groupId)
+        }
+    }
 
     init {
+        myBoxLayoutPanel.addToCenter(myThreadPanel)
         myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)
 
         myWrapper.isVisible = false
     }
 
-    override val isEditorDisplayed: Boolean = myEditor.isVisible
+    override val isEditorDisplayed: Boolean
+        get() = myEditor.isVisible
 
     override fun initialize() {
         editor.scrollPane.viewport.addComponentListener(myEditorWidthWatcher)
@@ -97,12 +112,21 @@ class ThreadViewImpl(
 
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
         val group = ComponentFactory.makeGroup(
-            providerData, mergeRequest, myGroups.isEmpty(), groupId, comments
+            providerData, mergeRequest, editor.project!!, myGroups.isEmpty(), groupId, comments
         )
+        group.dispatcher.addListener(myGroupComponentEventListener)
+        Disposer.register(this, group)
 
         myGroups[groupId] = group
-        myThreadPanel.add(group.createComponent())
+        myThreadPanel.add(group.component)
     }
+
+//    override fun showReplyEditorForGroup(groupId: String) {
+//        val group = myGroups[groupId]
+//        if (null !== group) {
+//            group.showReplyEditor()
+//        }
+//    }
 
     override fun showEditor() {
         myEditor.isVisible = true

@@ -2,7 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
 import com.intellij.openapi.Disposable
 import com.intellij.util.EventDispatcher
-import net.ntworld.mergeRequestIntegrationIde.ui.Component
+import net.ntworld.mergeRequestIntegrationIde.Component
 import java.util.*
 
 interface EditorComponent : Component, Disposable {
@@ -10,7 +10,14 @@ interface EditorComponent : Component, Disposable {
 
     var isVisible: Boolean
 
+    fun focus()
+
     interface Event: EventListener {
         fun onEditorResized()
+    }
+
+    enum class Type {
+        NEW_DISCUSSION,
+        REPLY
     }
 }

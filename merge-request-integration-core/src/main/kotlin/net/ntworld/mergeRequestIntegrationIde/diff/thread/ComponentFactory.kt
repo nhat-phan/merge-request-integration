@@ -10,26 +10,29 @@ object ComponentFactory {
     fun makeGroup(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
+        ideaProject: IdeaProject,
         borderTop: Boolean,
         groupId: String,
         comments: List<Comment>
     ) : GroupComponent {
-        return GroupComponentImpl(borderTop, providerData, mergeRequest, groupId, comments)
+        return GroupComponentImpl(borderTop, providerData, mergeRequest, ideaProject, groupId, comments)
     }
 
     fun makeComment(
+        groupComponent: GroupComponent,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         comment: Comment,
         indent: Int
     ): CommentComponent {
-        return CommentComponentImpl(providerData, mergeRequest, comment, indent)
+        return CommentComponentImpl(groupComponent, providerData, mergeRequest, comment, indent)
     }
 
     fun makeEditor(
         ideaProject: IdeaProject,
+        type: EditorComponent.Type,
         indent: Int
     ): EditorComponent {
-        return EditorComponentImpl(ideaProject, indent)
+        return EditorComponentImpl(ideaProject, type, indent)
     }
 }
