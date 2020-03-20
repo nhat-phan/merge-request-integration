@@ -9,11 +9,13 @@ interface ThreadModel : Model<ThreadModel.Change> {
 
     var visible: Boolean
 
-    var writingBody: String?
+    var showEditor: Boolean
 
     interface Change : EventListener {
         fun onCommentsChanged(comments: List<Comment>)
 
         fun onVisibilityChanged(visibility: Boolean)
+
+        fun onEditorVisibilityChanged(visibility: Boolean)
     }
 }

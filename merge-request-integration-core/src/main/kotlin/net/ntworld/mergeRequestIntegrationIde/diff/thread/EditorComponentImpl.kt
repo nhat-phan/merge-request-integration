@@ -67,8 +67,8 @@ class EditorComponentImpl(
                     e.presentation.description = "Add comment to the current position"
                 }
                 EditorComponent.Type.REPLY -> {
-                    e.presentation.text = "Add reply comment"
-                    e.presentation.description = "Add reply comment to current discussion thread"
+                    e.presentation.text = "Reply"
+                    e.presentation.description = "Reply to current discussion thread"
                 }
             }
         }
@@ -108,7 +108,7 @@ class EditorComponentImpl(
         myPanel.toolbar = createToolbar()
         myPanel.toolbar!!.isVisible = false
 
-        myPanel.border = BorderFactory.createMatteBorder(0, indent * 40 + 1, 1, 1, JBColor.border())
+        drawBorderTop(false)
         myEditorTextField.addComponentListener(myComponentListener)
         myEditorTextField.addFocusListener(myEditorFocusListener)
     }
@@ -125,6 +125,12 @@ class EditorComponentImpl(
 
     override fun focus() {
         myEditorTextField.grabFocus()
+    }
+
+    override fun drawBorderTop(display: Boolean) {
+        myPanel.border = BorderFactory.createMatteBorder(
+            if (display) 1 else 0, indent * 40 + 1, 1, 1, JBColor.border()
+        )
     }
 
     override fun dispose() {
@@ -158,6 +164,6 @@ class EditorComponentImpl(
     }
 
     companion object {
-        const val EMPTY_TEXT_REPLACED = "\n\n"
+        const val EMPTY_TEXT_REPLACED = "\n"
     }
 }

@@ -7,7 +7,9 @@ import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
@@ -40,41 +42,55 @@ internal class DiffPresenterImpl(
 
     override fun onRediffAborted() {}
 
-    override fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: AddCommentRequestedPosition) {
-        val commentPosition = convertAddCommentRequestedPositionToCommentPosition(position)
-        val providerData = model.providerData!!
-        val mergeRequest = model.mergeRequest!!
-        val item = CommentStoreItem.createNewItem(
-            providerData, mergeRequest,
-            projectService.codeReviewUtil.convertPositionToCommentNodeData(commentPosition),
-            commentPosition
-        )
-        projectService.commentStore.add(item)
-        projectService.dispatcher.multicaster.newCommentRequested(
-            providerData, mergeRequest, commentPosition, item
-        )
-    }
-
-    override fun onCommentsGutterIconClicked(renderer: GutterIconRenderer) {
-        assertDoingCodeReview {
-            val result = mutableMapOf<String, CommentPoint>()
-            model.commentsOnBeforeSide
-                .filter { it.line == renderer.visibleLineLeft }
-                .forEach { result[it.id] = it }
-            model.commentsOnAfterSide
-                .filter { it.line == renderer.visibleLineRight }
-                .forEach { result[it.id] = it }
-
-            val comments = result.values.map { it.comment }
-            view.toggleCommentsOnLine(
-                model.providerData!!,
-                model.mergeRequest!!,
-                renderer.logicalLine,
-                renderer.contentType,
-                comments
-            )
+    override fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
+        when (type) {
+            GutterActionType.ADD -> assertDoingCodeReview {
+                view.displayEditorOnLine(
+                    model.providerData!!,
+                    model.mergeRequest!!,
+                    renderer.logicalLine,
+                    renderer.contentType,
+                    collectCommentsOfGutterIconRenderer(renderer)
+                )
+            }
+            GutterActionType.TOGGLE -> assertDoingCodeReview {
+                view.toggleCommentsOnLine(
+                    model.providerData!!,
+                    model.mergeRequest!!,
+                    renderer.logicalLine,
+                    renderer.contentType,
+                    collectCommentsOfGutterIconRenderer(renderer)
+                )
+            }
         }
     }
+
+    private fun collectCommentsOfGutterIconRenderer(renderer: GutterIconRenderer) : List<Comment> {
+        val result = mutableMapOf<String, CommentPoint>()
+        model.commentsOnBeforeSide
+            .filter { it.line == renderer.visibleLineLeft }
+            .forEach { result[it.id] = it }
+        model.commentsOnAfterSide
+            .filter { it.line == renderer.visibleLineRight }
+            .forEach { result[it.id] = it }
+
+        return result.values.map { it.comment }
+    }
+
+//    override fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: GutterPosition) {
+//        val commentPosition = convertGutterPositionToCommentPosition(position)
+//        val providerData = model.providerData!!
+//        val mergeRequest = model.mergeRequest!!
+//        val item = CommentStoreItem.createNewItem(
+//            providerData, mergeRequest,
+//            projectService.codeReviewUtil.convertPositionToCommentNodeData(commentPosition),
+//            commentPosition
+//        )
+//        projectService.commentStore.add(item)
+//        projectService.dispatcher.multicaster.newCommentRequested(
+//            providerData, mergeRequest, commentPosition, item
+//        )
+//    }
 
     private fun displayGutterIcons() {
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
@@ -107,7 +123,7 @@ internal class DiffPresenterImpl(
         }
     }
 
-    private fun convertAddCommentRequestedPositionToCommentPosition(input: AddCommentRequestedPosition): CommentPosition {
+    private fun convertGutterPositionToCommentPosition(input: GutterPosition): CommentPosition {
         val repository: GitRepository? = RepositoryUtil.findRepository(projectService.project, model.providerData!!)
 
         return CommentPositionImpl(

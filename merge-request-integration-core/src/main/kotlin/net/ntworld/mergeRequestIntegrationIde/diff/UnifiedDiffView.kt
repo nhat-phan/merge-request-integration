@@ -59,21 +59,8 @@ class UnifiedDiffView(
                 visibleLineRight = right + 1,
                 // Doesn't matter, unified view only have 1 side
                 contentType = DiffView.ContentType.BEFORE,
-                action = this::onGutterIconActionTriggered
+                action = dispatcher.multicaster::onGutterActionPerformed
             ))
-        }
-    }
-
-    private fun onGutterIconActionTriggered(renderer: GutterIconRenderer, actionType: GutterActionType) {
-        when (actionType) {
-            GutterActionType.ADD -> {
-                dispatcher.multicaster.onAddGutterIconClicked(renderer, calcPosition(
-                    renderer.logicalLine
-                ))
-            }
-            GutterActionType.TOGGLE -> {
-                dispatcher.multicaster.onCommentsGutterIconClicked(renderer)
-            }
         }
     }
 
@@ -87,7 +74,25 @@ class UnifiedDiffView(
         // Doesn't matter, unified view only have 1 side
         // see exact comment above
         val gutterIconRenderer = findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE)
-        gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
+        gutterIconRenderer.setState(
+            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+        )
+    }
+
+    override fun displayEditorOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        logicalLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        displayCommentsAndEditorOnLine(
+            providerData, mergeRequest,
+            viewer.editor,
+            calcPosition(logicalLine),
+            logicalLine, contentType,
+            comments
+        )
     }
 
     override fun toggleCommentsOnLine(
@@ -98,18 +103,16 @@ class UnifiedDiffView(
         comments: List<Comment>
     ) {
         toggleCommentsOnLine(
-            providerData,
-            mergeRequest,
+            providerData, mergeRequest,
             viewer.editor,
             calcPosition(logicalLine),
-            logicalLine,
-            contentType,
+            logicalLine, contentType,
             comments
         )
     }
 
-    private fun calcPosition(logicalLine: Int): AddCommentRequestedPosition {
-        return AddCommentRequestedPosition(
+    private fun calcPosition(logicalLine: Int): GutterPosition {
+        return GutterPosition(
             editorType = DiffView.EditorType.UNIFIED,
             changeType = findChangeType(viewer.editor, logicalLine),
             oldLine = myLeftLineNumberConverter.execute(logicalLine + 1),

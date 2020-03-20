@@ -12,6 +12,8 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -62,7 +64,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         editor: EditorEx,
-        position: AddCommentRequestedPosition,
+        position: GutterPosition,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
@@ -71,13 +73,39 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             providerData, mergeRequest, editor, position, logicalLine, contentType, comments
         )
         model.visible = !model.visible
+        setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
     }
 
-    protected fun findThreadModelOnLine(
+    protected fun displayCommentsAndEditorOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         editor: EditorEx,
-        position: AddCommentRequestedPosition,
+        position: GutterPosition,
+        logicalLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        val model = findThreadModelOnLine(
+            providerData, mergeRequest, editor, position, logicalLine, contentType, comments
+        )
+        model.showEditor = true
+        setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
+    }
+
+    private fun setWritingStateOfGutterIconRenderer(
+        model: ThreadModel, logicalLine: Int, contentType: DiffView.ContentType
+    ) {
+        val renderer = findGutterIconRenderer(logicalLine, contentType)
+        if (model.showEditor) {
+            renderer.setState(GutterState.WRITING)
+        }
+    }
+
+    private fun findThreadModelOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        editor: EditorEx,
+        position: GutterPosition,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment> = listOf()

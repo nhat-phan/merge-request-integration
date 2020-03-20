@@ -25,7 +25,7 @@ class TwoSideTextDiffView(
                 visibleLineLeft = logicalLine + 1,
                 visibleLineRight = null,
                 contentType = DiffView.ContentType.BEFORE,
-                action = this::onGutterIconActionTriggered
+                action = dispatcher.multicaster::onGutterActionPerformed
             ))
         }
         for (logicalLine in 0 until viewer.editor2.document.lineCount) {
@@ -36,29 +36,36 @@ class TwoSideTextDiffView(
                 visibleLineLeft = null,
                 visibleLineRight = logicalLine + 1,
                 contentType = DiffView.ContentType.AFTER,
-                action = this::onGutterIconActionTriggered
+                action = dispatcher.multicaster::onGutterActionPerformed
             ))
-        }
-    }
-
-    private fun onGutterIconActionTriggered(renderer: GutterIconRenderer, actionType: GutterActionType) {
-        when (actionType) {
-            GutterActionType.ADD -> {
-                val position = if (renderer.contentType == DiffView.ContentType.BEFORE)
-                    calcPositionEditor1(renderer.logicalLine)
-                else
-                    calcPositionEditor2(renderer.logicalLine)
-                dispatcher.multicaster.onAddGutterIconClicked(renderer, position)
-            }
-            GutterActionType.TOGGLE -> {
-                dispatcher.multicaster.onCommentsGutterIconClicked(renderer)
-            }
         }
     }
 
     override fun changeGutterIconsByComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
         val gutterIconRenderer = findGutterIconRenderer(visibleLine - 1, contentType)
-        gutterIconRenderer.setState(GutterState.COMMENTS_FROM_ONE_AUTHOR)
+        gutterIconRenderer.setState(
+            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+        )
+    }
+
+    override fun displayEditorOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        logicalLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        if (contentType == DiffView.ContentType.BEFORE) {
+            displayCommentsAndEditorOnLine(
+                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine),
+                logicalLine, contentType, comments
+            )
+        } else {
+            displayCommentsAndEditorOnLine(
+                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine),
+                logicalLine, contentType, comments
+            )
+        }
     }
 
     override fun toggleCommentsOnLine(
@@ -81,9 +88,9 @@ class TwoSideTextDiffView(
         }
     }
 
-    private fun calcPositionEditor1(logicalLine: Int): AddCommentRequestedPosition {
+    private fun calcPositionEditor1(logicalLine: Int): GutterPosition {
         val newLine = viewer.syncScrollSupport!!.scrollable.transfer(Side.LEFT, logicalLine + 1)
-        return AddCommentRequestedPosition(
+        return GutterPosition(
             editorType = DiffView.EditorType.TWO_SIDE_LEFT,
             changeType = findChangeType(viewer.editor1, logicalLine),
             oldLine = logicalLine + 1,
@@ -95,9 +102,9 @@ class TwoSideTextDiffView(
         )
     }
 
-    private fun calcPositionEditor2(logicalLine: Int): AddCommentRequestedPosition {
+    private fun calcPositionEditor2(logicalLine: Int): GutterPosition {
         val oldLine = viewer.syncScrollSupport!!.scrollable.transfer(Side.RIGHT, logicalLine + 1)
-        return AddCommentRequestedPosition(
+        return GutterPosition(
             editorType = DiffView.EditorType.TWO_SIDE_RIGHT,
             changeType = findChangeType(viewer.editor1, logicalLine),
             oldLine = oldLine,

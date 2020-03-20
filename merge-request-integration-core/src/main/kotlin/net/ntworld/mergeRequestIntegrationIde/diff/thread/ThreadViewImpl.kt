@@ -14,7 +14,7 @@ import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.AddCommentRequestedPosition
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ComponentAdapter
@@ -31,7 +31,7 @@ class ThreadViewImpl(
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
     private val logicalLine: Int,
-    private val position: AddCommentRequestedPosition
+    private val position: GutterPosition
 ) : ThreadView, EditorComponent.Event {
     override val dispatcher = EventDispatcher.create(ThreadView.Action::class.java)
 
@@ -121,15 +121,10 @@ class ThreadViewImpl(
         myThreadPanel.add(group.component)
     }
 
-//    override fun showReplyEditorForGroup(groupId: String) {
-//        val group = myGroups[groupId]
-//        if (null !== group) {
-//            group.showReplyEditor()
-//        }
-//    }
-
     override fun showEditor() {
         myEditor.isVisible = true
+        myEditor.focus()
+        myEditor.drawBorderTop(myGroups.isEmpty())
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 

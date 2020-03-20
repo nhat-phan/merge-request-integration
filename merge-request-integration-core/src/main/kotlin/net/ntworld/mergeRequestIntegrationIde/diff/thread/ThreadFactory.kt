@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.AddCommentRequestedPosition
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 object ThreadFactory {
     fun makeModel(comments: List<Comment>): ThreadModel {
@@ -16,7 +16,7 @@ object ThreadFactory {
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
-        position: AddCommentRequestedPosition
+        position: GutterPosition
     ): ThreadView {
         return ThreadViewImpl(editor, providerData, mergeRequest, logicalLine, position)
     }

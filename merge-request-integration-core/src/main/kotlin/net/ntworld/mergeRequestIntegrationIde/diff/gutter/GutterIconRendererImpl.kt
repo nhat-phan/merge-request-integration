@@ -33,11 +33,11 @@ class GutterIconRendererImpl(
                 icon = if (showAddIcon) Icons.Gutter.Empty else Icons.Gutter.AddComment
                 desc = if (showAddIcon) "Add new comment" else ""
             }
-            GutterState.COMMENTS_FROM_ONE_AUTHOR -> {
+            GutterState.THREAD_HAS_SINGLE_COMMENT -> {
                 icon = Icons.Gutter.Comment
                 desc = "Toggle comment thread"
             }
-            GutterState.COMMENTS_FROM_MULTI_AUTHORS -> {
+            GutterState.THREAD_HAS_MULTI_COMMENTS -> {
                 icon = Icons.Gutter.Comments
                 desc = "Toggle comment thread"
             }

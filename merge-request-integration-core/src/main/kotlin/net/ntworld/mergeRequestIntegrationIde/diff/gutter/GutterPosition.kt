@@ -1,6 +1,8 @@
-package net.ntworld.mergeRequestIntegrationIde.diff
+package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 
-data class AddCommentRequestedPosition(
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
+
+data class GutterPosition(
     val editorType: DiffView.EditorType,
     val changeType: DiffView.ChangeType,
     val oldLine: Int?,

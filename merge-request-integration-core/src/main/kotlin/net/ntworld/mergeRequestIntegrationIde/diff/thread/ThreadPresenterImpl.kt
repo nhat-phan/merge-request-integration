@@ -25,7 +25,6 @@ class ThreadPresenterImpl(
             groups[comment.parentId]!!.add(comment)
         }
         groups.forEach { (id, items) -> view.addGroupOfComments(id, items) }
-        view.showEditor()
         if (model.visible) {
             view.show()
         } else {
@@ -38,6 +37,13 @@ class ThreadPresenterImpl(
             view.show()
         } else {
             view.hide()
+        }
+    }
+
+    override fun onEditorVisibilityChanged(visibility: Boolean) {
+        if (visibility) {
+            view.show()
+            view.showEditor()
         }
     }
 

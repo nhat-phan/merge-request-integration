@@ -23,7 +23,11 @@ class ThreadModelImpl(
             dispatcher.multicaster.onVisibilityChanged(value)
         }
 
-    override var writingBody: String? = null
+    override var showEditor: Boolean = false
+        set(value) {
+            field = value
+            dispatcher.multicaster.onEditorVisibilityChanged(value)
+        }
 
     override val dispatcher = EventDispatcher.create(ThreadModel.Change::class.java)
 

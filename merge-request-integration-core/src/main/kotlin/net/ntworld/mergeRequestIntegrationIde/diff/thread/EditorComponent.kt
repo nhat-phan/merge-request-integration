@@ -12,6 +12,8 @@ interface EditorComponent : Component, Disposable {
 
     fun focus()
 
+    fun drawBorderTop(display: Boolean)
+
     interface Event: EventListener {
         fun onEditorResized()
     }

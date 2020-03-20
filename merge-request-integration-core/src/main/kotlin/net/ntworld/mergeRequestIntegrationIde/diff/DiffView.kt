@@ -6,7 +6,9 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.View
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import java.util.*
 
 interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Disposable {
@@ -15,6 +17,14 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Dispos
     fun createGutterIcons()
 
     fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
+
+    fun displayEditorOnLine(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        logicalLine: Int,
+        contentType: ContentType,
+        comments: List<Comment>
+    )
 
     fun toggleCommentsOnLine(
         providerData: ProviderData,
@@ -54,8 +64,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Dispos
 
         fun onRediffAborted()
 
-        fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: AddCommentRequestedPosition)
+        fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType)
 
-        fun onCommentsGutterIconClicked(renderer: GutterIconRenderer)
     }
 }
