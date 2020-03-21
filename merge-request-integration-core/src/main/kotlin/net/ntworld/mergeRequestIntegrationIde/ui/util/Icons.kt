@@ -23,6 +23,8 @@ object Icons {
     val Trash = IconLoader.getIcon("/icons/trash.svg", Icons::class.java)
     val Resolve = IconLoader.getIcon("/icons/check-circle-gray.svg", Icons::class.java)
     val Resolved = IconLoader.getIcon("/icons/check-circle.svg", Icons::class.java)
+    val CaretDown = IconLoader.getIcon("/icons/chevron-down.svg", Icons::class.java)
+    val CaretRight = IconLoader.getIcon("/icons/chevron-right.svg", Icons::class.java)
 
     object Gutter {
         val Empty = IconLoader.getIcon("/icons/1px.svg", Icons::class.java)

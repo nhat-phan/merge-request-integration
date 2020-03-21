@@ -42,6 +42,32 @@ class GroupComponentImpl(
     }
 
     override val dispatcher = EventDispatcher.create(GroupComponent.Event::class.java)
+    override var collapse: Boolean = false
+        set(value) {
+            field = value
+            if (value) {
+                myPanel.components.forEachIndexed { index, component ->
+                    if (index != 0) {
+                        component.isVisible = false
+                    }
+                }
+                val editor = myEditor
+                if (null !== editor) {
+                    editor.isVisible = false
+                }
+            } else {
+                myPanel.components.forEachIndexed { index, component ->
+                    if (index != 0) {
+                        component.isVisible = true
+                    }
+                }
+                val editor = myEditor
+                if (null !== editor) {
+                    editor.isVisible = true
+                }
+            }
+            dispatcher.multicaster.onResized()
+        }
 
     override val component: JComponent = myBoxLayoutPanel
 
@@ -53,10 +79,10 @@ class GroupComponentImpl(
 
             myBoxLayoutPanel.addToBottom(createdEditor.component)
             createdEditor.focus()
+            myEditor = createdEditor
         } else {
             editor.focus()
         }
-        myEditor = editor
     }
 
     override fun destroyReplyEditor() {

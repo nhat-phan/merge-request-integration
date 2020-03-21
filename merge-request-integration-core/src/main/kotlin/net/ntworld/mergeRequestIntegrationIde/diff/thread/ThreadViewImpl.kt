@@ -15,6 +15,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ComponentAdapter
@@ -60,6 +61,10 @@ class ThreadViewImpl(
         editorComponent
     }
     private val myGroupComponentEventListener = object : GroupComponent.Event {
+        override fun onResized() {
+            myEditorWidthWatcher.updateWidthForAllInlays()
+        }
+
         override fun onEditorCreated(groupId: String, editor: EditorComponent) {
             editor.dispatcher.addListener(this@ThreadViewImpl)
             Disposer.register(this@ThreadViewImpl, editor)
@@ -77,6 +82,7 @@ class ThreadViewImpl(
         myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)
 
         myWrapper.isVisible = false
+        myWrapper.cursor = Cursor.getDefaultCursor()
     }
 
     override val isEditorDisplayed: Boolean

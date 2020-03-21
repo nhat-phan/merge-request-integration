@@ -2,10 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.util.TipUIUtil
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.Label
@@ -18,6 +15,9 @@ import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.MergeRequestDe
 import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import java.awt.Color
+import java.awt.Cursor
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -70,8 +70,25 @@ class CommentComponentImpl(
             groupComponent.showReplyEditor()
         }
     }
+    private val myNameMouseListener = object : MouseListener {
+        override fun mouseReleased(e: MouseEvent?) {}
+        override fun mouseEntered(e: MouseEvent?) {}
+        override fun mousePressed(e: MouseEvent?) {}
+        override fun mouseExited(e: MouseEvent?) {}
+
+        override fun mouseClicked(e: MouseEvent?) {
+            groupComponent.collapse = !groupComponent.collapse
+            myNameLabel.icon = if (groupComponent.collapse) Icons.CaretRight else Icons.CaretDown
+        }
+    }
 
     init {
+        if (indent == 0 && groupComponent.comments.size > 1) {
+            myNameLabel.icon = if (groupComponent.collapse) Icons.CaretRight else Icons.CaretDown
+            myNameLabel.addMouseListener(myNameMouseListener)
+            myNameLabel.cursor = Cursor.getDefaultCursor()
+        }
+
         myUsernameLabel.foreground = Color(153, 153, 153)
         myWebView.text = buildHtml(providerData, comment)
         myPanel.toolbar = createToolbar()
@@ -85,18 +102,18 @@ class CommentComponentImpl(
     private fun createToolbar(): JComponent {
         val panel = JPanel(MigLayout("ins 0, fill", "5[left]5[left]5[left]0[left, fill]push[right]", "center"))
 
-        val leftActionGroup = DefaultActionGroup()
-        leftActionGroup.add(myTimeAction)
-        leftActionGroup.addSeparator()
-        leftActionGroup.add(myOpenInBrowserAction)
-        val leftToolbar = ActionManager.getInstance().createActionToolbar(
-            "${CommentComponentImpl::class.java.canonicalName}/toolbar-left",
-            leftActionGroup,
+        val leftActionGroupTwo = DefaultActionGroup()
+        leftActionGroupTwo.add(myTimeAction)
+        val leftToolbarTwo = ActionManager.getInstance().createActionToolbar(
+            "${CommentComponentImpl::class.java.canonicalName}/toolbar-left-two",
+            leftActionGroupTwo,
             true
         )
 
         val rightActionGroup = DefaultActionGroup()
         rightActionGroup.add(myReplyAction)
+        rightActionGroup.addSeparator()
+        rightActionGroup.add(myOpenInBrowserAction)
         val rightToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-right",
             rightActionGroup,
@@ -106,7 +123,7 @@ class CommentComponentImpl(
         panel.add(myNameLabel)
         panel.add(myUsernameLabel)
         panel.add(myNameSeparatorLabel)
-        panel.add(leftToolbar.component)
+        panel.add(leftToolbarTwo.component)
         panel.add(rightToolbar.component)
         return panel
     }
