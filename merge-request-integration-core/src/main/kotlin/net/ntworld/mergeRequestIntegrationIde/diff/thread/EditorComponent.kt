@@ -1,12 +1,10 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
 import com.intellij.openapi.Disposable
-import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequestIntegrationIde.Component
-import java.util.*
 
 interface EditorComponent : Component, Disposable {
-    val dispatcher: EventDispatcher<Event>
+    var text: String
 
     var isVisible: Boolean
 
@@ -14,8 +12,12 @@ interface EditorComponent : Component, Disposable {
 
     fun drawBorderTop(display: Boolean)
 
-    interface Event: EventListener {
+    fun addListener(listener: EventListener)
+
+    interface EventListener: java.util.EventListener {
         fun onEditorResized()
+
+        fun onCancelClicked(editor: EditorComponent)
     }
 
     enum class Type {

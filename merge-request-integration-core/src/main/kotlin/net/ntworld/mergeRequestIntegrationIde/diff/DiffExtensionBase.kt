@@ -40,6 +40,7 @@ open class DiffExtensionBase(
                 val view = DiffFactory.makeView(applicationService, viewer, change)
                 if (null !== view) {
                     DiffFactory.makeDiffPresenter(
+                        applicationService = applicationService,
                         projectService = applicationService.getProjectService(project),
                         model = model,
                         view = view

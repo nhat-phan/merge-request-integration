@@ -4,14 +4,14 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.Model
 import java.util.*
 
-interface ThreadModel : Model<ThreadModel.Change> {
+interface ThreadModel : Model<ThreadModel.DataListener> {
     var comments: List<Comment>
 
     var visible: Boolean
 
     var showEditor: Boolean
 
-    interface Change : EventListener {
+    interface DataListener : EventListener {
         fun onCommentsChanged(comments: List<Comment>)
 
         fun onVisibilityChanged(visibility: Boolean)

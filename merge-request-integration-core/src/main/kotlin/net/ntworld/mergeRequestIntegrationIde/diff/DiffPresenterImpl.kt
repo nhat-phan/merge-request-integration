@@ -6,25 +6,31 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.CommentPositionChangeType
 import net.ntworld.mergeRequest.CommentPositionSource
+import net.ntworld.mergeRequest.command.DeleteCommentCommand
+import net.ntworld.mergeRequest.command.ResolveCommentCommand
+import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
+import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 import java.util.*
 
 internal class DiffPresenterImpl(
+    private val applicationService: ApplicationService,
     private val projectService: ProjectService,
     override val model: DiffModel,
     override val view: DiffView<*>
-) : DiffPresenter, DiffView.Action {
+) : AbstractPresenter<EventListener>(), DiffPresenter, DiffView.ActionListener {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
 
     init {
-        view.dispatcher.addListener(this)
+        view.addActionListener(this)
     }
 
     override fun onInit() {}
@@ -63,6 +69,37 @@ internal class DiffPresenterImpl(
                 )
             }
         }
+    }
+
+    override fun onDeleteCommentRequested(comment: Comment) = assertDoingCodeReview {
+        applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
+            providerId = model.providerData!!.id,
+            mergeRequestId = model.mergeRequest!!.id,
+            comment = comment
+        )
+        fetchAndUpdateComments()
+    }
+
+    override fun onResolveCommentRequested(comment: Comment) = assertDoingCodeReview {
+        applicationService.infrastructure.commandBus() process ResolveCommentCommand.make(
+            providerId = model.providerData!!.id,
+            mergeRequestId = model.mergeRequest!!.id,
+            comment = comment
+        )
+        fetchAndUpdateComments()
+    }
+
+    override fun onUnresolveCommentRequested(comment: Comment) = assertDoingCodeReview {
+        applicationService.infrastructure.commandBus() process UnresolveCommentCommand.make(
+            providerId = model.providerData!!.id,
+            mergeRequestId = model.mergeRequest!!.id,
+            comment = comment
+        )
+        fetchAndUpdateComments()
+    }
+
+    private fun fetchAndUpdateComments() {
+        // TODO: send a message out to request update comments/data of merge request
     }
 
     private fun collectCommentsOfGutterIconRenderer(renderer: GutterIconRenderer) : List<Comment> {

@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.util.TipUIUtil
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.Label
@@ -11,7 +12,6 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.MergeRequestDescriptionTab
 import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import java.awt.Color
@@ -21,7 +21,6 @@ import java.awt.event.MouseListener
 import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.JPanel
-import javax.swing.border.Border
 
 class CommentComponentImpl(
     private val groupComponent: GroupComponent,
@@ -37,7 +36,7 @@ class CommentComponentImpl(
     private var myUsePrettyTime: Boolean = true
 
     private val myWebView = TipUIUtil.createBrowser() as TipUIUtil.Browser
-    private val myHtmlTemplate = MergeRequestDescriptionTab::class.java.getResource(
+    private val myHtmlTemplate = CommentComponentImpl::class.java.getResource(
         "/templates/mr.comment.html"
     ).readText()
     private val myTimeAction = object : AnAction(null, null, null) {
@@ -68,6 +67,39 @@ class CommentComponentImpl(
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             groupComponent.showReplyEditor()
+        }
+    }
+    private val myDeleteAction = object : AnAction(
+        "Delete comment", "Delete comment", Icons.Trash
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val result = Messages.showYesNoDialog(
+                "Do you want to delete the comment?", "Are you sure", Messages.getQuestionIcon()
+            )
+            if (result == Messages.YES) {
+                groupComponent.requestDeleteComment(comment)
+            }
+        }
+    }
+    private val myResolveAction = object : AnAction() {
+        override fun actionPerformed(e: AnActionEvent) {
+            groupComponent.requestToggleResolvedStateOfComment(comment)
+        }
+
+        override fun update(e: AnActionEvent) {
+            super.update(e)
+            if (comment.resolved) {
+                e.presentation.icon = Icons.Resolved
+                e.presentation.description = "Unresolve thread"
+                val resolvedBy = comment.resolvedBy
+                if (null !== resolvedBy) {
+                    e.presentation.text = "Resolved by ${resolvedBy.name}"
+                }
+            } else {
+                e.presentation.icon = Icons.Resolve
+                e.presentation.text = "Resolve thead"
+                e.presentation.description = "Mark thread as resolved"
+            }
         }
     }
     private val myNameMouseListener = object : MouseListener {
@@ -111,9 +143,16 @@ class CommentComponentImpl(
         )
 
         val rightActionGroup = DefaultActionGroup()
-        rightActionGroup.add(myReplyAction)
-        rightActionGroup.addSeparator()
+        if (providerData.currentUser.id == comment.author.id) {
+            rightActionGroup.add(myDeleteAction)
+            rightActionGroup.addSeparator()
+        }
         rightActionGroup.add(myOpenInBrowserAction)
+        rightActionGroup.addSeparator()
+        if (comment.resolvable) {
+            rightActionGroup.add(myResolveAction)
+        }
+        rightActionGroup.add(myReplyAction)
         val rightToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-right",
             rightActionGroup,

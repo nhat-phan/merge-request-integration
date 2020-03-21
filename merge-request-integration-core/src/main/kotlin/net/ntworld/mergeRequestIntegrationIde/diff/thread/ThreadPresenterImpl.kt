@@ -2,18 +2,27 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 
 class ThreadPresenterImpl(
     override val model: ThreadModel,
     override val view: ThreadView
-) : ThreadPresenter, ThreadView.Action, ThreadModel.Change {
-    override val dispatcher = EventDispatcher.create(ThreadPresenter.Event::class.java)
+) : AbstractPresenter<ThreadPresenter.EventListener>(), ThreadPresenter, ThreadModel.DataListener {
+    override val dispatcher = EventDispatcher.create(ThreadPresenter.EventListener::class.java)
+    private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
+    private val myThreadViewActionListener = object : ThreadView.ActionListener,
+        CommentEvent by myCommentEventPropagator {
+    }
 
     init {
-        model.dispatcher.addListener(this)
-        view.dispatcher.addListener(this)
+        model.addDataListener(this)
+        view.addActionListener(myThreadViewActionListener)
         view.initialize()
         onCommentsChanged(model.comments)
+    }
+
+    override fun dispose() {
+        view.dispose()
     }
 
     override fun onCommentsChanged(comments: List<Comment>) {
@@ -46,5 +55,4 @@ class ThreadPresenterImpl(
             view.showEditor()
         }
     }
-
 }

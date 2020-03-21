@@ -18,7 +18,6 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
-import java.lang.Exception
 import java.util.*
 import javax.swing.*
 

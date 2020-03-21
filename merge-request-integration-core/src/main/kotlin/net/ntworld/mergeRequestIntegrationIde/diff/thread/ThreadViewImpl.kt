@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.Panel
@@ -14,6 +15,7 @@ import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import java.awt.Cursor
 import java.awt.Dimension
@@ -33,8 +35,8 @@ class ThreadViewImpl(
     private val mergeRequest: MergeRequest,
     private val logicalLine: Int,
     private val position: GutterPosition
-) : ThreadView, EditorComponent.Event {
-    override val dispatcher = EventDispatcher.create(ThreadView.Action::class.java)
+) : AbstractView<ThreadView.ActionListener>(), ThreadView {
+    override val dispatcher = EventDispatcher.create(ThreadView.ActionListener::class.java)
 
     private val myThreadPanel = Panel()
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
@@ -53,20 +55,47 @@ class ThreadViewImpl(
     private val myEditor by lazy {
         val editorComponent = ComponentFactory.makeEditor(editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0)
         editorComponent.isVisible = false
-        editorComponent.dispatcher.addListener(this)
+        editorComponent.addListener(myEditorComponentEventListener)
         Disposer.register(this@ThreadViewImpl, editorComponent)
 
         myCreatedEditors[""] = editorComponent
         myBoxLayoutPanel.addToBottom(editorComponent.component)
         editorComponent
     }
-    private val myGroupComponentEventListener = object : GroupComponent.Event {
+    private val myEditorComponentEventListener = object : EditorComponent.EventListener {
+        override fun onEditorResized() {
+            myEditorWidthWatcher.updateWidthForAllInlays()
+        }
+
+        override fun onCancelClicked(editor: EditorComponent) {
+            val mainEditor = myCreatedEditors[""]
+            if (null !== mainEditor && editor === mainEditor) {
+                val shouldHide = if (mainEditor.text.isNotBlank()) {
+                    val result = Messages.showYesNoDialog(
+                        "Do you want to delete the whole content?", "Are you sure", Messages.getQuestionIcon()
+                    )
+                    result == Messages.YES
+                } else true
+
+                if (shouldHide) {
+                    mainEditor.text = ""
+                    mainEditor.isVisible = false
+                    myEditorWidthWatcher.updateWidthForAllInlays()
+                } else {
+                    mainEditor.focus()
+                }
+            }
+        }
+    }
+    private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
+    private val myGroupComponentEventListener = object : GroupComponent.EventListener,
+        CommentEvent by myCommentEventPropagator {
         override fun onResized() {
             myEditorWidthWatcher.updateWidthForAllInlays()
         }
 
         override fun onEditorCreated(groupId: String, editor: EditorComponent) {
-            editor.dispatcher.addListener(this@ThreadViewImpl)
+            editor.addListener(myEditorComponentEventListener)
             Disposer.register(this@ThreadViewImpl, editor)
 
             myCreatedEditors[groupId] = editor
@@ -120,7 +149,7 @@ class ThreadViewImpl(
         val group = ComponentFactory.makeGroup(
             providerData, mergeRequest, editor.project!!, myGroups.isEmpty(), groupId, comments
         )
-        group.dispatcher.addListener(myGroupComponentEventListener)
+        group.addListener(myGroupComponentEventListener)
         Disposer.register(this, group)
 
         myGroups[groupId] = group
@@ -141,10 +170,6 @@ class ThreadViewImpl(
 
     override fun hide() {
         myWrapper.isVisible = false
-        myEditorWidthWatcher.updateWidthForAllInlays()
-    }
-
-    override fun onEditorResized() {
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 

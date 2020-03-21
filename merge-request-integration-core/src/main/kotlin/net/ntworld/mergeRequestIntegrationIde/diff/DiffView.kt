@@ -8,10 +8,9 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import java.util.*
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.CommentEvent
 
-interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Disposable {
+interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>, Disposable {
     val viewer: V
 
     fun createGutterIcons()
@@ -53,7 +52,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Dispos
         MODIFIED
     }
 
-    interface Action : EventListener {
+    interface ActionListener : CommentEvent {
         fun onInit()
 
         fun onDispose()
@@ -65,6 +64,5 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.Action>, Dispos
         fun onRediffAborted()
 
         fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType)
-
     }
 }

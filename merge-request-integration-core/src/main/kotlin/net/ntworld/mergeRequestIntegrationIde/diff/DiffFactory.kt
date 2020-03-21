@@ -14,8 +14,10 @@ import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 object DiffFactory {
-    fun makeDiffPresenter(projectService: ProjectService, model: DiffModel, view: DiffView<*>): DiffPresenter {
-        return DiffPresenterImpl(projectService, model, view)
+    fun makeDiffPresenter(
+        applicationService: ApplicationService, projectService: ProjectService, model: DiffModel, view: DiffView<*>
+    ): DiffPresenter {
+        return DiffPresenterImpl(applicationService, projectService, model, view)
     }
 
     fun makeView(

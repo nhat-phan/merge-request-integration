@@ -1,12 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequestIntegrationIde.Presenter
-import java.util.*
 
-interface ThreadPresenter : Presenter<ThreadPresenter.Event> {
+interface ThreadPresenter : Presenter<ThreadPresenter.EventListener>, Disposable {
     val model: ThreadModel
 
     val view: ThreadView
 
-    interface Event: EventListener
+    interface EventListener: java.util.EventListener, CommentEvent
 }

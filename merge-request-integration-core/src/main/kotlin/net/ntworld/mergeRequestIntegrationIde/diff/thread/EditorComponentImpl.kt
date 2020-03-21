@@ -10,7 +10,6 @@ import com.intellij.util.EventDispatcher
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
-import java.awt.Dimension
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.FocusEvent
@@ -24,6 +23,7 @@ class EditorComponentImpl(
     private val type: EditorComponent.Type,
     val indent: Int
 ) : EditorComponent {
+    private val dispatcher = EventDispatcher.create(EditorComponent.EventListener::class.java)
     private val myPanel = CustomSimpleToolWindowPanel(vertical = true, borderless = false)
     private val myDocument = DocumentImpl("")
     private val myEditorSettingsProvider = EditorSettingsProvider { editor ->
@@ -50,6 +50,7 @@ class EditorComponentImpl(
         "Cancel", "Cancel and delete this comment", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
+            dispatcher.multicaster.onCancelClicked(this@EditorComponentImpl)
         }
 
         override fun displayTextInToolbar() = true
@@ -113,9 +114,13 @@ class EditorComponentImpl(
         myEditorTextField.addFocusListener(myEditorFocusListener)
     }
 
-    override val dispatcher = EventDispatcher.create(EditorComponent.Event::class.java)
-
     override val component: JComponent = myPanel
+
+    override var text: String
+        get() = myEditorTextField.text
+        set(value) {
+            myEditorTextField.text = value
+        }
 
     override var isVisible: Boolean
         get() = myPanel.isVisible
@@ -132,6 +137,8 @@ class EditorComponentImpl(
             if (display) 1 else 0, indent * 40 + 1, 1, 1, JBColor.border()
         )
     }
+
+    override fun addListener(listener: EditorComponent.EventListener) = dispatcher.addListener(listener)
 
     override fun dispose() {
         dispatcher.listeners.clear()

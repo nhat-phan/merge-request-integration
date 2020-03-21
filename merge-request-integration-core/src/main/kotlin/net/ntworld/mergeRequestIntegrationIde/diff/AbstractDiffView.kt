@@ -11,17 +11,18 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 abstract class AbstractDiffView<V : DiffViewerBase>(
     private val applicationService: ApplicationService,
     private val viewerBase: DiffViewerBase
-) : DiffView<V> {
+) : AbstractView<DiffView.ActionListener>(), DiffView<V> {
+    final override val dispatcher = EventDispatcher.create(DiffView.ActionListener::class.java)
     private val diffViewerListener = object : DiffViewerListener() {
         override fun onInit() = dispatcher.multicaster.onInit()
         override fun onDispose() = dispatcher.multicaster.onDispose()
@@ -34,8 +35,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     private val myThreadModelOfBefore = mutableMapOf<Int, ThreadModel>()
     private val myThreadModelOfAfter = mutableMapOf<Int, ThreadModel>()
-
-    override val dispatcher = EventDispatcher.create(DiffView.Action::class.java)
+    private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
+    private val myThreadPresenterEventListener = object : ThreadPresenter.EventListener,
+        CommentEvent by myCommentEventPropagator {
+    }
 
     init {
         viewerBase.addListener(diffViewerListener)
@@ -109,14 +112,15 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment> = listOf()
-    ) : ThreadModel {
+    ): ThreadModel {
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
             val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, position)
-            Disposer.register(this, view)
-
             val presenter = ThreadFactory.makePresenter(model, view)
+
+            presenter.addListener(myThreadPresenterEventListener)
+            Disposer.register(this, presenter)
 
             map[logicalLine] = model
         }

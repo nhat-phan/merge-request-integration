@@ -1,8 +1,9 @@
 package net.ntworld.mergeRequestIntegrationIde
 
-import com.intellij.util.EventDispatcher
 import java.util.*
 
-interface Presenter<Event : EventListener> {
-    val dispatcher: EventDispatcher<Event>
+interface Presenter<T : EventListener> {
+    fun addListener(listener: T)
+
+    fun removeListener(listener: T)
 }

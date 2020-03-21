@@ -2,11 +2,12 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 
 class ThreadModelImpl(
     comments: List<Comment>,
-    visibility: Boolean
-) : ThreadModel {
+     visibility: Boolean
+) : AbstractModel<ThreadModel.DataListener>(), ThreadModel {
 
     override var comments: List<Comment> = comments
         set(value) {
@@ -29,6 +30,6 @@ class ThreadModelImpl(
             dispatcher.multicaster.onEditorVisibilityChanged(value)
         }
 
-    override val dispatcher = EventDispatcher.create(ThreadModel.Change::class.java)
+    override val dispatcher = EventDispatcher.create(ThreadModel.DataListener::class.java)
 
 }
