@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
+import com.intellij.util.messages.MessageBus
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
@@ -12,6 +13,8 @@ import com.intellij.openapi.project.Project as IdeaProject
 
 interface ProjectService {
     val project: IdeaProject
+
+    val messageBus: MessageBus
 
     val dispatcher: EventDispatcher<ProjectEventListener>
 

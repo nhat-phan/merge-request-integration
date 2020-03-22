@@ -137,7 +137,7 @@ class MergeRequestDetails(
             println(exception)
         }
 
-        override fun dataReceived(mergeRequest: MergeRequest, comments: List<Comment>) {
+        override fun dataReceived(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
             myToolbars.forEach {
                 it.setComments(mergeRequest, comments)
             }

@@ -3,10 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 import com.intellij.notification.NotificationType
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
-import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.CommentPosition
-import net.ntworld.mergeRequest.CommentPositionChangeType
-import net.ntworld.mergeRequest.CommentPositionSource
+import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
@@ -19,6 +16,8 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.CommentApiObserver
+import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
@@ -32,9 +31,22 @@ internal class DiffPresenterImpl(
     override val view: DiffView<*>
 ) : AbstractPresenter<EventListener>(), DiffPresenter, DiffView.ActionListener {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
+    private val myCommentApiObserver = object : CommentApiObserver {
+        override fun fetchCommentsRequested(providerData: ProviderData, mergeRequest: MergeRequest) {
+        }
+
+        override fun onCommentsUpdated(
+            providerData: ProviderData,
+            mergeRequest: MergeRequest,
+            comments: List<Comment>
+        ) {
+            println("new comments $comments")
+        }
+    }
 
     init {
         view.addActionListener(this)
+        projectService.messageBus.connect().subscribe(CommentApiObserver.TOPIC, myCommentApiObserver)
     }
 
     override fun onInit() {}
@@ -62,6 +74,7 @@ internal class DiffPresenterImpl(
                     renderer.contentType,
                     collectCommentsOfGutterIconRenderer(renderer)
                 )
+
             }
             GutterActionType.TOGGLE -> assertDoingCodeReview {
                 view.toggleCommentsOnLine(
@@ -92,6 +105,21 @@ internal class DiffPresenterImpl(
     }
 
     override fun onCreateCommentRequested(content: String, position: GutterPosition) = assertDoingCodeReview {
+        if (true) {
+            val commentPosition = convertGutterPositionToCommentPosition(position)
+            val providerData = model.providerData!!
+            val mergeRequest = model.mergeRequest!!
+            val item = CommentStoreItem.createNewItem(
+                providerData, mergeRequest,
+                projectService.codeReviewUtil.convertPositionToCommentNodeData(commentPosition),
+                commentPosition
+            )
+            projectService.commentStore.add(item)
+            projectService.dispatcher.multicaster.newCommentRequested(
+                providerData, mergeRequest, commentPosition, item
+            )
+        }
+
         val commentPosition = convertGutterPositionToCommentPosition(position)
         applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData!!.id,
@@ -136,7 +164,9 @@ internal class DiffPresenterImpl(
     }
 
     private fun fetchAndUpdateComments() {
-        // TODO: send a message out to request update comments/data of merge request
+        projectService.messageBus.syncPublisher(CommentApiObserver.TOPIC).fetchCommentsRequested(
+            model.providerData!!, model.mergeRequest!!
+        )
     }
 
     private fun collectCommentsOfGutterIconRenderer(renderer: GutterIconRenderer) : List<Comment> {
@@ -150,21 +180,6 @@ internal class DiffPresenterImpl(
 
         return result.values.map { it.comment }
     }
-
-//    override fun onAddGutterIconClicked(renderer: GutterIconRenderer, position: GutterPosition) {
-//        val commentPosition = convertGutterPositionToCommentPosition(position)
-//        val providerData = model.providerData!!
-//        val mergeRequest = model.mergeRequest!!
-//        val item = CommentStoreItem.createNewItem(
-//            providerData, mergeRequest,
-//            projectService.codeReviewUtil.convertPositionToCommentNodeData(commentPosition),
-//            commentPosition
-//        )
-//        projectService.commentStore.add(item)
-//        projectService.dispatcher.multicaster.newCommentRequested(
-//            providerData, mergeRequest, commentPosition, item
-//        )
-//    }
 
     private fun displayGutterIcons() {
         val before = groupCommentsByLine(model.commentsOnBeforeSide)

@@ -35,7 +35,7 @@ class GetCommentsTask(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id
             )
-            listener.dataReceived(mergeRequest, result.comments)
+            listener.dataReceived(providerData, mergeRequest, result.comments)
             listener.taskEnded()
         } catch (exception: Exception) {
             listener.onError(exception)
@@ -47,7 +47,7 @@ class GetCommentsTask(
 
         fun taskStarted() {}
 
-        fun dataReceived(mergeRequest: MergeRequest, comments: List<Comment>)
+        fun dataReceived(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>)
 
         fun taskEnded() {}
     }

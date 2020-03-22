@@ -5,6 +5,7 @@ import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
+import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.util.UUIDGenerator
 import net.ntworld.mergeRequest.*
 import com.intellij.openapi.project.Project as IdeaProject
@@ -16,6 +17,8 @@ import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.CommentApiObserver
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.CommentApiProvider
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
@@ -23,7 +26,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnections
 import org.jdom.Element
 
 abstract class AbstractProjectService(
-    override val project: IdeaProject
+    final override val project: IdeaProject
 ) : ProjectService, ServiceBase() {
     private var myIsInitialized = false
     private var myCodeReviewManager : CodeReviewManager? = null
@@ -31,6 +34,8 @@ abstract class AbstractProjectService(
     private var myCommits: Collection<Commit>? = null
     private var myChanges: Collection<Change>? = null
     private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
+
+    final override val messageBus: MessageBus = project.messageBus
 
     final override val dispatcher = EventDispatcher.create(ProjectEventListener::class.java)
 
@@ -81,6 +86,8 @@ abstract class AbstractProjectService(
 
     init {
         dispatcher.addListener(myProjectEventListener)
+
+        messageBus.connect().subscribe(CommentApiObserver.TOPIC, CommentApiProvider(this))
     }
 
     override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {

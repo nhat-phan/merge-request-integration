@@ -1,5 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.mergeRequest.ProjectVisibility
@@ -39,8 +41,11 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     override fun supported(): List<ProviderInfo> = supportedProviders
 
     override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure())
+
     override val settings: ApplicationSettings
         get() = myApplicationSettings
+
+    final override val messageBus: MessageBus = ApplicationManager.getApplication().messageBus
 
     override fun getState(): Element? {
         val element = super.getState()

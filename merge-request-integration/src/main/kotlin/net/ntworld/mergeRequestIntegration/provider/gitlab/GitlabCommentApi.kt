@@ -121,8 +121,8 @@ class GitlabCommentApi(
         model.baseSha = position.baseHash
         model.headSha = position.headHash
         model.startSha = position.startHash
-        model.oldPath = position.oldPath
-        model.newPath = position.newPath
+        model.oldPath = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldPath
+        model.newPath = if (null === position.newLine || position.newLine!! < 0) null else position.newPath
         model.oldLine = if (null === position.oldLine || position.oldLine!! < 0) null else position.oldLine
         model.newLine = if (null === position.newLine || position.newLine!! < 0) null else position.newLine
         model.positionType = Position.PositionType.TEXT
