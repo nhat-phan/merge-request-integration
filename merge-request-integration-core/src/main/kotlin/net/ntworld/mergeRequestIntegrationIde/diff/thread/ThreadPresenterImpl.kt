@@ -3,6 +3,8 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 class ThreadPresenterImpl(
     override val model: ThreadModel,
@@ -12,6 +14,18 @@ class ThreadPresenterImpl(
     private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
     private val myThreadViewActionListener = object : ThreadView.ActionListener,
         CommentEvent by myCommentEventPropagator {
+        override fun onMainEditorClosed() {
+            dispatcher.multicaster.onMainEditorClosed(this@ThreadPresenterImpl)
+        }
+
+        override fun onCreateCommentRequested(content: String, repliedComment: Comment?, position: GutterPosition?) {
+            if (null !== repliedComment) {
+                dispatcher.multicaster.onReplyCommentRequested(content, repliedComment)
+            }
+            if (null !== position) {
+                dispatcher.multicaster.onCreateCommentRequested(content, position)
+            }
+        }
     }
 
     init {
@@ -44,6 +58,9 @@ class ThreadPresenterImpl(
     override fun onVisibilityChanged(visibility: Boolean) {
         if (model.visible) {
             view.show()
+            if (model.showEditor) {
+                view.showEditor()
+            }
         } else {
             view.hide()
         }

@@ -38,6 +38,27 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
     private val myThreadPresenterEventListener = object : ThreadPresenter.EventListener,
         CommentEvent by myCommentEventPropagator {
+        override fun onMainEditorClosed(threadPresenter: ThreadPresenter) {
+            val renderer = findGutterIconRenderer(threadPresenter.view.logicalLine, threadPresenter.view.contentType)
+            if (threadPresenter.model.comments.isEmpty()) {
+                renderer.setState(GutterState.NO_COMMENT)
+            } else {
+                renderer.setState(
+                    if (threadPresenter.model.comments.size == 1)
+                        GutterState.THREAD_HAS_SINGLE_COMMENT
+                    else
+                        GutterState.THREAD_HAS_MULTI_COMMENTS
+                )
+            }
+        }
+
+        override fun onReplyCommentRequested(content: String, repliedComment: Comment) {
+            dispatcher.multicaster.onReplyCommentRequested(content, repliedComment)
+        }
+
+        override fun onCreateCommentRequested(content: String, position: GutterPosition) {
+            dispatcher.multicaster.onCreateCommentRequested(content, position)
+        }
     }
 
     init {
@@ -116,7 +137,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
-            val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, position)
+            val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, contentType, position)
             val presenter = ThreadFactory.makePresenter(model, view)
 
             presenter.addListener(myThreadPresenterEventListener)

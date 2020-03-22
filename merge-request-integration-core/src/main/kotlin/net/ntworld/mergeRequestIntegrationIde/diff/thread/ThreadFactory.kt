@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.ex.EditorEx
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 object ThreadFactory {
@@ -16,9 +17,10 @@ object ThreadFactory {
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
+        contentType: DiffView.ContentType,
         position: GutterPosition
     ): ThreadView {
-        return ThreadViewImpl(editor, providerData, mergeRequest, logicalLine, position)
+        return ThreadViewImpl(editor, providerData, mergeRequest, logicalLine, contentType, position)
     }
 
     fun makePresenter(model: ThreadModel, view: ThreadView): ThreadPresenter {

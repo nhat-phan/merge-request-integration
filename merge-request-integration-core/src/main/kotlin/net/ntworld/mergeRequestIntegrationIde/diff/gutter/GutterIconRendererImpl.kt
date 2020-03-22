@@ -30,7 +30,7 @@ class GutterIconRendererImpl(
     override fun setState(state: GutterState) {
         when (state) {
             GutterState.NO_COMMENT -> {
-                icon = if (showAddIcon) Icons.Gutter.Empty else Icons.Gutter.AddComment
+                icon = if (showAddIcon) Icons.Gutter.AddComment else Icons.Gutter.Empty
                 desc = if (showAddIcon) "Add new comment" else ""
             }
             GutterState.THREAD_HAS_SINGLE_COMMENT -> {

@@ -18,6 +18,8 @@ interface EditorComponent : Component, Disposable {
         fun onEditorResized()
 
         fun onCancelClicked(editor: EditorComponent)
+
+        fun onSubmitClicked(editor: EditorComponent)
     }
 
     enum class Type {

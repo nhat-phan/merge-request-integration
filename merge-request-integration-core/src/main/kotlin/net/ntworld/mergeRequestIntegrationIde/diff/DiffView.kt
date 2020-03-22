@@ -8,6 +8,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.CommentEvent
 
 interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>, Disposable {
@@ -64,5 +65,9 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         fun onRediffAborted()
 
         fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType)
+
+        fun onReplyCommentRequested(content: String, repliedComment: Comment)
+
+        fun onCreateCommentRequested(content: String, position: GutterPosition)
     }
 }

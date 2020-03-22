@@ -45,6 +45,10 @@ class GroupComponentImpl(
                 editor.focus()
             }
         }
+
+        override fun onSubmitClicked(editor: EditorComponent) {
+            dispatcher.multicaster.onReplyCommentRequested(comments.first(), editor.text)
+        }
     }
 
     init {

@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
+import com.intellij.notification.NotificationType
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Comment
@@ -9,8 +10,11 @@ import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
+import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
@@ -69,6 +73,39 @@ internal class DiffPresenterImpl(
                 )
             }
         }
+    }
+
+    override fun onReplyCommentRequested(content: String, repliedComment: Comment) = assertDoingCodeReview {
+        applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
+            providerId = model.providerData!!.id,
+            mergeRequestId = model.mergeRequest!!.id,
+            repliedComment = repliedComment,
+            body = content
+        ) ifError {
+            projectService.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchAndUpdateComments()
+    }
+
+    override fun onCreateCommentRequested(content: String, position: GutterPosition) = assertDoingCodeReview {
+        val commentPosition = convertGutterPositionToCommentPosition(position)
+        applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+            providerId = model.providerData!!.id,
+            mergeRequestId = model.mergeRequest!!.id,
+            position = commentPosition,
+            body = content
+        ) ifError {
+            projectService.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchAndUpdateComments()
     }
 
     override fun onDeleteCommentRequested(comment: Comment) = assertDoingCodeReview {

@@ -16,6 +16,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import java.awt.Cursor
 import java.awt.Dimension
@@ -33,8 +34,9 @@ class ThreadViewImpl(
     private val editor: EditorEx,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
-    private val logicalLine: Int,
-    private val position: GutterPosition
+    override val logicalLine: Int,
+    override val contentType: DiffView.ContentType,
+    override val position: GutterPosition
 ) : AbstractView<ThreadView.ActionListener>(), ThreadView {
     override val dispatcher = EventDispatcher.create(ThreadView.ActionListener::class.java)
 
@@ -81,9 +83,19 @@ class ThreadViewImpl(
                     mainEditor.text = ""
                     mainEditor.isVisible = false
                     myEditorWidthWatcher.updateWidthForAllInlays()
+                    dispatcher.multicaster.onMainEditorClosed()
                 } else {
                     mainEditor.focus()
                 }
+            }
+        }
+
+        override fun onSubmitClicked(editor: EditorComponent) {
+            val mainEditor = myCreatedEditors[""]
+            if (null !== mainEditor && editor === mainEditor) {
+                dispatcher.multicaster.onCreateCommentRequested(
+                    mainEditor.text, repliedComment = null, position = position
+                )
             }
         }
     }
@@ -104,6 +116,12 @@ class ThreadViewImpl(
         override fun onEditorDestroyed(groupId: String, editor: EditorComponent) {
             myCreatedEditors.remove(groupId)
         }
+
+        override fun onReplyCommentRequested(comment: Comment, content: String) {
+            dispatcher.multicaster.onCreateCommentRequested(
+                content, repliedComment = comment, position = null
+            )
+        }
     }
 
     init {
@@ -113,9 +131,6 @@ class ThreadViewImpl(
         myWrapper.isVisible = false
         myWrapper.cursor = Cursor.getDefaultCursor()
     }
-
-    override val isEditorDisplayed: Boolean
-        get() = myEditor.isVisible
 
     override fun initialize() {
         editor.scrollPane.viewport.addComponentListener(myEditorWidthWatcher)

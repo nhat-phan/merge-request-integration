@@ -27,5 +27,7 @@ interface GroupComponent : Component, Disposable {
         fun onEditorCreated(groupId: String, editor: EditorComponent)
 
         fun onEditorDestroyed(groupId: String, editor: EditorComponent)
+
+        fun onReplyCommentRequested(comment: Comment, content: String)
     }
 }

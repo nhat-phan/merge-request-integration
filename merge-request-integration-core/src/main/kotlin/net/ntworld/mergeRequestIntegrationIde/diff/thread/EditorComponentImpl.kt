@@ -59,6 +59,9 @@ class EditorComponentImpl(
         "Add comment", "Add comment to the current position", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
+            if (myEditorTextField.text.trim().isNotBlank()) {
+                dispatcher.multicaster.onSubmitClicked(this@EditorComponentImpl)
+            }
         }
 
         override fun update(e: AnActionEvent) {
