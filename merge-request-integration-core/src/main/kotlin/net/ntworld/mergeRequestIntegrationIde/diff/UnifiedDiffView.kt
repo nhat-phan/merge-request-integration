@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import gnu.trove.TIntFunction
@@ -51,20 +52,26 @@ class UnifiedDiffView(
             myCachedLeftLineNumbers[left] = logicalLine
             myCachedRightLineNumbers[right] = logicalLine
 
-            registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
-                viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                applicationService.settings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
-                logicalLine,
-                visibleLineLeft = left + 1,
-                visibleLineRight = right + 1,
-                // Doesn't matter, unified view only have 1 side
-                contentType = DiffView.ContentType.BEFORE,
-                action = dispatcher.multicaster::onGutterActionPerformed
-            ))
+            registerGutterIconRenderer(
+                GutterIconRendererFactory.makeGutterIconRenderer(
+                    viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                    applicationService.settings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
+                    logicalLine,
+                    visibleLineLeft = left + 1,
+                    visibleLineRight = right + 1,
+                    // Doesn't matter, unified view only have 1 side
+                    contentType = DiffView.ContentType.BEFORE,
+                    action = dispatcher.multicaster::onGutterActionPerformed
+                )
+            )
         }
     }
 
-    override fun changeGutterIconsByComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
+    private fun findGutterIconRenderer(
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        invoker: ((Int, GutterIconRenderer) -> Unit)
+    ) {
         val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
         val logicalLine = map[visibleLine - 1]
         if (null === logicalLine) {
@@ -73,20 +80,38 @@ class UnifiedDiffView(
 
         // Doesn't matter, unified view only have 1 side
         // see exact comment above
-        val gutterIconRenderer = findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE)
-        gutterIconRenderer.setState(
-            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
-        )
+        invoker.invoke(logicalLine, findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE))
     }
 
-    override fun updateComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
-        val logicalLine = map[visibleLine - 1]
-        if (null === logicalLine) {
-            return
+    override fun changeGutterIconsByComments(
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        findGutterIconRenderer(visibleLine, contentType) {_, renderer ->
+            updateGutterIcon(renderer, comments)
         }
+    }
 
-        updateComments(findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE), comments)
+    override fun updateComments(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
+            ApplicationManager.getApplication().invokeLater {
+                updateComments(
+                    providerData,
+                    mergeRequest,
+                    viewer.editor,
+                    calcPosition(logicalLine),
+                    renderer,
+                    comments
+                )
+            }
+        }
     }
 
     override fun displayEditorOnLine(

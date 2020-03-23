@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.base.DiffViewerListener
 import com.intellij.diff.util.TextDiffType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.TextAttributes
@@ -125,8 +126,35 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
     }
 
-    protected fun updateComments(renderer: GutterIconRenderer, comments: List<Comment>) {
-        println("update comment on ${renderer.logicalLine}")
+    protected fun updateComments(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        editor: EditorEx,
+        position: GutterPosition,
+        renderer: GutterIconRenderer,
+        comments: List<Comment>
+    ) {
+        val model = findThreadModelOnLine(
+            providerData,
+            mergeRequest,
+            editor,
+            position,
+            renderer.logicalLine,
+            renderer.contentType,
+            comments
+        )
+        model.comments = comments
+        updateGutterIcon(renderer, comments)
+    }
+
+    protected fun updateGutterIcon(renderer: GutterIconRenderer, comments: List<Comment>) {
+        val state = if (comments.isEmpty()) {
+            GutterState.NO_COMMENT
+        } else {
+            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+        }
+
+        renderer.setState(state)
     }
 
     private fun setWritingStateOfGutterIconRenderer(

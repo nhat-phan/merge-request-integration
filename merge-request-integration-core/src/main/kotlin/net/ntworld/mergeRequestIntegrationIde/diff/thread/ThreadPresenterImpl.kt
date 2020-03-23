@@ -47,7 +47,21 @@ class ThreadPresenterImpl(
             }
             groups[comment.parentId]!!.add(comment)
         }
-        groups.forEach { (id, items) -> view.addGroupOfComments(id, items) }
+        val currentGroups = view.getAllGroupOfCommentsIds().toMutableSet()
+
+        groups.forEach { (id, items) ->
+            if (view.hasGroupOfComments(id)) {
+                view.updateGroupOfComments(id, items)
+            } else {
+                view.addGroupOfComments(id, items)
+            }
+            currentGroups.remove(id)
+        }
+
+        currentGroups.forEach { id ->
+            view.deleteGroupOfComments(id)
+        }
+
         if (model.visible) {
             view.show()
         } else {

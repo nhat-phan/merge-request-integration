@@ -65,12 +65,24 @@ internal class DiffPresenterImpl(
         view.resetGutterIcons()
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
         for (item in before) {
-            view.updateComments(item.key, DiffView.ContentType.BEFORE, item.value)
+            view.updateComments(
+                model.providerData,
+                model.mergeRequest,
+                item.key,
+                DiffView.ContentType.BEFORE,
+                item.value
+            )
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
         for (item in after) {
-            view.updateComments(item.key, DiffView.ContentType.AFTER, item.value)
+            view.updateComments(
+                model.providerData,
+                model.mergeRequest,
+                item.key,
+                DiffView.ContentType.AFTER,
+                item.value
+            )
         }
     }
 
@@ -164,7 +176,7 @@ internal class DiffPresenterImpl(
         )
     }
 
-    private fun collectCommentsOfGutterIconRenderer(renderer: GutterIconRenderer) : List<Comment> {
+    private fun collectCommentsOfGutterIconRenderer(renderer: GutterIconRenderer): List<Comment> {
         val result = mutableMapOf<String, CommentPoint>()
         model.commentsOnBeforeSide
             .filter { it.line == renderer.visibleLineLeft }

@@ -19,11 +19,12 @@ class GroupComponentImpl(
     private val mergeRequest: MergeRequest,
     private val project: IdeaProject,
     override val id: String,
-    override val comments: List<Comment>
+    comments: List<Comment>
 ) : GroupComponent {
     private val dispatcher = EventDispatcher.create(GroupComponent.EventListener::class.java)
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
     private val myPanel = Panel()
+    private val myCommentComponents = mutableListOf<CommentComponent>()
     private var myEditor: EditorComponent? = null
     private var myEditorEventListener = object : EditorComponent.EventListener {
         override fun onEditorResized() {
@@ -51,6 +52,13 @@ class GroupComponentImpl(
         }
     }
 
+    override var comments: List<Comment> = comments
+        set(value) {
+            if (updateComments(field, value)) {
+                field = value
+            }
+        }
+
     init {
         myPanel.layout = BoxLayout(myPanel, BoxLayout.Y_AXIS)
         if (borderTop) {
@@ -58,13 +66,7 @@ class GroupComponentImpl(
         }
         myBoxLayoutPanel.addToCenter(myPanel)
 
-        comments.forEachIndexed { index, comment ->
-            myPanel.add(
-                ComponentFactory
-                    .makeComment(this, providerData, mergeRequest, comment, if (index == 0) 0 else 1)
-                    .component
-            )
-        }
+        rerenderComments(comments)
 
     }
 
@@ -138,5 +140,28 @@ class GroupComponentImpl(
 
     override fun dispose() {
         dispatcher.listeners.clear()
+    }
+
+    private fun updateComments(old: List<Comment>, new: List<Comment>): Boolean {
+        if (old.size != new.size) {
+            rerenderComments(new)
+            return true
+        }
+        // TODO: do not rerender if there is nothing change
+        rerenderComments(new)
+        return true
+    }
+
+    private fun rerenderComments(items: List<Comment>) {
+        myPanel.removeAll()
+        myCommentComponents.clear()
+
+        items.forEachIndexed { index, comment ->
+            val commentComponent = ComponentFactory
+                .makeComment(this, providerData, mergeRequest, comment, if (index == 0) 0 else 1)
+
+            myPanel.add(commentComponent.component)
+            myCommentComponents.add(commentComponent)
+        }
     }
 }

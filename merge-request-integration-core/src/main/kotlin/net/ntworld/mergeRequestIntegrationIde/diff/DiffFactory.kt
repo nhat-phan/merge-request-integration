@@ -58,7 +58,6 @@ object DiffFactory {
         if (null === codeReviewManager) {
             return null
         }
-
         return DiffModelImpl(codeReviewManager, change)
     }
 }

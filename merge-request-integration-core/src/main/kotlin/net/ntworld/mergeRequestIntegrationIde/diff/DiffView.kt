@@ -20,7 +20,13 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
-    fun updateComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
+    fun updateComments(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        visibleLine: Int,
+        contentType: ContentType,
+        comments: List<Comment>
+    )
 
     fun displayEditorOnLine(
         providerData: ProviderData,

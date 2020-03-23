@@ -132,6 +132,11 @@ class ThreadViewImpl(
         myWrapper.cursor = Cursor.getDefaultCursor()
     }
 
+    override fun dispose() {
+        editor.scrollPane.viewport.removeComponentListener(myEditorWidthWatcher)
+        myCreatedEditors.values.forEach { it.dispose() }
+    }
+
     override fun initialize() {
         editor.scrollPane.viewport.addComponentListener(myEditorWidthWatcher)
         Disposer.register(this, Disposable {
@@ -155,10 +160,11 @@ class ThreadViewImpl(
         EditorUtil.disposeWithEditor(editor, this)
     }
 
-    override fun dispose() {
-        editor.scrollPane.viewport.removeComponentListener(myEditorWidthWatcher)
-        myCreatedEditors.values.forEach { it.dispose() }
+    override fun getAllGroupOfCommentsIds(): Set<String> {
+        return myGroups.keys.toSet()
     }
+
+    override fun hasGroupOfComments(groupId: String): Boolean = myGroups.containsKey(groupId)
 
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
         val group = ComponentFactory.makeGroup(
@@ -169,6 +175,24 @@ class ThreadViewImpl(
 
         myGroups[groupId] = group
         myThreadPanel.add(group.component)
+    }
+
+    override fun updateGroupOfComments(groupId: String, comments: List<Comment>) {
+        val group = myGroups[groupId]
+        if (null !== group) {
+            group.comments = comments
+        }
+    }
+
+    override fun deleteGroupOfComments(groupId: String) {
+        val group = myGroups[groupId]
+        if (null !== group) {
+            // TODO: do something with edge-case that current user is writing
+            // then if we delete the component they will lost data
+            myThreadPanel.remove(group.component)
+            group.dispose()
+            myGroups.remove(groupId)
+        }
     }
 
     override fun showEditor() {

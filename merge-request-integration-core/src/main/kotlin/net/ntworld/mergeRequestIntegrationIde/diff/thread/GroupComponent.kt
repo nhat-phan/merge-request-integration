@@ -7,7 +7,7 @@ import net.ntworld.mergeRequestIntegrationIde.Component
 interface GroupComponent : Component, Disposable {
     val id: String
 
-    val comments: List<Comment>
+    var comments: List<Comment>
 
     var collapse: Boolean
 

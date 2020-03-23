@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
@@ -35,14 +36,26 @@ class SimpleOneSideDiffView(
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
-        val gutterIconRenderer = findGutterIconRenderer(visibleLine - 1, contentType)
-        gutterIconRenderer.setState(
-            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
-        )
+        updateGutterIcon(findGutterIconRenderer(visibleLine - 1, contentType), comments)
     }
 
-    override fun updateComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        updateComments(findGutterIconRenderer(visibleLine - 1, contentType), comments)
+    override fun updateComments(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        ApplicationManager.getApplication().invokeLater {
+            updateComments(
+                providerData,
+                mergeRequest,
+                viewer.editor,
+                calcPosition(visibleLine - 1),
+                findGutterIconRenderer(visibleLine - 1, contentType),
+                comments
+            )
+        }
     }
 
     override fun displayEditorOnLine(

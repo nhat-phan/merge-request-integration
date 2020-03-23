@@ -15,7 +15,15 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
 
     fun initialize()
 
+    fun getAllGroupOfCommentsIds(): Set<String>
+
+    fun hasGroupOfComments(groupId: String): Boolean
+
     fun addGroupOfComments(groupId: String, comments: List<Comment>)
+
+    fun updateGroupOfComments(groupId: String, comments: List<Comment>)
+
+    fun deleteGroupOfComments(groupId: String)
 
     fun showEditor()
 

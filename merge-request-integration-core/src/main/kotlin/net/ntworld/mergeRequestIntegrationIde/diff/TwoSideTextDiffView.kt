@@ -2,6 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.Side
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
@@ -18,38 +19,61 @@ class TwoSideTextDiffView(
 
     override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor1.document.lineCount) {
-            registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
-                viewer.editor1.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                applicationService.settings.showAddCommentIconsInDiffViewGutter,
-                logicalLine,
-                visibleLineLeft = logicalLine + 1,
-                visibleLineRight = null,
-                contentType = DiffView.ContentType.BEFORE,
-                action = dispatcher.multicaster::onGutterActionPerformed
-            ))
+            registerGutterIconRenderer(
+                GutterIconRendererFactory.makeGutterIconRenderer(
+                    viewer.editor1.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                    applicationService.settings.showAddCommentIconsInDiffViewGutter,
+                    logicalLine,
+                    visibleLineLeft = logicalLine + 1,
+                    visibleLineRight = null,
+                    contentType = DiffView.ContentType.BEFORE,
+                    action = dispatcher.multicaster::onGutterActionPerformed
+                )
+            )
         }
         for (logicalLine in 0 until viewer.editor2.document.lineCount) {
-            registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
-                viewer.editor2.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                applicationService.settings.showAddCommentIconsInDiffViewGutter,
-                logicalLine,
-                visibleLineLeft = null,
-                visibleLineRight = logicalLine + 1,
-                contentType = DiffView.ContentType.AFTER,
-                action = dispatcher.multicaster::onGutterActionPerformed
-            ))
+            registerGutterIconRenderer(
+                GutterIconRendererFactory.makeGutterIconRenderer(
+                    viewer.editor2.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                    applicationService.settings.showAddCommentIconsInDiffViewGutter,
+                    logicalLine,
+                    visibleLineLeft = null,
+                    visibleLineRight = logicalLine + 1,
+                    contentType = DiffView.ContentType.AFTER,
+                    action = dispatcher.multicaster::onGutterActionPerformed
+                )
+            )
         }
     }
 
-    override fun changeGutterIconsByComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        val gutterIconRenderer = findGutterIconRenderer(visibleLine - 1, contentType)
-        gutterIconRenderer.setState(
-            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
-        )
+    override fun changeGutterIconsByComments(
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        updateGutterIcon(findGutterIconRenderer(visibleLine - 1, contentType), comments)
     }
 
-    override fun updateComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
-        updateComments(findGutterIconRenderer(visibleLine - 1, contentType), comments)
+    override fun updateComments(
+        providerData: ProviderData,
+        mergeRequest: MergeRequest,
+        visibleLine: Int,
+        contentType: DiffView.ContentType,
+        comments: List<Comment>
+    ) {
+        ApplicationManager.getApplication().invokeLater {
+            if (contentType == DiffView.ContentType.BEFORE) {
+                updateComments(
+                    providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
+                    findGutterIconRenderer(visibleLine - 1, contentType), comments
+                )
+            } else {
+                updateComments(
+                    providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
+                    findGutterIconRenderer(visibleLine - 1, contentType), comments
+                )
+            }
+        }
     }
 
     override fun displayEditorOnLine(
