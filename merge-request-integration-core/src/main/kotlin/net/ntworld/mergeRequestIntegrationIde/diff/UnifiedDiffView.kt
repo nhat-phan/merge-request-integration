@@ -79,6 +79,16 @@ class UnifiedDiffView(
         )
     }
 
+    override fun updateComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
+        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
+        val logicalLine = map[visibleLine - 1]
+        if (null === logicalLine) {
+            return
+        }
+
+        updateComments(findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE), comments)
+    }
+
     override fun displayEditorOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,

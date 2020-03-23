@@ -9,6 +9,11 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 @State(name = "MergeRequestIntegrationProjectLevel", storages = [(Storage("merge-request-integration-ce.xml"))])
 class CommunityProjectService(ideaProject: IdeaProject) : AbstractProjectService(ideaProject) {
+
+    init {
+        bindDataProviderForNotifiers()
+    }
+
     override fun getApplicationService(): ApplicationService {
         return ServiceManager.getService(CommunityApplicationService::class.java)
     }

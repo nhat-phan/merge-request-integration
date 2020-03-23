@@ -48,6 +48,10 @@ class TwoSideTextDiffView(
         )
     }
 
+    override fun updateComments(visibleLine: Int, contentType: DiffView.ContentType, comments: List<Comment>) {
+        updateComments(findGutterIconRenderer(visibleLine - 1, contentType), comments)
+    }
+
     override fun displayEditorOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,

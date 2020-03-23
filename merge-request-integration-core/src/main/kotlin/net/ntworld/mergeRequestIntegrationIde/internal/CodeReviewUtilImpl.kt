@@ -7,10 +7,6 @@ import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewUtil
 
 object CodeReviewUtilImpl : CodeReviewUtil {
 
-    override fun findCommentPosition(change: Change, line: Int, side: CodeReviewUtil.Side): CommentPosition {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun findCommentNodeData(comment: Comment): CodeReviewUtil.CommentNodeData {
         val position = comment.position
         if (null === position) {

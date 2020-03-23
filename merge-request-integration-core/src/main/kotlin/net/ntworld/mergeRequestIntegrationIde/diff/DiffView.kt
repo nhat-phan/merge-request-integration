@@ -16,7 +16,11 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun createGutterIcons()
 
+    fun resetGutterIcons()
+
     fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
+
+    fun updateComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
     fun displayEditorOnLine(
         providerData: ProviderData,

@@ -42,39 +42,39 @@ class EditorWatcher private constructor(
 
     override fun activeEditorsChanged(activeEditors: MutableList<Editor>) {
         checkAvailableUpdates()
-        val codeReviewManager = projectService.codeReviewManager
-        if (null === codeReviewManager || null === codeReviewManager.repository) {
-            return
-        }
-
-        for (activeEditor in activeEditors) {
-            if (activeEditor !is EditorEx) {
-                continue
-            }
-            val file = activeEditor.virtualFile
-            if (file !is LightVirtualFile) {
-                continue
-            }
-
-            val path = OutsidersPsiFileSupport.getOriginalFilePath(file)
-            if (null === path || !path.startsWith(codeReviewManager.repository!!.root.path)) {
-                continue
-            }
-
-            val info = codeReviewManager.findChangeInfoByPathAndContent(
-                path, activeEditor.document.text
-            )
-            if (null === info) {
-                continue
-            }
-
-            val points = codeReviewManager.findCommentPoints(path, info)
-            points.forEach {
-                if (!it.comment.resolved) {
-                    EditorCommentManager.createPoint(applicationService, activeEditor, it)
-                }
-            }
-        }
+//        val codeReviewManager = projectService.codeReviewManager
+//        if (null === codeReviewManager || null === codeReviewManager.repository) {
+//            return
+//        }
+//
+//        for (activeEditor in activeEditors) {
+//            if (activeEditor !is EditorEx) {
+//                continue
+//            }
+//            val file = activeEditor.virtualFile
+//            if (file !is LightVirtualFile) {
+//                continue
+//            }
+//
+//            val path = OutsidersPsiFileSupport.getOriginalFilePath(file)
+//            if (null === path || !path.startsWith(codeReviewManager.repository!!.root.path)) {
+//                continue
+//            }
+//
+//            val info = codeReviewManager.findChangeInfoByPathAndContent(
+//                path, activeEditor.document.text
+//            )
+//            if (null === info) {
+//                continue
+//            }
+//
+//            val points = codeReviewManager.findCommentPoints(path, info)
+//            points.forEach {
+//                if (!it.comment.resolved) {
+//                    EditorCommentManager.createPoint(applicationService, activeEditor, it)
+//                }
+//            }
+//        }
     }
 
     private fun checkAvailableUpdates() {

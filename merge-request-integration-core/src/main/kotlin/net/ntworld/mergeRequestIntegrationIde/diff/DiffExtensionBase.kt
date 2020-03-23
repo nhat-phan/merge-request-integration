@@ -38,7 +38,7 @@ open class DiffExtensionBase(
             assertViewerIsValid(viewer) { project, change ->
                 val model = DiffFactory.makeDiffModel(applicationService, project, change)
                 val view = DiffFactory.makeView(applicationService, viewer, change)
-                if (null !== view) {
+                if (null !== view && null !== model) {
                     DiffFactory.makeDiffPresenter(
                         applicationService = applicationService,
                         projectService = applicationService.getProjectService(project),

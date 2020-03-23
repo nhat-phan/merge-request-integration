@@ -65,6 +65,15 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         viewerBase.addListener(diffViewerListener)
     }
 
+    override fun resetGutterIcons() {
+        for (renderer in myGutterIconRenderersOfBefore.values) {
+            renderer.setState(GutterState.NO_COMMENT)
+        }
+        for (renderer in myGutterIconRenderersOfAfter.values) {
+            renderer.setState(GutterState.NO_COMMENT)
+        }
+    }
+
     override fun dispose() {
         myGutterIconRenderersOfBefore.clear()
         myGutterIconRenderersOfAfter.clear()
@@ -114,6 +123,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         )
         model.showEditor = true
         setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
+    }
+
+    protected fun updateComments(renderer: GutterIconRenderer, comments: List<Comment>) {
+        println("update comment on ${renderer.logicalLine}")
     }
 
     private fun setWritingStateOfGutterIconRenderer(

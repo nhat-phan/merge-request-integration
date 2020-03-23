@@ -17,8 +17,8 @@ import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.CommentApiObserver
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.CommentApiProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
@@ -72,6 +72,10 @@ abstract class AbstractProjectService(
         }
 
         override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+            val codeReviewManager = myCodeReviewManager
+            if (null !== codeReviewManager) {
+                codeReviewManager.dispose()
+            }
             myCodeReviewManager = null
         }
     }
@@ -86,8 +90,15 @@ abstract class AbstractProjectService(
 
     init {
         dispatcher.addListener(myProjectEventListener)
+    }
 
-        messageBus.connect().subscribe(CommentApiObserver.TOPIC, CommentApiProvider(this))
+    protected fun bindDataProviderForNotifiers() {
+        val connection = messageBus.connect(project)
+        connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(
+            getApplicationService(),
+            project,
+            messageBus
+        ))
     }
 
     override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
