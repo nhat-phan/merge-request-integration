@@ -18,6 +18,12 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun resetGutterIcons()
 
+    fun destroyExistingComments(contentType: ContentType)
+
+    fun showAllComments()
+
+    fun hideAllComments()
+
     fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
     fun resetEditor(logicalLine: Int, contentType: ContentType, repliedComment: Comment?)
@@ -27,7 +33,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         mergeRequest: MergeRequest,
         visibleLine: Int,
         contentType: ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        requestSource: DiffModel.Source
     )
 
     fun displayEditorOnLine(
@@ -38,12 +45,13 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         comments: List<Comment>
     )
 
-    fun toggleCommentsOnLine(
+    fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
         contentType: ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        mode: DisplayCommentMode
     )
 
     enum class EditorType {
@@ -65,6 +73,12 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         MODIFIED
     }
 
+    enum class DisplayCommentMode {
+        TOGGLE,
+        SHOW,
+        HIDE
+    }
+
     interface ActionListener : CommentEvent {
         fun onInit()
 
@@ -76,7 +90,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
         fun onRediffAborted()
 
-        fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType)
+        fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType, mode: DisplayCommentMode)
 
         fun onReplyCommentRequested(
             content: String, repliedComment: Comment, logicalLine: Int, contentType: ContentType

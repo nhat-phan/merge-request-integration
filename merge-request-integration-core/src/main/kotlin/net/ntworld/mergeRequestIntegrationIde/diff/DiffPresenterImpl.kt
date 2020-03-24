@@ -20,7 +20,6 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 import java.util.*
 
@@ -48,6 +47,7 @@ internal class DiffPresenterImpl(
 
     override fun onAfterRediff() {
         view.createGutterIcons()
+
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
         for (item in before) {
             view.changeGutterIconsByComments(item.key, DiffView.ContentType.BEFORE, item.value)
@@ -57,36 +57,50 @@ internal class DiffPresenterImpl(
         for (item in after) {
             view.changeGutterIconsByComments(item.key, DiffView.ContentType.AFTER, item.value)
         }
+
+        if (applicationService.settings.displayCommentsInDiffView) {
+            view.showAllComments()
+        }
     }
 
     override fun onRediffAborted() {}
 
-    override fun onCommentsUpdated() {
+    override fun onCommentsUpdated(source: DiffModel.Source) {
         view.resetGutterIcons()
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
+        if (before.isEmpty()) {
+            view.destroyExistingComments(DiffView.ContentType.BEFORE)
+        }
         for (item in before) {
             view.updateComments(
                 model.providerData,
                 model.mergeRequest,
                 item.key,
                 DiffView.ContentType.BEFORE,
-                item.value
+                item.value,
+                source
             )
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
+        if (after.isEmpty()) {
+            view.destroyExistingComments(DiffView.ContentType.AFTER)
+        }
         for (item in after) {
             view.updateComments(
                 model.providerData,
                 model.mergeRequest,
                 item.key,
                 DiffView.ContentType.AFTER,
-                item.value
+                item.value,
+                source
             )
         }
     }
 
-    override fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
+    override fun onGutterActionPerformed(
+        renderer: GutterIconRenderer, type: GutterActionType, mode: DiffView.DisplayCommentMode
+    ) {
         when (type) {
             GutterActionType.ADD -> {
                 view.displayEditorOnLine(
@@ -99,12 +113,13 @@ internal class DiffPresenterImpl(
 
             }
             GutterActionType.TOGGLE -> {
-                view.toggleCommentsOnLine(
+                view.changeCommentsVisibilityOnLine(
                     model.providerData,
                     model.mergeRequest,
                     renderer.logicalLine,
                     renderer.contentType,
-                    collectCommentsOfGutterIconRenderer(renderer)
+                    collectCommentsOfGutterIconRenderer(renderer),
+                    mode
                 )
             }
         }

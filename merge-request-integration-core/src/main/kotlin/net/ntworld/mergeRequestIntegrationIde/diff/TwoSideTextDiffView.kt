@@ -27,7 +27,7 @@ class TwoSideTextDiffView(
                     visibleLineLeft = logicalLine + 1,
                     visibleLineRight = null,
                     contentType = DiffView.ContentType.BEFORE,
-                    action = dispatcher.multicaster::onGutterActionPerformed
+                    action = ::dispatchOnGutterActionPerformed
                 )
             )
         }
@@ -40,7 +40,7 @@ class TwoSideTextDiffView(
                     visibleLineLeft = null,
                     visibleLineRight = logicalLine + 1,
                     contentType = DiffView.ContentType.AFTER,
-                    action = dispatcher.multicaster::onGutterActionPerformed
+                    action = ::dispatchOnGutterActionPerformed
                 )
             )
         }
@@ -59,9 +59,24 @@ class TwoSideTextDiffView(
         mergeRequest: MergeRequest,
         visibleLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        requestSource: DiffModel.Source
     ) {
-        ApplicationManager.getApplication().invokeLater {
+        if (requestSource == DiffModel.Source.NOTIFIER) {
+            ApplicationManager.getApplication().invokeLater {
+                if (contentType == DiffView.ContentType.BEFORE) {
+                    updateComments(
+                        providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
+                        findGutterIconRenderer(visibleLine - 1, contentType), comments
+                    )
+                } else {
+                    updateComments(
+                        providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
+                        findGutterIconRenderer(visibleLine - 1, contentType), comments
+                    )
+                }
+            }
+        } else {
             if (contentType == DiffView.ContentType.BEFORE) {
                 updateComments(
                     providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
@@ -96,22 +111,23 @@ class TwoSideTextDiffView(
         }
     }
 
-    override fun toggleCommentsOnLine(
+    override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        mode: DiffView.DisplayCommentMode
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             toggleCommentsOnLine(
                 providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine),
-                logicalLine, contentType, comments
+                logicalLine, contentType, comments, mode
             )
         } else {
             toggleCommentsOnLine(
                 providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine),
-                logicalLine, contentType, comments
+                logicalLine, contentType, comments, mode
             )
         }
     }
@@ -134,7 +150,7 @@ class TwoSideTextDiffView(
         val oldLine = viewer.syncScrollSupport!!.scrollable.transfer(Side.RIGHT, logicalLine + 1)
         return GutterPosition(
             editorType = DiffView.EditorType.TWO_SIDE_RIGHT,
-            changeType = findChangeType(viewer.editor1, logicalLine),
+            changeType = findChangeType(viewer.editor2, logicalLine),
             oldLine = oldLine,
             oldPath = change.beforeRevision!!.file.toString(),
             newLine = logicalLine + 1,

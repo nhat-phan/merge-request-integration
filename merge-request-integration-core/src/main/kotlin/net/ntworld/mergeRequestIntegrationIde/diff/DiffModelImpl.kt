@@ -9,12 +9,12 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 
 class DiffModelImpl(
     private val codeReviewManager: CodeReviewManager,
-    override val change: Change
+    override val change: Change,
+    override var displayResolvedComments: Boolean
 ) : AbstractModel<DiffModel.DataListener>(), DiffModel {
     override val dispatcher = EventDispatcher.create(DiffModel.DataListener::class.java)
     private val commentFilterOnBeforeSide: ((ContentRevision, Comment) -> Boolean) = { revision, comment ->
@@ -54,9 +54,10 @@ class DiffModelImpl(
                 mergeRequest.id != codeReviewManager.mergeRequest.id) {
                 return
             }
+            codeReviewManager.comments = comments.toList()
             buildCommentsOnBeforeSide(comments)
             buildCommentsOnAfterSide(comments)
-            dispatcher.multicaster.onCommentsUpdated()
+            dispatcher.multicaster.onCommentsUpdated(DiffModel.Source.NOTIFIER)
         }
     }
 
@@ -83,6 +84,13 @@ class DiffModelImpl(
         commentsOnAfterSide.clear()
     }
 
+    override fun rebuildComments(showResolved: Boolean) {
+        displayResolvedComments = showResolved
+        buildCommentsOnBeforeSide(null)
+        buildCommentsOnAfterSide(null)
+        dispatcher.multicaster.onCommentsUpdated(DiffModel.Source.UI)
+    }
+
     private fun buildCommentPoints(
         result: MutableList<CommentPoint>,
         revision: ContentRevision?,
@@ -98,10 +106,16 @@ class DiffModelImpl(
 
         val list = if (null !== comments) {
             comments.filter {
-                filter.invoke(revision, it)
+                if (!displayResolvedComments && it.resolved) {
+                    false
+                } else {
+                    filter.invoke(revision, it)
+                }
             }
         } else {
-            codeReviewManager.getCommentsByPath(revision.file.path)
+            codeReviewManager.getCommentsByPath(revision.file.path).filter {
+                displayResolvedComments || !it.resolved
+            }
         }
         for (comment in list) {
             val position = comment.position

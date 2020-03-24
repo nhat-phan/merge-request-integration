@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.editor
+package net.ntworld.mergeRequestIntegrationIde.diff
 
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager

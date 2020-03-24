@@ -10,6 +10,7 @@ import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import java.awt.event.ComponentEvent
 
 class UnifiedDiffView(
     private val applicationService: ApplicationService,
@@ -61,7 +62,7 @@ class UnifiedDiffView(
                     visibleLineRight = right + 1,
                     // Doesn't matter, unified view only have 1 side
                     contentType = DiffView.ContentType.BEFORE,
-                    action = dispatcher.multicaster::onGutterActionPerformed
+                    action = ::dispatchOnGutterActionPerformed
                 )
             )
         }
@@ -98,10 +99,22 @@ class UnifiedDiffView(
         mergeRequest: MergeRequest,
         visibleLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        requestSource: DiffModel.Source
     ) {
         findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
-            ApplicationManager.getApplication().invokeLater {
+            if (requestSource == DiffModel.Source.NOTIFIER) {
+                ApplicationManager.getApplication().invokeLater {
+                    updateComments(
+                        providerData,
+                        mergeRequest,
+                        viewer.editor,
+                        calcPosition(logicalLine),
+                        renderer,
+                        comments
+                    )
+                }
+            } else {
                 updateComments(
                     providerData,
                     mergeRequest,
@@ -130,29 +143,33 @@ class UnifiedDiffView(
         )
     }
 
-    override fun toggleCommentsOnLine(
+    override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        mode: DiffView.DisplayCommentMode
     ) {
         toggleCommentsOnLine(
             providerData, mergeRequest,
             viewer.editor,
             calcPosition(logicalLine),
             logicalLine, contentType,
-            comments
+            comments,
+            mode
         )
     }
 
     private fun calcPosition(logicalLine: Int): GutterPosition {
+        val left = myLeftLineNumberConverter.execute(logicalLine) + 1
+        val right = myRightLineNumberConverter.execute(logicalLine) + 1
         return GutterPosition(
             editorType = DiffView.EditorType.UNIFIED,
             changeType = findChangeType(viewer.editor, logicalLine),
-            oldLine = myLeftLineNumberConverter.execute(logicalLine + 1),
+            oldLine = if (left > 0) left else -1,
             oldPath = change.beforeRevision!!.file.toString(),
-            newLine = myRightLineNumberConverter.execute(logicalLine + 1),
+            newLine = if (right > 0) right else -1,
             newPath = change.afterRevision!!.file.toString(),
             baseHash = change.beforeRevision!!.revisionNumber.asString(),
             headHash = change.afterRevision!!.revisionNumber.asString()

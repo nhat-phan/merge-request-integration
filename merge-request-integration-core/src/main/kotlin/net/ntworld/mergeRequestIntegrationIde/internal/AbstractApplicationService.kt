@@ -15,10 +15,15 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
 import org.jdom.Element
+import java.net.URL
 
 abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
+    private val publicLegalGrantedDomains = listOf(
+        "gitlab.com",
+        "www.gitlab.com"
+    )
     private val legalGrantedDomains = listOf(
-        "https://gitlab.personio-internal.de"
+        "gitlab.personio-internal.de"
     )
     private val myOptionEnableRequestCache = EnableRequestCacheOption()
     private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
@@ -116,16 +121,12 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     }
 
     override fun isLegal(providerData: ProviderData): Boolean {
-        if (providerData.project.visibility == ProjectVisibility.PUBLIC) {
+        val url = URL(providerData.project.url)
+        if (publicLegalGrantedDomains.contains(url.host) &&
+            providerData.project.visibility == ProjectVisibility.PUBLIC) {
             return true
         }
-
-        for (legalGranted in legalGrantedDomains) {
-            if (providerData.project.url.startsWith(legalGranted)) {
-                return true
-            }
-        }
-        return false
+        return legalGrantedDomains.contains(url.host)
     }
 
     override fun updateSettings(settings: ApplicationSettings) {

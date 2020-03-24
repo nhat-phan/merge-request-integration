@@ -1,5 +1,0 @@
-package net.ntworld.mergeRequestIntegrationIdeEE
-
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.ShowCommentsEditorActionBase
-
-class ShowCommentsEditorAction : ShowCommentsEditorActionBase()

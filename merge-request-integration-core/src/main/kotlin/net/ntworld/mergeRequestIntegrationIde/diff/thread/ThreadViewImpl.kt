@@ -195,8 +195,6 @@ class ThreadViewImpl(
     override fun deleteGroupOfComments(groupId: String) {
         val group = myGroups[groupId]
         if (null !== group) {
-            // TODO: do something with edge-case that current user is writing
-            // then if we delete the component they will lost data
             myThreadPanel.remove(group.component)
             group.dispose()
             myGroups.remove(groupId)

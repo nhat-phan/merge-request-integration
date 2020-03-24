@@ -4,13 +4,10 @@ import com.intellij.diff.DiffContext
 import com.intellij.diff.DiffExtension
 import com.intellij.diff.FrameDiffTool
 import com.intellij.diff.requests.DiffRequest
-import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
-import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.diff.tools.util.base.DiffViewerBase
-import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.DiffUserDataKeys
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.actions.diff.ChangeDiffRequestProducer
@@ -28,7 +25,14 @@ open class DiffExtensionBase(
         }
         context.putUserData(
             DiffUserDataKeys.CONTEXT_ACTIONS, listOf(
-                TestAction
+                MyToggleAllCommentsAction(
+                    presenter,
+                    applicationService.settings.displayCommentsInDiffView
+                ),
+                MyToggleResolvedCommentsAction(
+                    presenter,
+                    false
+                )
             )
         )
     }
@@ -64,8 +68,39 @@ open class DiffExtensionBase(
         return invoker.invoke(project, change)
     }
 
-    private object TestAction : AnAction(null, null, Icons.Comments) {
-        override fun actionPerformed(e: AnActionEvent) {
+    private class MyToggleAllCommentsAction(
+        private val presenter: DiffPresenter,
+        initializedState: Boolean
+    ) : ToggleAction("Toggle Comments", "Toggle all comments in this diff view", Icons.Comments) {
+        private var myShowAll = initializedState
+
+        override fun isSelected(e: AnActionEvent): Boolean {
+            return myShowAll
+        }
+
+        override fun setSelected(e: AnActionEvent, state: Boolean) {
+            myShowAll = state
+            if (myShowAll) {
+                presenter.view.showAllComments()
+            } else {
+                presenter.view.hideAllComments()
+            }
+        }
+    }
+
+    private class MyToggleResolvedCommentsAction(
+        private val presenter: DiffPresenter,
+        initializedState: Boolean
+    ) : ToggleAction("Show Resolved Comments", "Toggle resolved comments in this diff view", Icons.Resolved) {
+        private var myShown = initializedState
+
+        override fun isSelected(e: AnActionEvent): Boolean {
+            return myShown
+        }
+
+        override fun setSelected(e: AnActionEvent, state: Boolean) {
+            myShown = state
+            presenter.model.rebuildComments(myShown)
         }
     }
 }

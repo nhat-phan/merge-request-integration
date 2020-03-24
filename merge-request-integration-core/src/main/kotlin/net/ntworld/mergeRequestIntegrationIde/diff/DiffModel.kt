@@ -6,7 +6,6 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.Model
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.CommentPoint
 import java.util.*
 
 interface DiffModel : Model<DiffModel.DataListener>, Disposable {
@@ -22,7 +21,16 @@ interface DiffModel : Model<DiffModel.DataListener>, Disposable {
 
     val commentsOnAfterSide: List<CommentPoint>
 
+    var displayResolvedComments: Boolean
+
+    fun rebuildComments(showResolved: Boolean)
+
+    enum class Source {
+        UI,
+        NOTIFIER
+    }
+
     interface DataListener : EventListener {
-        fun onCommentsUpdated()
+        fun onCommentsUpdated(source: Source)
     }
 }

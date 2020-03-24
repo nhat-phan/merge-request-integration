@@ -13,6 +13,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
@@ -70,6 +71,18 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         viewerBase.addListener(diffViewerListener)
     }
 
+    override fun destroyExistingComments(contentType: DiffView.ContentType) {
+        val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
+        for (item in map.values) {
+            item.comments = listOf()
+        }
+        map.clear()
+    }
+
+    override fun showAllComments() = changeAllCommentsVisibility(true)
+
+    override fun hideAllComments() = changeAllCommentsVisibility(false)
+
     override fun resetGutterIcons() {
         for (renderer in myGutterIconRenderersOfBefore.values) {
             renderer.setState(GutterState.NO_COMMENT)
@@ -94,6 +107,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         myGutterIconRenderersOfAfter.clear()
     }
 
+    protected fun dispatchOnGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
+        dispatcher.multicaster.onGutterActionPerformed(renderer, type, DiffView.DisplayCommentMode.TOGGLE)
+    }
+
     protected fun registerGutterIconRenderer(gutterIconRenderer: GutterIconRenderer) {
         val map = if (gutterIconRenderer.contentType == DiffView.ContentType.BEFORE)
             myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
@@ -115,12 +132,17 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         position: GutterPosition,
         logicalLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        mode: DiffView.DisplayCommentMode
     ) {
         val model = findThreadModelOnLine(
             providerData, mergeRequest, editor, position, logicalLine, contentType, comments
         )
-        model.visible = !model.visible
+        when (mode) {
+            DiffView.DisplayCommentMode.TOGGLE -> model.visible = !model.visible
+            DiffView.DisplayCommentMode.SHOW -> model.visible = true
+            DiffView.DisplayCommentMode.HIDE -> model.visible = false
+        }
         setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
     }
 
@@ -169,6 +191,20 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
 
         renderer.setState(state)
+    }
+
+    private fun changeAllCommentsVisibility(displayed: Boolean) {
+        val mode = if (displayed) DiffView.DisplayCommentMode.SHOW else DiffView.DisplayCommentMode.HIDE
+        for (renderer in myGutterIconRenderersOfBefore.values) {
+            dispatcher.multicaster.onGutterActionPerformed(
+                renderer, GutterActionType.TOGGLE, mode
+            )
+        }
+        for (renderer in myGutterIconRenderersOfAfter.values) {
+            dispatcher.multicaster.onGutterActionPerformed(
+                renderer, GutterActionType.TOGGLE, mode
+            )
+        }
     }
 
     private fun setWritingStateOfGutterIconRenderer(

@@ -148,13 +148,24 @@ class GroupComponentImpl(
     }
 
     private fun updateComments(old: List<Comment>, new: List<Comment>): Boolean {
-        if (old.size != new.size) {
-            rerenderComments(new)
-            return true
-        }
-        // TODO: do not rerender if there is nothing change
         rerenderComments(new)
         return true
+        // TODO: Find the way to not update comments if it doesn't change
+//        if (old.size != new.size) {
+//            rerenderComments(new)
+//            return true
+//        }
+//        for (i in 0 until old.lastIndex) {
+//            val oldItem = old[i]
+//            val newItem = new[i]
+//            if (oldItem != newItem) {
+//                rerenderComments(new)
+//                println("Change, rerender")
+//                return true
+//            }
+//        }
+//        println("Not change, do nothing")
+//        return false
     }
 
     private fun rerenderComments(items: List<Comment>) {

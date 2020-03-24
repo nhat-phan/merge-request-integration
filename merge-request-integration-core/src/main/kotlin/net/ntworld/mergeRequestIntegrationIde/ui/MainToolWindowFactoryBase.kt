@@ -5,7 +5,6 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.ui.editor.EditorWatcher
 import net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab.HomeToolWindowTab
 
 open class MainToolWindowFactoryBase(
@@ -19,6 +18,5 @@ open class MainToolWindowFactoryBase(
         )
         home.isCloseable = false
         toolWindow.contentManager.addContent(home)
-        EditorWatcher.start(applicationService, ideaProject, toolWindow)
     }
 }

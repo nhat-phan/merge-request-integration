@@ -26,7 +26,7 @@ class SimpleOneSideDiffView(
                 visibleLineLeft = if (contentType == DiffView.ContentType.BEFORE) logicalLine + 1 else null,
                 visibleLineRight = if (contentType == DiffView.ContentType.AFTER) logicalLine + 1 else null,
                 contentType = contentType,
-                action = dispatcher.multicaster::onGutterActionPerformed
+                action = ::dispatchOnGutterActionPerformed
             ))
         }
     }
@@ -44,9 +44,21 @@ class SimpleOneSideDiffView(
         mergeRequest: MergeRequest,
         visibleLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        requestSource: DiffModel.Source
     ) {
-        ApplicationManager.getApplication().invokeLater {
+        if (requestSource == DiffModel.Source.NOTIFIER) {
+            ApplicationManager.getApplication().invokeLater {
+                updateComments(
+                    providerData,
+                    mergeRequest,
+                    viewer.editor,
+                    calcPosition(visibleLine - 1),
+                    findGutterIconRenderer(visibleLine - 1, contentType),
+                    comments
+                )
+            }
+        } else {
             updateComments(
                 providerData,
                 mergeRequest,
@@ -74,19 +86,21 @@ class SimpleOneSideDiffView(
         )
     }
 
-    override fun toggleCommentsOnLine(
+    override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         logicalLine: Int,
         contentType: DiffView.ContentType,
-        comments: List<Comment>
+        comments: List<Comment>,
+        mode: DiffView.DisplayCommentMode
     ) {
         toggleCommentsOnLine(
             providerData, mergeRequest,
             viewer.editor,
             calcPosition(logicalLine),
             logicalLine, contentType,
-            comments
+            comments,
+            mode
         )
     }
 
