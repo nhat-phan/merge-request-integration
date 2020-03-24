@@ -11,11 +11,15 @@ interface ThreadModel : Model<ThreadModel.DataListener> {
 
     var showEditor: Boolean
 
+    fun resetEditor(comment: Comment?)
+
     interface DataListener : EventListener {
         fun onCommentsChanged(comments: List<Comment>)
 
         fun onVisibilityChanged(visibility: Boolean)
 
         fun onEditorVisibilityChanged(visibility: Boolean)
+
+        fun onEditorReset(comment: Comment?)
     }
 }

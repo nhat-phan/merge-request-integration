@@ -94,7 +94,11 @@ class ThreadViewImpl(
             val mainEditor = myCreatedEditors[""]
             if (null !== mainEditor && editor === mainEditor) {
                 dispatcher.multicaster.onCreateCommentRequested(
-                    mainEditor.text, repliedComment = null, position = position
+                    mainEditor.text,
+                    logicalLine,
+                    contentType,
+                    repliedComment = null,
+                    position = position
                 )
             }
         }
@@ -119,7 +123,11 @@ class ThreadViewImpl(
 
         override fun onReplyCommentRequested(comment: Comment, content: String) {
             dispatcher.multicaster.onCreateCommentRequested(
-                content, repliedComment = comment, position = null
+                content,
+                logicalLine,
+                contentType,
+                repliedComment = comment,
+                position = null
             )
         }
     }
@@ -192,6 +200,19 @@ class ThreadViewImpl(
             myThreadPanel.remove(group.component)
             group.dispose()
             myGroups.remove(groupId)
+        }
+    }
+
+    override fun resetMainEditor() {
+        myEditor.text = ""
+        myEditor.isVisible = false
+        myEditorWidthWatcher.updateWidthForAllInlays()
+    }
+
+    override fun resetEditorOfGroup(groupId: String) {
+        val group = myGroups[groupId]
+        if (null !== group) {
+            group.resetReplyEditor()
         }
     }
 

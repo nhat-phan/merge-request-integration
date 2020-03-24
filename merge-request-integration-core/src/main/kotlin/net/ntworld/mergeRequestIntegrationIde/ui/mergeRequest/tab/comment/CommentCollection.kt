@@ -25,6 +25,7 @@ import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentNodeDataImpl
 import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.*
+import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
@@ -106,6 +107,7 @@ class CommentCollection(
                 }
                 is GroupNode -> {
                     dispatcher.multicaster.commentUnselected()
+                    jumpToDiffViewIfDoingCodeReview(node)
                 }
             }
         }
@@ -494,7 +496,7 @@ class CommentCollection(
 
     private class GroupNode(
         private val ideaProject: IdeaProject,
-        private val repository: GitRepository?,
+        val repository: GitRepository?,
         val data: GroupedComments
     ) : PresentableNodeDescriptor<GroupedComments>(ideaProject, null) {
         fun isGeneral() = data.nodeData.isGeneral
@@ -539,5 +541,15 @@ class CommentCollection(
         }
 
         override fun getElement(): GroupedComments = data
+    }
+
+    private fun jumpToDiffViewIfDoingCodeReview(node: GroupNode) {
+        if (projectService.isDoingCodeReview()) {
+            DisplayChangesService.searchAndOpenChange(
+                ideaProject,
+                node.repository,
+                node.data.nodeData.fullPath
+            )
+        }
     }
 }

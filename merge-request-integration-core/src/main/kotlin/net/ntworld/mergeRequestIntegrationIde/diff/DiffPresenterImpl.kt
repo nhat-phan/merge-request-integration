@@ -110,7 +110,9 @@ internal class DiffPresenterImpl(
         }
     }
 
-    override fun onReplyCommentRequested(content: String, repliedComment: Comment) {
+    override fun onReplyCommentRequested(
+        content: String, repliedComment: Comment, logicalLine: Int, contentType: DiffView.ContentType
+    ) {
         applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequest.id,
@@ -124,9 +126,12 @@ internal class DiffPresenterImpl(
             throw ProviderException(it)
         }
         fetchAndUpdateComments()
+        view.resetEditor(logicalLine, contentType, repliedComment)
     }
 
-    override fun onCreateCommentRequested(content: String, position: GutterPosition) {
+    override fun onCreateCommentRequested(
+        content: String, position: GutterPosition, logicalLine: Int, contentType: DiffView.ContentType
+    ) {
         val commentPosition = convertGutterPositionToCommentPosition(position)
         applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
@@ -141,6 +146,7 @@ internal class DiffPresenterImpl(
             throw ProviderException(it)
         }
         fetchAndUpdateComments()
+        view.resetEditor(logicalLine, contentType, null)
     }
 
     override fun onDeleteCommentRequested(comment: Comment) {

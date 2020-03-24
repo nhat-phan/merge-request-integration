@@ -111,6 +111,11 @@ class GroupComponentImpl(
 
     override val component: JComponent = myBoxLayoutPanel
 
+    override fun resetReplyEditor() {
+        destroyReplyEditor()
+        dispatcher.multicaster.onResized()
+    }
+
     override fun showReplyEditor() {
         val editor = myEditor
         if (null === editor) {

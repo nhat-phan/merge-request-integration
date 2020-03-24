@@ -6,6 +6,7 @@ import com.intellij.diff.impl.DiffRequestProcessor
 import com.intellij.diff.requests.NoDiffRequest
 import com.intellij.diff.util.DiffPlaces
 import com.intellij.ide.ui.UISettings
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.*
 import com.intellij.openapi.project.Project as IdeaProject
@@ -181,6 +182,30 @@ object DisplayChangesService {
                 openChange(ideaProject, fileEditorManagerEx, item)
             }
         }
+    }
+
+    fun searchAndOpenChange(
+        ideaProject: IdeaProject,
+        repository: GitRepository?,
+        path: String
+    ) {
+        val fullPath = RepositoryUtil.findAbsolutePath(repository, path)
+        val change = myChangePreviewDiffVirtualFileMap.keys.firstOrNull {
+            val beforeRevision = it.beforeRevision
+            if (null !== beforeRevision && beforeRevision.file.path == fullPath) {
+                return@firstOrNull true
+            }
+
+            val afterRevision = it.afterRevision
+            if (null !== afterRevision && afterRevision.file.path == fullPath) {
+                return@firstOrNull true
+            }
+            return@firstOrNull false
+        }
+        if (null === change) {
+            return
+        }
+        openChange(ideaProject, FileEditorManagerEx.getInstanceEx(ideaProject), change, true)
     }
 
     fun openChange(

@@ -15,6 +15,8 @@ interface GroupComponent : Component, Disposable {
 
     fun requestToggleResolvedStateOfComment(comment: Comment)
 
+    fun resetReplyEditor()
+
     fun showReplyEditor()
 
     fun destroyReplyEditor()

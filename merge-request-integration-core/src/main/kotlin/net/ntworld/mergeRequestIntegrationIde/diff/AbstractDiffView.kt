@@ -53,12 +53,16 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             }
         }
 
-        override fun onReplyCommentRequested(content: String, repliedComment: Comment) {
-            dispatcher.multicaster.onReplyCommentRequested(content, repliedComment)
+        override fun onReplyCommentRequested(
+            content: String, repliedComment: Comment, logicalLine: Int, contentType: DiffView.ContentType
+        ) {
+            dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, contentType)
         }
 
-        override fun onCreateCommentRequested(content: String, position: GutterPosition) {
-            dispatcher.multicaster.onCreateCommentRequested(content, position)
+        override fun onCreateCommentRequested(
+            content: String, position: GutterPosition, logicalLine: Int, contentType: DiffView.ContentType
+        ) {
+            dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, contentType)
         }
     }
 
@@ -72,6 +76,16 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
         for (renderer in myGutterIconRenderersOfAfter.values) {
             renderer.setState(GutterState.NO_COMMENT)
+        }
+    }
+
+    override fun resetEditor(logicalLine: Int, contentType: DiffView.ContentType, repliedComment: Comment?) {
+        val map = if (contentType == DiffView.ContentType.BEFORE)
+            myThreadModelOfBefore else myThreadModelOfAfter
+
+        val model = map[logicalLine]
+        if (null !== model) {
+            model.resetEditor(repliedComment)
         }
     }
 

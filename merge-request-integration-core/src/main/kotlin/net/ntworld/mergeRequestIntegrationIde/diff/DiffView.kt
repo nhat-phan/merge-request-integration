@@ -20,6 +20,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
 
+    fun resetEditor(logicalLine: Int, contentType: ContentType, repliedComment: Comment?)
+
     fun updateComments(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
@@ -76,8 +78,12 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
         fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType)
 
-        fun onReplyCommentRequested(content: String, repliedComment: Comment)
+        fun onReplyCommentRequested(
+            content: String, repliedComment: Comment, logicalLine: Int, contentType: ContentType
+        )
 
-        fun onCreateCommentRequested(content: String, position: GutterPosition)
+        fun onCreateCommentRequested(
+            content: String, position: GutterPosition, logicalLine: Int, contentType: ContentType
+        )
     }
 }

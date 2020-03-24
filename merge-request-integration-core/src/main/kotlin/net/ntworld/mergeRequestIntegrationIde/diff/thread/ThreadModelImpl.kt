@@ -8,6 +8,7 @@ class ThreadModelImpl(
     comments: List<Comment>,
      visibility: Boolean
 ) : AbstractModel<ThreadModel.DataListener>(), ThreadModel {
+    override val dispatcher = EventDispatcher.create(ThreadModel.DataListener::class.java)
 
     override var comments: List<Comment> = comments
         set(value) {
@@ -30,6 +31,8 @@ class ThreadModelImpl(
             dispatcher.multicaster.onEditorVisibilityChanged(value)
         }
 
-    override val dispatcher = EventDispatcher.create(ThreadModel.DataListener::class.java)
+    override fun resetEditor(comment: Comment?) {
+        dispatcher.multicaster.onEditorReset(comment)
+    }
 
 }

@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff.thread
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
@@ -18,12 +19,15 @@ class ThreadPresenterImpl(
             dispatcher.multicaster.onMainEditorClosed(this@ThreadPresenterImpl)
         }
 
-        override fun onCreateCommentRequested(content: String, repliedComment: Comment?, position: GutterPosition?) {
+        override fun onCreateCommentRequested(
+            content: String, logicalLine: Int, contentType: DiffView.ContentType,
+            repliedComment: Comment?, position: GutterPosition?
+        ) {
             if (null !== repliedComment) {
-                dispatcher.multicaster.onReplyCommentRequested(content, repliedComment)
+                dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, contentType)
             }
             if (null !== position) {
-                dispatcher.multicaster.onCreateCommentRequested(content, position)
+                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, contentType)
             }
         }
     }
@@ -84,6 +88,15 @@ class ThreadPresenterImpl(
         if (visibility) {
             view.show()
             view.showEditor()
+        }
+    }
+
+    override fun onEditorReset(comment: Comment?) {
+        if (null === comment) {
+            model.showEditor = false
+            view.resetMainEditor()
+        } else {
+            view.resetEditorOfGroup(comment.parentId)
         }
     }
 }

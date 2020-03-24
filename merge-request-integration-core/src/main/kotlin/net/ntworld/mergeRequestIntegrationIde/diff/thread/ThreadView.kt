@@ -25,6 +25,10 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
 
     fun deleteGroupOfComments(groupId: String)
 
+    fun resetMainEditor()
+
+    fun resetEditorOfGroup(groupId: String)
+
     fun showEditor()
 
     fun show()
@@ -34,6 +38,12 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
     interface ActionListener : CommentEvent {
         fun onMainEditorClosed()
 
-        fun onCreateCommentRequested(content: String, repliedComment: Comment?, position: GutterPosition?)
+        fun onCreateCommentRequested(
+            content: String,
+            logicalLine: Int,
+            contentType: DiffView.ContentType,
+            repliedComment: Comment?,
+            position: GutterPosition?
+        )
     }
 }
