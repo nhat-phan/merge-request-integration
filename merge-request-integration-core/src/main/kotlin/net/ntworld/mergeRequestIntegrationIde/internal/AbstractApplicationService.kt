@@ -10,6 +10,8 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
+import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.compatibility.Version193Adapter
 import net.ntworld.mergeRequestIntegrationIde.internal.option.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
@@ -46,6 +48,8 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     override fun supported(): List<ProviderInfo> = supportedProviders
 
     override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure())
+
+    override val intellijIdeApi: IntellijIdeApi = Version193Adapter()
 
     override val settings: ApplicationSettings
         get() = myApplicationSettings

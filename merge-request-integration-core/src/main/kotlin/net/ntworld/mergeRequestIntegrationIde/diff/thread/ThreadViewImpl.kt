@@ -18,6 +18,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
@@ -31,6 +32,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class ThreadViewImpl(
+    private val applicationService: ApplicationService,
     private val editor: EditorEx,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
@@ -44,14 +46,6 @@ class ThreadViewImpl(
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
     private val myWrapper = ComponentWrapper(myBoxLayoutPanel)
     private val myEditorWidthWatcher = EditorTextWidthWatcher()
-    private val resizePolicy by lazy {
-        val constructors = EditorEmbeddedComponentManager.ResizePolicy::class.java.declaredConstructors
-        for (ctor in constructors) {
-            ctor.isAccessible = true
-            return@lazy ctor.newInstance(0) as EditorEmbeddedComponentManager.ResizePolicy
-        }
-        return@lazy EditorEmbeddedComponentManager.ResizePolicy.any()
-    }
     private val myCreatedEditors = mutableMapOf<String, EditorComponent>()
     private val myGroups = mutableMapOf<String, GroupComponent>()
     private val myEditor by lazy {
@@ -156,13 +150,7 @@ class ThreadViewImpl(
         editorEmbeddedComponentManager.addComponent(
             editor,
             myWrapper,
-            EditorEmbeddedComponentManager.Properties(
-                resizePolicy,
-                true,
-                false,
-                0,
-                offset
-            )
+            applicationService.intellijIdeApi.makeEditorEmbeddedComponentManagerProperties(offset)
         )
 
         EditorUtil.disposeWithEditor(editor, this)

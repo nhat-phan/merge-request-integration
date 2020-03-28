@@ -4,13 +4,11 @@ import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
-import gnu.trove.TIntFunction
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import java.awt.event.ComponentEvent
 
 class UnifiedDiffView(
     private val applicationService: ApplicationService,
@@ -18,30 +16,10 @@ class UnifiedDiffView(
     private val change: Change
 ) : AbstractDiffView<UnifiedDiffViewer>(applicationService, viewer) {
     private val myLeftLineNumberConverter by lazy {
-        try {
-            val myLineNumberConvertor = viewer.editor.gutter.javaClass.getDeclaredField("myLineNumberConvertor")
-            myLineNumberConvertor.isAccessible = true
-            myLineNumberConvertor.get(viewer.editor.gutter) as TIntFunction
-        } catch (exception: NoSuchFieldException) {
-            val myLineNumberConverter = viewer.editor.gutter.javaClass.getDeclaredField("myLineNumberConverter")
-            myLineNumberConverter.isAccessible = true
-            myLineNumberConverter.get(viewer.editor.gutter) as TIntFunction
-        }
+        applicationService.intellijIdeApi.findLeftLineNumberConverter(viewer.editor)
     }
     private val myRightLineNumberConverter by lazy {
-        try {
-            val myAdditionalLineNumberConvertor = viewer.editor.gutter.javaClass.getDeclaredField(
-                "myAdditionalLineNumberConvertor"
-            )
-            myAdditionalLineNumberConvertor.isAccessible = true
-            myAdditionalLineNumberConvertor.get(viewer.editor.gutter) as TIntFunction
-        } catch (exception: NoSuchFieldException) {
-            val myAdditionalLineNumberConverter = viewer.editor.gutter.javaClass.getDeclaredField(
-                "myAdditionalLineNumberConverter"
-            )
-            myAdditionalLineNumberConverter.isAccessible = true
-            myAdditionalLineNumberConverter.get(viewer.editor.gutter) as TIntFunction
-        }
+        applicationService.intellijIdeApi.findRightLineNumberConverter(viewer.editor)
     }
     private val myCachedLeftLineNumbers = mutableMapOf<Int, Int>()
     private val myCachedRightLineNumbers = mutableMapOf<Int, Int>()

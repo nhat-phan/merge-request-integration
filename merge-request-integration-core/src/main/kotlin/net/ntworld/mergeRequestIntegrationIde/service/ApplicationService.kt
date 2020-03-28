@@ -6,10 +6,13 @@ import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 
 interface ApplicationService {
 
     val infrastructure: Infrastructure
+
+    val intellijIdeApi: IntellijIdeApi
 
     val settings: ApplicationSettings
 

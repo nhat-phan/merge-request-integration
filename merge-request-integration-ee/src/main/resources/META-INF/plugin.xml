@@ -4,7 +4,6 @@
     <vendor>ntworld</vendor>
     <version>2019.3.2</version>
     <product-descriptor code="PMRINTEGEE" release-date="20200107" release-version="20193"/>
-    <idea-version since-build="193.4697.65"/>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>

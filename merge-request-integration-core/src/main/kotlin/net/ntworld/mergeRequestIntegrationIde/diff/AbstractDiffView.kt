@@ -228,7 +228,9 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
-            val view = ThreadFactory.makeView(editor, providerData, mergeRequest, logicalLine, contentType, position)
+            val view = ThreadFactory.makeView(
+                applicationService, editor, providerData, mergeRequest, logicalLine, contentType, position
+            )
             val presenter = ThreadFactory.makePresenter(model, view)
 
             presenter.addListener(myThreadPresenterEventListener)

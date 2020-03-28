@@ -2,7 +2,6 @@
     <id>net.ntworld.nhat-phan.merge-request-integration-ce</id>
     <name>Merge Request Integration CE - Code Review for GitLab</name>
     <vendor>ntworld</vendor>
-    <idea-version since-build="193.4697.65"/>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>

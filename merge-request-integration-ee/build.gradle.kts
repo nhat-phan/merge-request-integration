@@ -9,6 +9,8 @@ val gitlab4jVersion: String by project
 val githubApiVersion: String by project
 val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
+val intellijSinceBuild: String by project
+val intellijUntilBuild: String by project
 
 group = artifactGroup
 version = enterpriseEditionVersion
@@ -35,7 +37,7 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version = intellijVersion
-    updateSinceUntilBuild = false
+    updateSinceUntilBuild = true
     setPlugins("git4idea")
 }
 
@@ -56,10 +58,12 @@ tasks {
             jvmTarget = jvmTarget
         }
     }
-    
+
     named<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
         changeNotes(htmlFixer("./merge-request-integration-ee/doc/release-notes.$enterpriseEditionVersion.html"))
         pluginDescription(htmlFixer("./merge-request-integration-ee/doc/description.html"))
+        sinceBuild(intellijSinceBuild)
+        untilBuild(intellijUntilBuild)
     }
 }
 
