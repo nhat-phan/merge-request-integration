@@ -2,7 +2,6 @@ package net.ntworld.mergeRequestIntegrationIde.ui.provider
 
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
-import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
@@ -23,14 +22,21 @@ class ProviderDetailsMRList(
     private val ideaProject: IdeaProject,
     private val providerData: ProviderData,
     private val filterBy: GetMergeRequestFilter,
-    private val orderBy:  MergeRequestOrdering
+    private val orderBy:  MergeRequestOrdering,
+    private val displayType: ApprovalStatusDisplayType
 ): AbstractMergeRequestCollection(applicationService, ideaProject, providerData) {
     private var isLoaded = false
     private val myList = JBList<MergeRequestInfo>()
     private val myItemPanels = mutableMapOf<Int, MergeRequestItemPanel>()
     private val myCellRenderer = ListCellRenderer<MergeRequestInfo> { list, value, index, isSelected, cellHasFocus ->
         if (null === myItemPanels[index]) {
-            myItemPanels[index] = MergeRequestItemPanel(value)
+            myItemPanels[index] = MergeRequestItemPanel(
+                applicationService,
+                ideaProject,
+                providerData,
+                value,
+                displayType
+            )
         }
         val panel = myItemPanels[index]!!
         panel.changeStyle(isSelected, cellHasFocus)
@@ -84,5 +90,11 @@ class ProviderDetailsMRList(
         myItemPanels.clear()
         myList.setListData(collection.toTypedArray())
         myList.isVisible = true
+    }
+
+    enum class ApprovalStatusDisplayType {
+        NONE,
+        STATUSES_AND_MINE_APPROVAL,
+        STATUSES
     }
 }

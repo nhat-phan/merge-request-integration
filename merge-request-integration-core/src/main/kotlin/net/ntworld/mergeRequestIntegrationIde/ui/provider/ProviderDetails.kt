@@ -88,7 +88,8 @@ class ProviderDetails(
                 assigneeId = "",
                 approverIds = listOf()
             ),
-            MergeRequestOrdering.RECENTLY_UPDATED
+            MergeRequestOrdering.RECENTLY_UPDATED,
+            displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.NONE
         )
         list.eventDispatcher.addListener(myListEventListener)
         list
@@ -110,7 +111,8 @@ class ProviderDetails(
                 assigneeId = "",
                 approverIds = listOf()
             ),
-            MergeRequestOrdering.RECENTLY_UPDATED
+            MergeRequestOrdering.RECENTLY_UPDATED,
+            displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES
         )
         list.eventDispatcher.addListener(myListEventListener)
         list
@@ -132,7 +134,8 @@ class ProviderDetails(
                 assigneeId = providerData.currentUser.id,
                 approverIds = listOf()
             ),
-            MergeRequestOrdering.RECENTLY_UPDATED
+            MergeRequestOrdering.RECENTLY_UPDATED,
+            displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES
         )
         list.eventDispatcher.addListener(myListEventListener)
         list
@@ -154,7 +157,8 @@ class ProviderDetails(
                 assigneeId = "",
                 approverIds = listOf(providerData.currentUser.id)
             ),
-            MergeRequestOrdering.RECENTLY_UPDATED
+            MergeRequestOrdering.RECENTLY_UPDATED,
+            displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES_AND_MINE_APPROVAL
         )
         list.eventDispatcher.addListener(myListEventListener)
         list

@@ -18,6 +18,7 @@ import net.ntworld.mergeRequestIntegrationIde.task.FindApprovalTask
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ApprovalPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.service.CodeReviewService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.ui.util.findVisibilityIconAndTextForApproval
 import java.awt.Dimension
 import java.awt.Point
 import javax.swing.JComponent
@@ -188,26 +189,12 @@ class MergeRequestDetailsToolbar(
                 return
             }
 
-            val required = approval.approvalsRequired
-            val left = approval.approvalsLeft
             myApprovalPanel.hide()
             myApprovalPanel.setApproval(approval)
-            e.presentation.isVisible = required > 0
-            if (required == 0) {
-                return
-            }
-
-            if (left == 0) {
-                e.presentation.icon = Icons.Approved
-                e.presentation.text = "approved $required/$required"
-                return
-            }
-            if (left == required) {
-                e.presentation.icon = Icons.NoApproval
-            } else {
-                e.presentation.icon = Icons.RequiredApproval
-            }
-            e.presentation.text = "approval ${required - left}/$required"
+            val triple = approval.findVisibilityIconAndTextForApproval()
+            e.presentation.isVisible = triple.first
+            e.presentation.icon = triple.second
+            e.presentation.text = triple.third
         }
 
         override fun displayTextInToolbar(): Boolean = true
