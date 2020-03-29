@@ -49,7 +49,7 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
 
     override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure())
 
-    override val intellijIdeApi: IntellijIdeApi = Version193Adapter()
+    override val intellijIdeApi: IntellijIdeApi = Version201Adapter()
 
     override val settings: ApplicationSettings
         get() = myApplicationSettings
