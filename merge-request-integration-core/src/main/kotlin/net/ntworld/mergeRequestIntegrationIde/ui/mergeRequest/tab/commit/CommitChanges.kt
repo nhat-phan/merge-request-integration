@@ -18,6 +18,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.tree.DefaultTreeModel
+import kotlin.concurrent.thread
 
 class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
@@ -44,10 +45,12 @@ class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
 
     override fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
         myTree.isVisible = false
-        ApplicationManager.getApplication().invokeLater {
+        thread {
             val changes = DisplayChangesService.findChanges(ideaProject, providerData, commits.map { it.id })
-            myTree.setChangesToDisplay(changes)
-            myTree.isVisible = true
+            ApplicationManager.getApplication().invokeLater {
+                myTree.setChangesToDisplay(changes)
+                myTree.isVisible = true
+            }
         }
     }
 

@@ -18,7 +18,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun resetGutterIcons()
 
-    fun destroyExistingComments(contentType: ContentType)
+    fun destroyExistingComments(excludedVisibleLines: Set<Int>, contentType: ContentType)
 
     fun showAllComments()
 

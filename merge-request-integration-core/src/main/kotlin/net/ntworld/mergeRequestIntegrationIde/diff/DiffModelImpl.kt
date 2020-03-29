@@ -9,9 +9,11 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 
 class DiffModelImpl(
+    private val projectService: ProjectService,
     private val codeReviewManager: CodeReviewManager,
     override val change: Change,
     override var displayResolvedComments: Boolean
@@ -54,7 +56,7 @@ class DiffModelImpl(
                 mergeRequest.id != codeReviewManager.mergeRequest.id) {
                 return
             }
-            codeReviewManager.comments = comments.toList()
+            projectService.setCodeReviewComments(providerData, mergeRequest, comments)
             buildCommentsOnBeforeSide(comments)
             buildCommentsOnAfterSide(comments)
             dispatcher.multicaster.onCommentsUpdated(DiffModel.Source.NOTIFIER)

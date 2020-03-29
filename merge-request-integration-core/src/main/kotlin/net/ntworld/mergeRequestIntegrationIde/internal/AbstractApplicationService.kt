@@ -11,8 +11,7 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
-import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
-import net.ntworld.mergeRequestIntegrationIde.compatibility.Version193Adapter
+import net.ntworld.mergeRequestIntegrationIde.compatibility.*
 import net.ntworld.mergeRequestIntegrationIde.internal.option.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings

@@ -74,6 +74,23 @@ class CommentCollection(
         override fun displayCommentRequested(comment: Comment) {
             findCommentNodeByIdAndGrabFocus(comment, myRoot)
         }
+
+        override fun codeReviewCommentsSet(
+            providerData: ProviderData,
+            mergeRequest: MergeRequest,
+            comments: Collection<Comment>
+        ) {
+            val currentProviderData = myProviderData
+            val currentMergeRequest = myMergeRequest
+            if (null === currentProviderData || null === currentMergeRequest) {
+                return
+            }
+            if (currentProviderData.id == providerData.id && currentMergeRequest.id == mergeRequest.id) {
+                ApplicationManager.getApplication().invokeLater {
+                    setComments(providerData, mergeRequest, comments.toList())
+                }
+            }
+        }
     }
     private val myTreeSelectionListener = object : TreeSelectionListener {
         override fun valueChanged(e: TreeSelectionEvent?) {

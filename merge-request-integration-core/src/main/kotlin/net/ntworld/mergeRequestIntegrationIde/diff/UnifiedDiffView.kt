@@ -24,6 +24,15 @@ class UnifiedDiffView(
     private val myCachedLeftLineNumbers = mutableMapOf<Int, Int>()
     private val myCachedRightLineNumbers = mutableMapOf<Int, Int>()
 
+    override fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int {
+        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
+        val logicalLine = map[visibleLine - 1]
+        if (null === logicalLine) {
+            return -1
+        }
+        return logicalLine
+    }
+
     override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             val left = myLeftLineNumberConverter.execute(logicalLine)
@@ -51,9 +60,8 @@ class UnifiedDiffView(
         contentType: DiffView.ContentType,
         invoker: ((Int, GutterIconRenderer) -> Unit)
     ) {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
-        val logicalLine = map[visibleLine - 1]
-        if (null === logicalLine) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, contentType)
+        if (-1 == logicalLine) {
             return
         }
 
@@ -81,27 +89,14 @@ class UnifiedDiffView(
         requestSource: DiffModel.Source
     ) {
         findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
-            if (requestSource == DiffModel.Source.NOTIFIER) {
-                ApplicationManager.getApplication().invokeLater {
-                    updateComments(
-                        providerData,
-                        mergeRequest,
-                        viewer.editor,
-                        calcPosition(logicalLine),
-                        renderer,
-                        comments
-                    )
-                }
-            } else {
-                updateComments(
-                    providerData,
-                    mergeRequest,
-                    viewer.editor,
-                    calcPosition(logicalLine),
-                    renderer,
-                    comments
-                )
-            }
+            updateComments(
+                providerData,
+                mergeRequest,
+                viewer.editor,
+                calcPosition(logicalLine),
+                renderer,
+                comments
+            )
         }
     }
 

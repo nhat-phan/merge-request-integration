@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.*
@@ -94,8 +95,10 @@ class MergeRequestDetails(
         }
 
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, pipelines: List<Pipeline>) {
-            myToolbars.forEach {
-                it.setPipelines(mergeRequestInfo, pipelines)
+            ApplicationManager.getApplication().invokeLater {
+                myToolbars.forEach {
+                    it.setPipelines(mergeRequestInfo, pipelines)
+                }
             }
         }
     }
@@ -109,14 +112,16 @@ class MergeRequestDetails(
         }
 
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
-            myToolbars.forEach {
-                it.setCommits(mergeRequestInfo, commits)
-            }
-            myCommitsTab.setCommits(providerData, mergeRequestInfo, commits)
-            if (commits.isEmpty()) {
-                myCommitsTabInfo.text = "Commits"
-            } else {
-                myCommitsTabInfo.text = "Commits · ${commits.size}"
+            ApplicationManager.getApplication().invokeLater {
+                myToolbars.forEach {
+                    it.setCommits(mergeRequestInfo, commits)
+                }
+                myCommitsTab.setCommits(providerData, mergeRequestInfo, commits)
+                if (commits.isEmpty()) {
+                    myCommitsTabInfo.text = "Commits"
+                } else {
+                    myCommitsTabInfo.text = "Commits · ${commits.size}"
+                }
             }
         }
     }
@@ -138,10 +143,12 @@ class MergeRequestDetails(
         }
 
         override fun dataReceived(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
-            myToolbars.forEach {
-                it.setComments(mergeRequest, comments)
+            ApplicationManager.getApplication().invokeLater {
+                myToolbars.forEach {
+                    it.setComments(mergeRequest, comments)
+                }
+                myCommentsTab.setComments(providerData, mergeRequest, comments)
             }
-            myCommentsTab.setComments(providerData, mergeRequest, comments)
         }
     }
     private val myFindApprovalListener = object : FindApprovalTask.Listener {
@@ -150,8 +157,10 @@ class MergeRequestDetails(
         }
 
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, approval: Approval) {
-            myToolbars.forEach {
-                it.setApproval(mergeRequestInfo, approval)
+            ApplicationManager.getApplication().invokeLater {
+                myToolbars.forEach {
+                    it.setApproval(mergeRequestInfo, approval)
+                }
             }
         }
     }

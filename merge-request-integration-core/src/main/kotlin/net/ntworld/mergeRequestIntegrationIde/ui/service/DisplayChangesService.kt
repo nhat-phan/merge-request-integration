@@ -6,6 +6,7 @@ import com.intellij.diff.impl.DiffRequestProcessor
 import com.intellij.diff.requests.NoDiffRequest
 import com.intellij.diff.util.DiffPlaces
 import com.intellij.ide.ui.UISettings
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.*
@@ -25,6 +26,7 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 import javax.swing.SwingConstants
+import kotlin.concurrent.thread
 
 object DisplayChangesService {
     private var myTabPlacement: JBTabsPosition? = null
@@ -59,28 +61,32 @@ object DisplayChangesService {
 
         val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(ideaProject)
         if (commits.size <= 1) {
-            val hash = if (commits.isEmpty()) diff.headHash else commits.first().id
-            displayChangesForOneCommit(
-                applicationService,
-                ideaProject,
-                fileEditorManagerEx,
-                providerData,
-                mergeRequest,
-                repository,
-                log,
-                hash
-            )
+            thread {
+                val hash = if (commits.isEmpty()) diff.headHash else commits.first().id
+                displayChangesForOneCommit(
+                    applicationService,
+                    ideaProject,
+                    fileEditorManagerEx,
+                    providerData,
+                    mergeRequest,
+                    repository,
+                    log,
+                    hash
+                )
+            }
         } else {
-            displayChangesForCommits(
-                applicationService,
-                ideaProject,
-                fileEditorManagerEx,
-                providerData,
-                mergeRequest,
-                repository,
-                log,
-                commits
-            )
+            thread {
+                displayChangesForCommits(
+                    applicationService,
+                    ideaProject,
+                    fileEditorManagerEx,
+                    providerData,
+                    mergeRequest,
+                    repository,
+                    log,
+                    commits
+                )
+            }
         }
         // rearrangeTabPlacement(fileEditorManagerEx)
     }
@@ -172,14 +178,15 @@ object DisplayChangesService {
     ) {
         applicationService.getProjectService(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
 
-        val max = applicationService.settings.maxDiffChangesOpenedAutomatically
-        if (max == 0 || changes.size > max) {
-            return
-        }
-        val limit = UISettings().editorTabLimit
-        changes.forEachIndexed { index, item ->
-            if (index < limit) {
-                openChange(ideaProject, fileEditorManagerEx, item)
+        ApplicationManager.getApplication().invokeLater {
+            val max = applicationService.settings.maxDiffChangesOpenedAutomatically
+            if (max != 0 && changes.size < max) {
+                val limit = UISettings().editorTabLimit
+                changes.forEachIndexed { index, item ->
+                    if (index < limit) {
+                        openChange(ideaProject, fileEditorManagerEx, item)
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
@@ -66,11 +67,19 @@ internal class DiffPresenterImpl(
     override fun onRediffAborted() {}
 
     override fun onCommentsUpdated(source: DiffModel.Source) {
+        if (source == DiffModel.Source.NOTIFIER) {
+            ApplicationManager.getApplication().invokeLater {
+                handleWhenCommentsGetUpdated(source)
+            }
+        } else {
+            handleWhenCommentsGetUpdated(source)
+        }
+    }
+
+    private fun handleWhenCommentsGetUpdated(source: DiffModel.Source) {
         view.resetGutterIcons()
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
-        if (before.isEmpty()) {
-            view.destroyExistingComments(DiffView.ContentType.BEFORE)
-        }
+        view.destroyExistingComments(before.keys, DiffView.ContentType.BEFORE)
         for (item in before) {
             view.updateComments(
                 model.providerData,
@@ -83,9 +92,7 @@ internal class DiffPresenterImpl(
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
-        if (after.isEmpty()) {
-            view.destroyExistingComments(DiffView.ContentType.AFTER)
-        }
+        view.destroyExistingComments(after.keys, DiffView.ContentType.AFTER)
         for (item in after) {
             view.updateComments(
                 model.providerData,

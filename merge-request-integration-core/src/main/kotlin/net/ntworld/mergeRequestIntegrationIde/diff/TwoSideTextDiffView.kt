@@ -17,6 +17,10 @@ class TwoSideTextDiffView(
     private val change: Change
 ) : AbstractDiffView<TwosideTextDiffViewer>(applicationService, viewer) {
 
+    override fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int {
+        return visibleLine - 1
+    }
+
     override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor1.document.lineCount) {
             registerGutterIconRenderer(
@@ -62,32 +66,16 @@ class TwoSideTextDiffView(
         comments: List<Comment>,
         requestSource: DiffModel.Source
     ) {
-        if (requestSource == DiffModel.Source.NOTIFIER) {
-            ApplicationManager.getApplication().invokeLater {
-                if (contentType == DiffView.ContentType.BEFORE) {
-                    updateComments(
-                        providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
-                        findGutterIconRenderer(visibleLine - 1, contentType), comments
-                    )
-                } else {
-                    updateComments(
-                        providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
-                        findGutterIconRenderer(visibleLine - 1, contentType), comments
-                    )
-                }
-            }
+        if (contentType == DiffView.ContentType.BEFORE) {
+            updateComments(
+                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
+                findGutterIconRenderer(visibleLine - 1, contentType), comments
+            )
         } else {
-            if (contentType == DiffView.ContentType.BEFORE) {
-                updateComments(
-                    providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
-                    findGutterIconRenderer(visibleLine - 1, contentType), comments
-                )
-            } else {
-                updateComments(
-                    providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
-                    findGutterIconRenderer(visibleLine - 1, contentType), comments
-                )
-            }
+            updateComments(
+                providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
+                findGutterIconRenderer(visibleLine - 1, contentType), comments
+            )
         }
     }
 

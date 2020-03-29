@@ -71,12 +71,23 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         viewerBase.addListener(diffViewerListener)
     }
 
-    override fun destroyExistingComments(contentType: DiffView.ContentType) {
+    protected abstract fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int
+
+    override fun destroyExistingComments(excludedVisibleLines: Set<Int>, contentType: DiffView.ContentType) {
+        val excludedLogicalLines = excludedVisibleLines
+            .map { convertVisibleLineToLogicalLine(it, contentType) }
+            .filter { it >= 0 }
+
         val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
-        for (item in map.values) {
-            item.comments = listOf()
+        val removedKeys = mutableListOf<Int>()
+        for (entry in map) {
+            if (excludedLogicalLines.contains(entry.key)) {
+                continue
+            }
+            entry.value.comments = listOf()
+            removedKeys.add(entry.key)
         }
-        map.clear()
+        removedKeys.forEach { map.remove(it) }
     }
 
     override fun showAllComments() = changeAllCommentsVisibility(true)

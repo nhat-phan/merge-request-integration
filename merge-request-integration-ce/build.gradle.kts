@@ -60,7 +60,9 @@ tasks {
     }
 
     named<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-        changeNotes(htmlFixer("./merge-request-integration-ce/doc/release-notes.$communityEditionVersion.html"))
+        val version = if (!communityEditionVersion.endsWith("eap"))
+            communityEditionVersion else communityEditionVersion.substring(0, communityEditionVersion.length - 3)
+        changeNotes(htmlFixer("./merge-request-integration-ce/doc/release-notes.$version.html"))
         pluginDescription(htmlFixer("./merge-request-integration-ce/doc/description.html"))
         sinceBuild(intellijSinceBuild)
         untilBuild(intellijUntilBuild)

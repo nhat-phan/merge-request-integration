@@ -234,6 +234,7 @@ abstract class AbstractProjectService(
         if (null !== codeReviewService) {
             codeReviewService.comments = comments
         }
+        dispatcher.multicaster.codeReviewCommentsSet(providerData, mergeRequest, comments)
     }
 
     override fun getCodeReviewComments(): Collection<Comment> {
@@ -251,6 +252,7 @@ abstract class AbstractProjectService(
         if (null !== codeReviewService) {
             codeReviewService.commits = commits
         }
+        dispatcher.multicaster.codeReviewCommitsSet(providerData, mergeRequest, commits)
     }
 
     override fun getCodeReviewCommits(): Collection<Commit> {

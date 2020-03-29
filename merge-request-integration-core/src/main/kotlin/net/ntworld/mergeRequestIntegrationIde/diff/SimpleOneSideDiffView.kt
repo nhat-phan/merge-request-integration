@@ -17,6 +17,10 @@ class SimpleOneSideDiffView(
     private val contentType: DiffView.ContentType
 ) : AbstractDiffView<SimpleOnesideDiffViewer>(applicationService, viewer) {
 
+    override fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int {
+        return visibleLine - 1
+    }
+
     override fun createGutterIcons() {
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
@@ -47,27 +51,14 @@ class SimpleOneSideDiffView(
         comments: List<Comment>,
         requestSource: DiffModel.Source
     ) {
-        if (requestSource == DiffModel.Source.NOTIFIER) {
-            ApplicationManager.getApplication().invokeLater {
-                updateComments(
-                    providerData,
-                    mergeRequest,
-                    viewer.editor,
-                    calcPosition(visibleLine - 1),
-                    findGutterIconRenderer(visibleLine - 1, contentType),
-                    comments
-                )
-            }
-        } else {
-            updateComments(
-                providerData,
-                mergeRequest,
-                viewer.editor,
-                calcPosition(visibleLine - 1),
-                findGutterIconRenderer(visibleLine - 1, contentType),
-                comments
-            )
-        }
+        updateComments(
+            providerData,
+            mergeRequest,
+            viewer.editor,
+            calcPosition(visibleLine - 1),
+            findGutterIconRenderer(visibleLine - 1, contentType),
+            comments
+        )
     }
 
     override fun displayEditorOnLine(
