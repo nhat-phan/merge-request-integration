@@ -7,6 +7,7 @@ import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
+import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
@@ -125,6 +126,9 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
     }
 
     override fun isLegal(providerData: ProviderData): Boolean {
+        if (providerData.status == ProviderStatus.ERROR || providerData.project.url.isEmpty()) {
+            return false
+        }
         val url = URL(providerData.project.url)
         if (publicLegalGrantedDomains.contains(url.host) &&
             providerData.project.visibility == ProjectVisibility.PUBLIC) {

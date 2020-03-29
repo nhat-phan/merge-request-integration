@@ -32,7 +32,7 @@ abstract class AbstractConnectionsConfigurable(
     private val myInitializedData = mutableMapOf<String, MyProviderSettings>()
     private var myIsInitialized = false
     private val myTabs: TabsUI by lazy {
-        val tabs = Tabs(ideaProject, this)
+        val tabs = Tabs(ideaProject, ideaProject)
 
         tabs.setCommonCenterActionGroupFactory {
             val actionGroup = DefaultActionGroup()
