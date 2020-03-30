@@ -43,6 +43,10 @@ class GithubMergeRequestApi(
         return listOf()
     }
 
+    override fun getChanges(projectId: String, mergeRequestId: String): List<Change> {
+        TODO("Not yet implemented")
+    }
+
     override fun search(
         projectId: String,
         currentUserId: String,

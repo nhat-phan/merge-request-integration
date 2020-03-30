@@ -76,6 +76,18 @@ class GitlabMergeRequestApi(
         }
     }
 
+    override fun getChanges(projectId: String, mergeRequestId: String): List<Change> {
+        val out = infrastructure.serviceBus() process GitlabGetMRChangesRequest(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt()
+        )
+        return if (out.hasError()) {
+            listOf()
+        } else {
+            out.getResponse().changes.map { GitlabDiffTransformer.transform(it) }
+        }
+    }
+
     override fun search(
         projectId: String,
         currentUserId: String,

@@ -16,6 +16,8 @@ interface MergeRequestApi {
 
     fun getCommits(projectId: String, mergeRequestId: String): List<Commit>
 
+    fun getChanges(projectId: String, mergeRequestId: String): List<Change>
+
     fun search(
         projectId: String,
         currentUserId: String,
