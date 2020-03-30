@@ -1,6 +1,9 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
+import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
@@ -16,10 +19,14 @@ import net.ntworld.mergeRequestIntegrationIde.internal.option.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
+import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManagerImpl
 import org.jdom.Element
 import java.net.URL
 
 abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
+    override val watcherManager: WatcherManager = WatcherManagerImpl()
+
     private val publicLegalGrantedDomains = listOf(
         "gitlab.com",
         "www.gitlab.com"
@@ -44,6 +51,30 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         myOptionMaxDiffChangesOpenedAutomatically
     )
     private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
+    private val myAppLifecycleListener = object : AppLifecycleListener {
+        override fun appClosing() {
+            watcherManager.dispose()
+        }
+
+        override fun appStarting(projectFromCommandLine: Project?) {
+            println(projectFromCommandLine)
+        }
+    }
+
+    init {
+        val connection = ApplicationManager.getApplication().messageBus.connect()
+        connection.subscribe(AppLifecycleListener.TOPIC, myAppLifecycleListener)
+//        private val myBranchChangeListener = object: BranchChangeListener {
+//            override fun branchWillChange(branchName: String) {
+//                println("branchWillChange $branchName")
+//            }
+//
+//            override fun branchHasChanged(branchName: String) {
+//                println("branchHasChanged $branchName")
+//            }
+//        }
+//        connection.subscribe(BranchChangeListener.VCS_BRANCH_CHANGED, myBranchChangeListener)
+    }
 
     override fun supported(): List<ProviderInfo> = supportedProviders
 

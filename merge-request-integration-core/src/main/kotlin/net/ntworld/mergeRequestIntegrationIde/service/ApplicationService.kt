@@ -7,6 +7,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 
 interface ApplicationService {
 
@@ -17,6 +18,8 @@ interface ApplicationService {
     val settings: ApplicationSettings
 
     val messageBus: MessageBus
+
+    val watcherManager: WatcherManager
 
     fun getProjectService(project: Project): ProjectService
 
