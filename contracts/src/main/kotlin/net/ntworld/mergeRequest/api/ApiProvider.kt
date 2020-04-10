@@ -18,5 +18,7 @@ interface ApiProvider {
 
     val comment: CommentApi
 
+    val commit: CommitApi
+
     fun setOptions(options: ApiOptions)
 }

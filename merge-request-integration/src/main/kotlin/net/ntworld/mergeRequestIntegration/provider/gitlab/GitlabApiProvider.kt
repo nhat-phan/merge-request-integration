@@ -25,6 +25,8 @@ class GitlabApiProvider(
 
     override val comment: CommentApi = GitlabCommentApi(infrastructure, credentials)
 
+    override val commit: CommitApi = GitlabCommitApi(infrastructure, credentials)
+
     override fun setOptions(options: ApiOptions) {
         myMergeRequestApi.options = options
     }

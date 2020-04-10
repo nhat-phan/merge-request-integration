@@ -20,7 +20,10 @@ class GithubApiProvider(
     override val project: ProjectApi = GithubProjectApi(infrastructure, credentials)
 
     override val comment: CommentApi
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        get() = TODO("not implemented")
+
+    override val commit: CommitApi
+        get() = TODO("Not yet implemented")
 
     override fun setOptions(options: ApiOptions) {
     }
