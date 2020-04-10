@@ -10,7 +10,7 @@ object RepositoryUtil {
     private val repositoryCached = mutableMapOf<String, GitRepository>()
 
     fun findRepository(ideaProject: IdeaProject, providerData: ProviderData): GitRepository? {
-        if (null == repositoryCached[providerData.id]) {
+        if (null === repositoryCached[providerData.id]) {
             val vcsRepositoryManager = VcsRepositoryManager.getInstance(ideaProject)
             for (repository in vcsRepositoryManager.repositories) {
                 if (repository.root.path == providerData.repository) {

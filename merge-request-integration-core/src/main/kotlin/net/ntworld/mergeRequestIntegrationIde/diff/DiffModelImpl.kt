@@ -99,12 +99,13 @@ class DiffModelImpl(
         comments: List<Comment>?,
         filter: ((ContentRevision, Comment) -> Boolean),
         factory: ((CommentPosition, Comment) -> CommentPoint),
-        matcher: ((CommentPosition, ContentRevision) -> Boolean)
+        matcher: ((CommentPosition, ContentRevision, List<String>) -> Boolean)
     ) {
         result.clear()
         if (null === revision) {
             return
         }
+        val commits = codeReviewManager.commits.map { it.id }
 
         val list = if (null !== comments) {
             comments.filter {
@@ -124,7 +125,7 @@ class DiffModelImpl(
             if (null === position) {
                 continue
             }
-            if (matcher.invoke(position, revision)) {
+            if (matcher.invoke(position, revision, commits)) {
                 result.add(factory(position, comment))
                 continue
             }
@@ -137,9 +138,9 @@ class DiffModelImpl(
         comments,
         commentFilterOnBeforeSide,
         commentFactoryOnBeforeSide
-    ) { position, revision ->
+    ) { position, revision, commits ->
         val hash = revision.revisionNumber.asString()
-        null !== position.oldLine && (position.startHash == hash || position.baseHash == hash)
+        null !== position.oldLine && (position.startHash == hash || position.baseHash == hash || commits.contains(hash))
     }
 
     private fun buildCommentsOnAfterSide(comments: List<Comment>?) = buildCommentPoints(
@@ -148,8 +149,8 @@ class DiffModelImpl(
         comments,
         commentFilterOnAfterSide,
         commentFactoryOnAfterSide
-    ) { position, revision ->
+    ) { position, revision, commits ->
         val hash = revision.revisionNumber.asString()
-        null !== position.newLine && (position.headHash == hash || position.baseHash == hash)
+        null !== position.newLine && (position.headHash == hash || position.baseHash == hash || commits.contains(hash))
     }
 }
