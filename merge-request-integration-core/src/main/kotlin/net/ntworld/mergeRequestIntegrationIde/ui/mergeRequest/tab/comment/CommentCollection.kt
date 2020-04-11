@@ -546,7 +546,7 @@ class CommentCollection(
         }
 
         private fun findIcon(): Icon {
-            val psiFile = findPsiFile(ideaProject, RepositoryUtil.findAbsolutePath(repository, data.nodeData.fullPath))
+            val psiFile = findPsiFile(ideaProject, RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, data.nodeData.fullPath))
             if (null === psiFile) {
                 return AllIcons.FileTypes.Any_type
             }

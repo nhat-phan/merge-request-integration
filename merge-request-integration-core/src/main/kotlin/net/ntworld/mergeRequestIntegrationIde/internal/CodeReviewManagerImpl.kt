@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangesUtil
@@ -18,6 +19,8 @@ internal class CodeReviewManagerImpl(
 ) : CodeReviewManager, CodeReviewUtil by util {
     override val repository: GitRepository? = RepositoryUtil.findRepository(ideaProject, providerData)
     override val messageBusConnection: MessageBusConnection = ideaProject.messageBus.connect()
+
+    private val myLogger = Logger.getInstance(this.javaClass)
 
     private var myComments: Collection<Comment> = listOf()
     private var myChanges: Collection<Change> = listOf()
@@ -82,10 +85,15 @@ internal class CodeReviewManagerImpl(
                 doHashComment(repository, position.oldPath!!, comment)
             }
         }
+        myLogger.info("myCommentsMap was built successfully")
+        myCommentsMap.forEach { (path, comments) ->
+            val commentIds = comments.map { it.id }
+            myLogger.info("$path contains ${commentIds.joinToString(",")}")
+        }
     }
 
     private fun doHashComment(repository: GitRepository, path: String, comment: Comment) {
-        val fullPath = RepositoryUtil.findAbsolutePath(repository, path)
+        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
         val list = myCommentsMap[fullPath]
         if (null === list) {
             myCommentsMap[fullPath] = mutableListOf(comment)
@@ -97,10 +105,12 @@ internal class CodeReviewManagerImpl(
     }
 
     override fun getCommentsByPath(path: String): List<Comment> {
-        val comments = myCommentsMap[path]
+        val crossPlatformsPath = RepositoryUtil.transformToCrossPlatformsPath(path)
+        val comments = myCommentsMap[crossPlatformsPath]
         if (null !== comments) {
             return comments
         }
+        myLogger.info("There is no comments for $crossPlatformsPath")
         return listOf()
     }
 

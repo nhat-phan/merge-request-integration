@@ -22,11 +22,15 @@ object RepositoryUtil {
         return repositoryCached[providerData.id]
     }
 
-    fun findAbsolutePath(repository: GitRepository?, relativePath: String): String {
+    fun transformToCrossPlatformsPath(input: String): String {
+        return if (input.contains('\\')) input.replace('\\', '/') else input
+    }
+
+    fun findAbsoluteCrossPlatformsPath(repository: GitRepository?, relativePath: String): String {
         if (null === repository) {
-            return relativePath.replace('/', File.separatorChar)
+            return transformToCrossPlatformsPath(relativePath)
         }
-        return "${repository.root.path}${File.separatorChar}${relativePath.replace('/', File.separatorChar)}"
+        return transformToCrossPlatformsPath("${repository.root.path}${File.separatorChar}$relativePath")
     }
 
     fun findRelativePath(repository: GitRepository?, absolutePath: String): String {

@@ -24,7 +24,8 @@ class DiffModelImpl(
         if (null === position || null === position.oldPath) {
             false
         } else {
-            RepositoryUtil.findAbsolutePath(codeReviewManager.repository, position.oldPath!!) == revision.file.path
+            RepositoryUtil.findAbsoluteCrossPlatformsPath(codeReviewManager.repository, position.oldPath!!) ==
+                RepositoryUtil.transformToCrossPlatformsPath(revision.file.path)
         }
     }
     private val commentFilterOnAfterSide: ((ContentRevision, Comment) -> Boolean) = { revision, comment ->
@@ -32,7 +33,8 @@ class DiffModelImpl(
         if (null === position || null === position.newPath) {
             false
         } else {
-            RepositoryUtil.findAbsolutePath(codeReviewManager.repository, position.newPath!!) == revision.file.path
+            RepositoryUtil.findAbsoluteCrossPlatformsPath(codeReviewManager.repository, position.newPath!!) ==
+                RepositoryUtil.transformToCrossPlatformsPath(revision.file.path)
         }
     }
     private val commentFactoryOnBeforeSide: ((CommentPosition, Comment) -> CommentPoint) = { position, comment ->

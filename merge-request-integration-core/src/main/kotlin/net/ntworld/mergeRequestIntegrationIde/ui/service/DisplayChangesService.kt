@@ -7,12 +7,10 @@ import com.intellij.diff.requests.NoDiffRequest
 import com.intellij.diff.util.DiffPlaces
 import com.intellij.ide.ui.UISettings
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.*
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.ui.tabs.JBTabsPosition
-import com.intellij.ui.tabs.impl.JBTabsImpl
 import com.intellij.vcs.log.Hash
 import com.intellij.vcs.log.impl.VcsLogContentUtil
 import com.intellij.vcs.log.impl.VcsLogManager
@@ -23,7 +21,6 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
 import javax.swing.SwingConstants
 import kotlin.concurrent.thread
@@ -196,7 +193,7 @@ object DisplayChangesService {
         repository: GitRepository?,
         path: String
     ) {
-        val fullPath = RepositoryUtil.findAbsolutePath(repository, path)
+        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
         val change = myChangePreviewDiffVirtualFileMap.keys.firstOrNull {
             val beforeRevision = it.beforeRevision
             if (null !== beforeRevision && beforeRevision.file.path == fullPath) {
