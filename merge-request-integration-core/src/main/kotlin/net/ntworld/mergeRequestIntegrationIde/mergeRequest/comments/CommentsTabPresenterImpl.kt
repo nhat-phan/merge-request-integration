@@ -49,5 +49,6 @@ class CommentsTabPresenterImpl(
 
     private fun handleWhenCommentsGetUpdated(source: DataChangedSource) {
         view.displayCommentCount(model.comments.size)
+        view.renderTree(model.comments, model.displayResolvedComments)
     }
 }
