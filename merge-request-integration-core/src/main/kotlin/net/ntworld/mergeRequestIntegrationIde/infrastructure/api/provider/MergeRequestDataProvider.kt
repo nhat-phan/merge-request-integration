@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider
 import com.intellij.util.messages.MessageBus
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -15,23 +15,25 @@ class MergeRequestDataProvider(
     private val messageBus: MessageBus
 ) : MergeRequestDataNotifier {
     private val getCommentsTaskListener = object : GetCommentsTask.Listener {
-        override fun dataReceived(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
+        override fun dataReceived(
+            providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>
+        ) {
             messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC)
-                .onCommentsUpdated(providerData, mergeRequest, comments)
+                .onCommentsUpdated(providerData, mergeRequestInfo, comments)
         }
     }
 
-    override fun fetchCommentsRequested(providerData: ProviderData, mergeRequest: MergeRequest) {
+    override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         val task = GetCommentsTask(
             applicationService,
             project,
             providerData,
-            mergeRequest,
+            mergeRequestInfo,
             getCommentsTaskListener
         )
         task.start()
     }
 
-    override fun onCommentsUpdated(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
+    override fun onCommentsUpdated(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>) {
     }
 }

@@ -5,6 +5,7 @@ import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
@@ -34,7 +35,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         visibleLine: Int,
         contentType: ContentType,
         comments: List<Comment>,
-        requestSource: DiffModel.Source
+        requestSource: DataChangedSource
     )
 
     fun displayEditorOnLine(

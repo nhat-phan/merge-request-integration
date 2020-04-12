@@ -15,6 +15,7 @@ import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
+import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
@@ -66,8 +67,8 @@ internal class DiffPresenterImpl(
 
     override fun onRediffAborted() {}
 
-    override fun onCommentsUpdated(source: DiffModel.Source) {
-        if (source == DiffModel.Source.NOTIFIER) {
+    override fun onCommentsUpdated(source: DataChangedSource) {
+        if (source == DataChangedSource.NOTIFIER) {
             ApplicationManager.getApplication().invokeLater {
                 handleWhenCommentsGetUpdated(source)
             }
@@ -76,7 +77,7 @@ internal class DiffPresenterImpl(
         }
     }
 
-    private fun handleWhenCommentsGetUpdated(source: DiffModel.Source) {
+    private fun handleWhenCommentsGetUpdated(source: DataChangedSource) {
         view.resetGutterIcons()
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
         view.destroyExistingComments(before.keys, DiffView.ContentType.BEFORE)

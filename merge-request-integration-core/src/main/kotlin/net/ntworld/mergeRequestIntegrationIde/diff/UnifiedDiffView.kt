@@ -7,6 +7,7 @@ import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
@@ -86,7 +87,7 @@ class UnifiedDiffView(
         visibleLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
-        requestSource: DiffModel.Source
+        requestSource: DataChangedSource
     ) {
         findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
             updateComments(

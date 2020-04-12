@@ -7,6 +7,7 @@ import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBusConnection
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.AbstractModel
+import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
@@ -46,12 +47,12 @@ class DiffModelImpl(
 
     private val messageBusConnection: MessageBusConnection = codeReviewManager.messageBusConnection
     private val myMergeRequestDataNotifier = object : MergeRequestDataNotifier {
-        override fun fetchCommentsRequested(providerData: ProviderData, mergeRequest: MergeRequest) {
+        override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         }
 
         override fun onCommentsUpdated(
             providerData: ProviderData,
-            mergeRequest: MergeRequest,
+            mergeRequestInfo: MergeRequestInfo,
             comments: List<Comment>
         ) {
             if (providerData.id != codeReviewManager.providerData.id ||
@@ -61,7 +62,7 @@ class DiffModelImpl(
             projectService.setCodeReviewComments(providerData, mergeRequest, comments)
             buildCommentsOnBeforeSide(comments)
             buildCommentsOnAfterSide(comments)
-            dispatcher.multicaster.onCommentsUpdated(DiffModel.Source.NOTIFIER)
+            dispatcher.multicaster.onCommentsUpdated(DataChangedSource.NOTIFIER)
         }
     }
 
@@ -92,7 +93,7 @@ class DiffModelImpl(
         displayResolvedComments = showResolved
         buildCommentsOnBeforeSide(null)
         buildCommentsOnAfterSide(null)
-        dispatcher.multicaster.onCommentsUpdated(DiffModel.Source.UI)
+        dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
     }
 
     private fun buildCommentPoints(

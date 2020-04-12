@@ -2,7 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.api
 
 import com.intellij.util.messages.Topic
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 
 interface MergeRequestDataNotifier {
@@ -10,8 +10,8 @@ interface MergeRequestDataNotifier {
         val TOPIC = Topic.create("MRI:MergeRequestDataNotifier", MergeRequestDataNotifier::class.java)
     }
 
-    fun fetchCommentsRequested(providerData: ProviderData, mergeRequest: MergeRequest)
+    fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo)
 
-    fun onCommentsUpdated(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>)
+    fun onCommentsUpdated(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>)
 
 }

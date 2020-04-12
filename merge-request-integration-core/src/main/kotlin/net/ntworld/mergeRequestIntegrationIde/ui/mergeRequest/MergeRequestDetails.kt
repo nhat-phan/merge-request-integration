@@ -7,10 +7,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabFactory
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabPresenter
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.task.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
@@ -59,9 +60,9 @@ class MergeRequestDetails(
         tabInfo
     }
 
-    private val myCommentsTab: MergeRequestCommentsTabUI = MergeRequestCommentsTab(applicationService, ideaProject)
-    private val myCommentsTabInfo: TabInfo by lazy {
-        val tabInfo = TabInfo(myCommentsTab.createComponent())
+    private val myLegacyCommentsTab: MergeRequestCommentsTabUI = MergeRequestCommentsTab(applicationService, ideaProject)
+    private val myLegacyCommentsTabInfo: TabInfo by lazy {
+        val tabInfo = TabInfo(myLegacyCommentsTab.createComponent())
         tabInfo.text = "Comments"
         tabInfo.icon = Icons.Comments
 
@@ -73,8 +74,17 @@ class MergeRequestDetails(
         }
 
         override fun refreshRequested(mergeRequest: MergeRequest) {
-            GetCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
+            GetLegacyCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
         }
+    }
+
+    private val myCommentsTabPresenter: CommentsTabPresenter by lazy {
+        val projectService = applicationService.getProjectService(ideaProject)
+        val model = CommentsTabFactory.makeCommentsTabModel(projectService, providerData)
+        val view = CommentsTabFactory.makeCommentsTabView()
+        CommentsTabFactory.makeCommentsTabPresenter(
+            applicationService, projectService, model, view
+        )
     }
 
     private val myTabs: TabsUI by lazy {
@@ -137,7 +147,7 @@ class MergeRequestDetails(
         }
     }
 
-    private val myGetCommentsListener = object: GetCommentsTask.Listener {
+    private val myGetCommentsListener = object: GetLegacyCommentsTask.Listener {
         override fun onError(exception: Exception) {
             println(exception)
         }
@@ -147,7 +157,7 @@ class MergeRequestDetails(
                 myToolbars.forEach {
                     it.setComments(mergeRequest, comments)
                 }
-                myCommentsTab.setComments(providerData, mergeRequest, comments)
+                myLegacyCommentsTab.setComments(providerData, mergeRequest, comments)
             }
         }
     }
@@ -172,12 +182,12 @@ class MergeRequestDetails(
             position: CommentPosition,
             item: CommentStore.Item
         ) {
-            myTabs.getTabs().select(myCommentsTabInfo, true)
+            myTabs.getTabs().select(myLegacyCommentsTabInfo, true)
         }
 
         override fun displayCommentRequested(comment: Comment) {
             if (applicationService.getProjectService(ideaProject).isDoingCodeReview()) {
-                myTabs.getTabs().select(myCommentsTabInfo, true)
+                myTabs.getTabs().select(myLegacyCommentsTabInfo, true)
             }
         }
     }
@@ -191,11 +201,12 @@ class MergeRequestDetails(
     init {
         myTabs.addTab(myInfoTabInfo)
         myTabs.addTab(myDescriptionTabInfo)
-        myTabs.addTab(myCommentsTabInfo)
+        myTabs.addTab(myLegacyCommentsTabInfo)
+        myTabs.addTab(myCommentsTabPresenter.tabInfo)
         myTabs.addTab(myCommitsTabInfo)
 
         myCommitsTab.dispatcher.addListener(mySelectCommitsListener)
-        myCommentsTab.dispatcher.addListener(myCommentsTabListener)
+        myLegacyCommentsTab.dispatcher.addListener(myCommentsTabListener)
         applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
@@ -204,7 +215,7 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequest(mergeRequest: MergeRequest) {
-        GetCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
+        GetLegacyCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
         myInfoTab.setMergeRequest(mergeRequest)
         myToolbars.forEach {
             it.setMergeRequest(mergeRequest)
@@ -216,7 +227,9 @@ class MergeRequestDetails(
 
         myInfoTab.setMergeRequestInfo(mergeRequestInfo)
         myDescriptionTab.setMergeRequestInfo(providerData, mergeRequestInfo)
-        myCommentsTabInfo.text = "Comments"
+        myLegacyCommentsTabInfo.text = "Comments"
+
+        myCommentsTabPresenter.model.mergeRequestInfo = mergeRequestInfo
 
         myTabs.getTabs().select(myInfoTabInfo, false)
         myTabs.component.isVisible = true
@@ -239,9 +252,9 @@ class MergeRequestDetails(
 
     private fun displayCommentsCount(count: Int) {
         if (count == 0) {
-            myCommentsTabInfo.text = "Comments"
+            myLegacyCommentsTabInfo.text = "Comments"
         } else {
-            myCommentsTabInfo.text = "Comments · $count"
+            myLegacyCommentsTabInfo.text = "Comments · $count"
         }
     }
 
