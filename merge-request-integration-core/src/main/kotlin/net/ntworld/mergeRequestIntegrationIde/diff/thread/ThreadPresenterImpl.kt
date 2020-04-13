@@ -6,6 +6,7 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
 
 class ThreadPresenterImpl(
     override val model: ThreadModel,
@@ -44,13 +45,7 @@ class ThreadPresenterImpl(
     }
 
     override fun onCommentsChanged(comments: List<Comment>) {
-        val groups = mutableMapOf<String, MutableList<Comment>>()
-        for (comment in model.comments) {
-            if (!groups.containsKey(comment.parentId)) {
-                groups[comment.parentId] = mutableListOf()
-            }
-            groups[comment.parentId]!!.add(comment)
-        }
+        val groups = CommentUtil.groupCommentsByThreadId(model.comments)
         val currentGroups = view.getAllGroupOfCommentsIds().toMutableSet()
 
         groups.forEach { (id, items) ->

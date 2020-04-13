@@ -23,24 +23,6 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
     }
 }
 
-//data class FileTreeNode(
-//    val path: String,
-//
-//    override val parent: RootCommentTreeNode,
-//
-//    override val children: List<CommentTreeNode>
-//) : CommentTreeNode
-//
-//data class FileLineTreeNode(
-//    val line: Int,
-//
-//    val position: CommentPosition,
-//
-//    override val parent: FileTreeNode,
-//
-//    override val children: List<CommentTreeNode>
-//) : CommentTreeNode
-
 //data class SingleCommentTreeNode(
 //    val commentId: String,
 //    val position: CommentPosition?,

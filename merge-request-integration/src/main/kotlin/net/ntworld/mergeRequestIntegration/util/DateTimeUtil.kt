@@ -35,4 +35,8 @@ object DateTimeUtil {
     fun toPretty(date: Date): String {
         return prettyTime.format(date)
     }
+
+    fun toPretty(datetime: DateTime): String {
+        return prettyTime.format(toDate(datetime))
+    }
 }

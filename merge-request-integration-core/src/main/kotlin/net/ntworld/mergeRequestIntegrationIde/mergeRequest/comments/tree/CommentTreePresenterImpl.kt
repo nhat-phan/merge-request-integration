@@ -7,7 +7,20 @@ import java.util.*
 class CommentTreePresenterImpl(
     override val model: CommentTreeModel,
     override val view: CommentTreeView
-) : AbstractPresenter<EventListener>(), CommentTreePresenter {
+) : AbstractPresenter<EventListener>(), CommentTreePresenter, CommentTreeModel.DataListener {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
+
+    init {
+        model.addDataListener(this)
+        // view.addActionListener()
+    }
+
+    override fun onCommentsUpdated() {
+        view.renderTree(model.comments)
+    }
+
+    override fun onDisplayResolvedCommentsChanged() {
+        view.setShowResolvedCommentState(model.displayResolvedComments)
+    }
 
 }

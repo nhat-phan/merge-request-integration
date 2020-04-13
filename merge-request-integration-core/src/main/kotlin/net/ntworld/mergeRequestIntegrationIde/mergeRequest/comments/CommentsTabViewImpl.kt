@@ -7,11 +7,14 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class CommentsTabViewImpl() : AbstractView<CommentsTabView.ActionListener>(), CommentsTabView {
+class CommentsTabViewImpl(
+    private val projectService: ProjectService
+) : AbstractView<CommentsTabView.ActionListener>(), CommentsTabView {
     override val dispatcher = EventDispatcher.create(CommentsTabView.ActionListener::class.java)
 
     private val mySplitter = OnePixelSplitter(
@@ -20,13 +23,14 @@ class CommentsTabViewImpl() : AbstractView<CommentsTabView.ActionListener>(), Co
     )
     private val myTreePresenter: CommentTreePresenter = CommentTreeFactory.makePresenter(
         CommentTreeFactory.makeModel(),
-        CommentTreeFactory.makeView()
+        CommentTreeFactory.makeView(projectService.project)
     )
 
     override val component: JComponent = mySplitter
 
     override val tabInfo: TabInfo by lazy {
         val tabInfo = TabInfo(component)
+        tabInfo.text = "Comments"
         tabInfo.icon = Icons.Comments
         tabInfo
     }

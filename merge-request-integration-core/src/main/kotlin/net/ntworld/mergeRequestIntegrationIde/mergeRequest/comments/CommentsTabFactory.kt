@@ -7,8 +7,8 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 object CommentsTabFactory {
-    fun makeCommentsTabView(): CommentsTabView {
-        return CommentsTabViewImpl()
+    fun makeCommentsTabView(projectService: ProjectService): CommentsTabView {
+        return CommentsTabViewImpl(projectService)
     }
 
     fun makeCommentsTabModel(

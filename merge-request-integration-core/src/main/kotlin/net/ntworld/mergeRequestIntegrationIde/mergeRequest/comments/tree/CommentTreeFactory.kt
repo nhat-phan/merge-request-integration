@@ -1,12 +1,14 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree
 
+import com.intellij.openapi.project.Project as IdeaProject
+
 object CommentTreeFactory {
     fun makeModel(): CommentTreeModel {
         return CommentTreeModelImpl()
     }
 
-    fun makeView(): CommentTreeView {
-        return CommentTreeViewImpl()
+    fun makeView(ideaProject: IdeaProject): CommentTreeView {
+        return CommentTreeViewImpl(ideaProject)
     }
 
     fun makePresenter(

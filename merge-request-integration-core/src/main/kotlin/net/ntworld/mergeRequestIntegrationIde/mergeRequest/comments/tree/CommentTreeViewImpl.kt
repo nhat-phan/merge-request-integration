@@ -1,16 +1,21 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree
 
 import com.intellij.ide.util.treeView.NodeRenderer
+import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.NodeFactory
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.RootNodeBuilder
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
 import javax.swing.tree.*
 
-class CommentTreeViewImpl : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
+class CommentTreeViewImpl(
+    private val ideaProject: IdeaProject
+) : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
 
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
@@ -46,10 +51,10 @@ class CommentTreeViewImpl : AbstractView<CommentTreeView.ActionListener>(), Comm
     }
 
     override fun renderTree(comments: List<Comment>) {
-//        val builder = TreeNodeBuilder(comments)
-//
-//        TreeNodeFactory.applyToTreeRoot(ideaProject, builder.build(), myRoot)
-//        myModel.nodeStructureChanged(myRoot)
+        val builder = RootNodeBuilder(comments)
+
+        NodeFactory.applyToTreeRoot(ideaProject, builder.build(), myRoot)
+        myModel.nodeStructureChanged(myRoot)
     }
 
     override fun setShowResolvedCommentState(selected: Boolean) {

@@ -34,4 +34,8 @@ object Icons {
         val WritingComment = IconLoader.getIcon("/icons/gutter-writing-comment.svg", Icons::class.java)
     }
 
+    object TreeNode {
+        val ResolvedComment = IconLoader.getIcon("/icons/check-square.svg", Icons::class.java)
+        val UnresolvedComment = IconLoader.getIcon("/icons/square-yellow.svg", Icons::class.java)
+    }
 }
