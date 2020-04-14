@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.util
 
 import net.ntworld.mergeRequest.Approval
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import javax.swing.Icon
 
 fun Approval.findVisibilityIconAndTextForApproval() : Triple<Boolean, Icon?, String?> {

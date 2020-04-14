@@ -27,8 +27,8 @@ import net.ntworld.mergeRequestIntegrationIde.internal.CommentStoreItem
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
-import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.awt.Component
 import javax.swing.Icon
 import javax.swing.JComponent

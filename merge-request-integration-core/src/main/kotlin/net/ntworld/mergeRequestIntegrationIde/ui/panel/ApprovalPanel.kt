@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.panel
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Approval
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import java.util.*
 import javax.swing.BoxLayout
 import javax.swing.JButton

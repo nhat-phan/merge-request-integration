@@ -13,11 +13,9 @@ import net.ntworld.mergeRequest.command.ApproveMergeRequestCommand
 import net.ntworld.mergeRequest.command.UnapproveMergeRequestCommand
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
-import net.ntworld.mergeRequestIntegrationIde.task.FindApprovalTask
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ApprovalPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.service.CodeReviewService
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.findVisibilityIconAndTextForApproval
 import java.awt.Dimension
 import java.awt.Point

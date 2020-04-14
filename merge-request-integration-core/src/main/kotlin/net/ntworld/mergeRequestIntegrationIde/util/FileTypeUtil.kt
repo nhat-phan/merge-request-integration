@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.util
+package net.ntworld.mergeRequestIntegrationIde.util
 
 import com.intellij.lang.Language
 import com.intellij.openapi.fileTypes.LanguageFileType

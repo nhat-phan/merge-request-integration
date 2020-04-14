@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.util
+package net.ntworld.mergeRequestIntegrationIde.util
 
 import net.ntworld.mergeRequest.ProviderData
 import org.commonmark.parser.Parser

@@ -5,7 +5,7 @@ import com.intellij.ui.SimpleTextAttributes
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 
 open class CommentNode(
     val comment: Comment,

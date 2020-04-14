@@ -9,7 +9,7 @@ import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewUtil
-import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 internal class CodeReviewManagerImpl(
     private val ideaProject: IdeaProject,

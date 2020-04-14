@@ -12,8 +12,8 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import java.awt.Color
 import java.awt.Cursor
 import java.awt.event.MouseEvent

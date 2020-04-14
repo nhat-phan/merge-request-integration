@@ -5,7 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import git4idea.fetch.GitFetchSupport
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import com.intellij.openapi.project.Project as IdeaProject
 
 class RepositoryFetchAllRemotesTask(

@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import com.intellij.openapi.editor.markup.GutterIconRenderer as GutterIconRendererClass
 
 class GutterIconRendererImpl(

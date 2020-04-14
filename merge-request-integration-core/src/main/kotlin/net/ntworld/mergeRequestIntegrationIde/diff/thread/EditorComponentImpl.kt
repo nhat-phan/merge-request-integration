@@ -9,7 +9,7 @@ import com.intellij.ui.JBColor
 import com.intellij.util.EventDispatcher
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
-import net.ntworld.mergeRequestIntegrationIde.ui.util.FileTypeUtil
+import net.ntworld.mergeRequestIntegrationIde.util.FileTypeUtil
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.FocusEvent

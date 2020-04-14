@@ -17,8 +17,8 @@ import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.MergeRequestDescriptionTab
-import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import java.awt.ComponentOrientation
 import java.awt.Dimension
 import java.awt.event.ActionListener

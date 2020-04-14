@@ -8,7 +8,7 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import javax.swing.JComponent
 import javax.swing.JPanel
 

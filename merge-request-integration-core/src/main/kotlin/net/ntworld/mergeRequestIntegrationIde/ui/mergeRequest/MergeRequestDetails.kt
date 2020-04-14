@@ -16,7 +16,7 @@ import net.ntworld.mergeRequestIntegrationIde.task.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
 import net.ntworld.mergeRequestIntegrationIde.ui.service.FetchService
-import net.ntworld.mergeRequestIntegrationIde.ui.util.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent

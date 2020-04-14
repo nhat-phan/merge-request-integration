@@ -22,7 +22,7 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
-import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.util.*
 
 internal class DiffPresenterImpl(

@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project as IdeaProject
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.ui.util.RepositoryUtil
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import kotlin.Exception
 
 object CheckoutService {

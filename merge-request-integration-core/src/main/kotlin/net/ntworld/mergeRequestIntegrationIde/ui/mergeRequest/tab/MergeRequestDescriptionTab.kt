@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab
 import com.intellij.ide.util.TipUIUtil
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.ui.util.HtmlHelper
+import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
 import javax.swing.JComponent
 
 class MergeRequestDescriptionTab : MergeRequestDescriptionTabUI {
