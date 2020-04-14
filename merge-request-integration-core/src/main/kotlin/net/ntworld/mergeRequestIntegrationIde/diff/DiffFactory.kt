@@ -6,6 +6,7 @@ import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
@@ -51,12 +52,7 @@ object DiffFactory {
         return UnifiedDiffView(applicationService, viewer, change)
     }
 
-    fun makeDiffModel(applicationService: ApplicationService, ideaProject: IdeaProject, change: Change): DiffModel? {
-        val projectService = applicationService.getProjectService(ideaProject)
-        val codeReviewManager = projectService.codeReviewManager
-        if (null === codeReviewManager) {
-            return null
-        }
-        return DiffModelImpl(projectService, codeReviewManager, change, false)
+    fun makeDiffModel(projectService: ProjectService, reviewContext: ReviewContext, change: Change): DiffModel? {
+        return DiffModelImpl(projectService, reviewContext, change, false)
     }
 }

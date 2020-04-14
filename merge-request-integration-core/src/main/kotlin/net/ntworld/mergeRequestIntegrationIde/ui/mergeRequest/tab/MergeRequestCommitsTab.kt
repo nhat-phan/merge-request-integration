@@ -27,7 +27,7 @@ class MergeRequestCommitsTab(
         0.5f
     )
     private val myCollection: CommitCollectionUI = CommitCollection()
-    private val myChanges: CommitChangesUI = CommitChanges(ideaProject)
+    private val myChanges: CommitChangesUI = CommitChanges(applicationService.getProjectService(ideaProject))
     private val myCollectionListener = object : CommitCollectionUI.Listener {
         override fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
             if (commits.isEmpty()) {

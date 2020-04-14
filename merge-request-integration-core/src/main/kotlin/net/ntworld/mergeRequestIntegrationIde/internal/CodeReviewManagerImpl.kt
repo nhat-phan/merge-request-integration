@@ -68,6 +68,7 @@ internal class CodeReviewManagerImpl(
         }
     }
 
+    // TODO: this function will be replaced by ReviewContext
     private fun buildCommentsMap(value: Collection<Comment>) {
         if (null === repository) {
             return

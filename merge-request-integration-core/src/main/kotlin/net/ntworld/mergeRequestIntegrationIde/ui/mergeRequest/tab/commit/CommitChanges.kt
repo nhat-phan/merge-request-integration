@@ -3,8 +3,10 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
+import com.intellij.openapi.vcs.changes.ui.ChangesBrowserChangeNode
 import com.intellij.openapi.vcs.changes.ui.ChangesTreeImpl
 import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
 import com.intellij.ui.ScrollPaneFactory
@@ -12,6 +14,7 @@ import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
@@ -20,13 +23,25 @@ import javax.swing.JPanel
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
-class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
+class CommitChanges(private val projectService: ProjectService) : CommitChangesUI {
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
-    private val myTree = MyTree(ideaProject)
+    private val myTree = MyTree(projectService.project)
 
     init {
         myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree, true))
         myComponent.toolbar = createToolbar()
+        myTree.addTreeSelectionListener {
+            if (null !== it) {
+                val lastPath = it.path.lastPathComponent
+                if (lastPath is ChangesBrowserChangeNode) {
+                    DisplayChangesService.openChange(
+                        projectService.project,
+                        FileEditorManagerEx.getInstanceEx(projectService.project),
+                        lastPath.userObject
+                    )
+                }
+            }
+        }
     }
 
     override fun clear() {
@@ -46,7 +61,7 @@ class CommitChanges(private val ideaProject: IdeaProject) : CommitChangesUI {
     override fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
         myTree.isVisible = false
         thread {
-            val changes = DisplayChangesService.findChanges(ideaProject, providerData, commits.map { it.id })
+            val changes = projectService.repositoryFile.findChanges(providerData, commits.map { it.id })
             ApplicationManager.getApplication().invokeLater {
                 myTree.setChangesToDisplay(changes)
                 myTree.isVisible = true

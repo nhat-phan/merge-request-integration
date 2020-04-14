@@ -14,11 +14,15 @@ import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequest.query.generated.GetMergeRequestFilterImpl
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
+import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
@@ -87,6 +91,13 @@ abstract class AbstractProjectService(
             }
             return ApiProviderManager.providerDataCollection
         }
+
+    override val repositoryFile: RepositoryFileService by lazy {
+        CachedRepositoryFile(
+            LocalRepositoryFileService(ideaProject = project),
+            MemoryCache()
+        )
+    }
 
     init {
         dispatcher.addListener(myProjectEventListener)

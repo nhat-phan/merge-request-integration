@@ -9,7 +9,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.Label
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
@@ -25,7 +25,7 @@ import javax.swing.JPanel
 class CommentComponentImpl(
     private val groupComponent: GroupComponent,
     private val providerData: ProviderData,
-    private val mergeRequest: MergeRequest,
+    private val mergeRequestInfo: MergeRequestInfo,
     private val comment: Comment,
     private val indent: Int
 ) : CommentComponent {
@@ -59,7 +59,7 @@ class CommentComponentImpl(
         "View in browser", "Open and view the comment in browser", Icons.ExternalLink
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            BrowserUtil.open(providerData.info.createCommentUrl(mergeRequest.url, comment))
+            BrowserUtil.open(providerData.info.createCommentUrl(mergeRequestInfo.url, comment))
         }
     }
     private val myReplyAction = object : AnAction(

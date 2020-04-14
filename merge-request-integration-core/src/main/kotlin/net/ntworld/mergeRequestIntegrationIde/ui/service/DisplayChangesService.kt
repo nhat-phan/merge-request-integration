@@ -143,28 +143,6 @@ object DisplayChangesService {
         displayChanges(applicationService, ideaProject, fileEditorManagerEx, providerData, mergeRequest, changes)
     }
 
-    fun findChanges(ideaProject: IdeaProject, providerData: ProviderData, hashes: List<String>): List<Change> {
-        try {
-            val repository = RepositoryUtil.findRepository(ideaProject, providerData)
-            if (null === repository) {
-                return listOf()
-            }
-            val log = VcsLogContentUtil.getOrCreateLog(ideaProject)
-            if (null === log) {
-                return listOf()
-            }
-
-            val details = VcsLogUtil.getDetails(
-                log.dataManager.getLogProvider(repository.root),
-                repository.root,
-                hashes
-            )
-            return VcsLogUtil.collectChanges(details) { it.changes }
-        } catch (exception: Exception) {
-            return listOf()
-        }
-    }
-
     private fun displayChanges(
         applicationService: ApplicationService,
         ideaProject: IdeaProject,

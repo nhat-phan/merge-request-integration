@@ -7,7 +7,7 @@ import com.intellij.ui.components.Panel
 import com.intellij.util.EventDispatcher
 import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
@@ -16,7 +16,7 @@ import javax.swing.JComponent
 class GroupComponentImpl(
     private val borderTop: Boolean,
     private val providerData: ProviderData,
-    private val mergeRequest: MergeRequest,
+    private val mergeRequestInfo: MergeRequestInfo,
     private val project: IdeaProject,
     override val id: String,
     comments: List<Comment>
@@ -174,7 +174,7 @@ class GroupComponentImpl(
 
         items.forEachIndexed { index, comment ->
             val commentComponent = ComponentFactory
-                .makeComment(this, providerData, mergeRequest, comment, if (index == 0) 0 else 1)
+                .makeComment(this, providerData, mergeRequestInfo, comment, if (index == 0) 0 else 1)
 
             myPanel.add(commentComponent.component)
             myCommentComponents.add(commentComponent)

@@ -10,6 +10,7 @@ import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommentsQuery
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class GetLegacyCommentsTask(
@@ -36,6 +37,7 @@ class GetLegacyCommentsTask(
                 mergeRequestId = mergeRequest.id
             )
             listener.dataReceived(providerData, mergeRequest, result.comments)
+            ReviewContextManager.updateComments(providerData.id, mergeRequest.id, result.comments)
             listener.taskEnded()
         } catch (exception: Exception) {
             listener.onError(exception)

@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 import com.intellij.diff.FrameDiffTool
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.View
@@ -31,7 +31,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun updateComments(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         visibleLine: Int,
         contentType: ContentType,
         comments: List<Comment>,
@@ -40,7 +40,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun displayEditorOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: ContentType,
         comments: List<Comment>
@@ -48,7 +48,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: ContentType,
         comments: List<Comment>,

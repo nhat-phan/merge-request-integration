@@ -10,6 +10,7 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommitsQuery
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class GetCommitsTask(
@@ -36,6 +37,7 @@ class GetCommitsTask(
                 mergeRequestId = mergeRequestInfo.id
             )
             listener.dataReceived(mergeRequestInfo, result.commits)
+            ReviewContextManager.updateCommits(providerData.id, mergeRequestInfo.id, result.commits)
             listener.taskEnded()
         } catch (exception: Exception) {
             listener.onError(exception)

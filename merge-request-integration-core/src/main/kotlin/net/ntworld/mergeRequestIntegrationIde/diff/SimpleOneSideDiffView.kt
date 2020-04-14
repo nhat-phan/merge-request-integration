@@ -1,11 +1,10 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
@@ -46,7 +45,7 @@ class SimpleOneSideDiffView(
 
     override fun updateComments(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         visibleLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
@@ -54,7 +53,7 @@ class SimpleOneSideDiffView(
     ) {
         updateComments(
             providerData,
-            mergeRequest,
+            mergeRequestInfo,
             viewer.editor,
             calcPosition(visibleLine - 1),
             findGutterIconRenderer(visibleLine - 1, contentType),
@@ -64,13 +63,13 @@ class SimpleOneSideDiffView(
 
     override fun displayEditorOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
         displayCommentsAndEditorOnLine(
-            providerData, mergeRequest,
+            providerData, mergeRequestInfo,
             viewer.editor,
             calcPosition(logicalLine),
             logicalLine, contentType,
@@ -80,14 +79,14 @@ class SimpleOneSideDiffView(
 
     override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
         mode: DiffView.DisplayCommentMode
     ) {
         toggleCommentsOnLine(
-            providerData, mergeRequest,
+            providerData, mergeRequestInfo,
             viewer.editor,
             calcPosition(logicalLine),
             logicalLine, contentType,

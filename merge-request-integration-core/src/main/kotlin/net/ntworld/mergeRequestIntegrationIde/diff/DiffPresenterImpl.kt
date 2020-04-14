@@ -84,7 +84,7 @@ internal class DiffPresenterImpl(
         for (item in before) {
             view.updateComments(
                 model.providerData,
-                model.mergeRequest,
+                model.mergeRequestInfo,
                 item.key,
                 DiffView.ContentType.BEFORE,
                 item.value,
@@ -97,7 +97,7 @@ internal class DiffPresenterImpl(
         for (item in after) {
             view.updateComments(
                 model.providerData,
-                model.mergeRequest,
+                model.mergeRequestInfo,
                 item.key,
                 DiffView.ContentType.AFTER,
                 item.value,
@@ -113,7 +113,7 @@ internal class DiffPresenterImpl(
             GutterActionType.ADD -> {
                 view.displayEditorOnLine(
                     model.providerData,
-                    model.mergeRequest,
+                    model.mergeRequestInfo,
                     renderer.logicalLine,
                     renderer.contentType,
                     collectCommentsOfGutterIconRenderer(renderer)
@@ -123,7 +123,7 @@ internal class DiffPresenterImpl(
             GutterActionType.TOGGLE -> {
                 view.changeCommentsVisibilityOnLine(
                     model.providerData,
-                    model.mergeRequest,
+                    model.mergeRequestInfo,
                     renderer.logicalLine,
                     renderer.contentType,
                     collectCommentsOfGutterIconRenderer(renderer),
@@ -138,7 +138,7 @@ internal class DiffPresenterImpl(
     ) {
         applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
             providerId = model.providerData.id,
-            mergeRequestId = model.mergeRequest.id,
+            mergeRequestId = model.mergeRequestInfo.id,
             repliedComment = repliedComment,
             body = content
         ) ifError {
@@ -158,7 +158,7 @@ internal class DiffPresenterImpl(
         val commentPosition = convertGutterPositionToCommentPosition(position)
         applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
-            mergeRequestId = model.mergeRequest.id,
+            mergeRequestId = model.mergeRequestInfo.id,
             position = commentPosition,
             body = content
         ) ifError {
@@ -175,7 +175,7 @@ internal class DiffPresenterImpl(
     override fun onDeleteCommentRequested(comment: Comment) {
         applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
             providerId = model.providerData.id,
-            mergeRequestId = model.mergeRequest.id,
+            mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
         )
         fetchAndUpdateComments()
@@ -184,7 +184,7 @@ internal class DiffPresenterImpl(
     override fun onResolveCommentRequested(comment: Comment) {
         applicationService.infrastructure.commandBus() process ResolveCommentCommand.make(
             providerId = model.providerData.id,
-            mergeRequestId = model.mergeRequest.id,
+            mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
         )
         fetchAndUpdateComments()
@@ -193,7 +193,7 @@ internal class DiffPresenterImpl(
     override fun onUnresolveCommentRequested(comment: Comment) {
         applicationService.infrastructure.commandBus() process UnresolveCommentCommand.make(
             providerId = model.providerData.id,
-            mergeRequestId = model.mergeRequest.id,
+            mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
         )
         fetchAndUpdateComments()
@@ -201,7 +201,7 @@ internal class DiffPresenterImpl(
 
     private fun fetchAndUpdateComments() {
         projectService.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(
-            model.providerData, model.mergeRequest
+            model.providerData, model.mergeRequestInfo
         )
     }
 
@@ -261,12 +261,12 @@ internal class DiffPresenterImpl(
             return model.commits.last().id
         }
 
-        val diff = model.mergeRequest.diffReference
+        val diff = model.diffReference
         return if (null === diff) "" else diff.baseHash
     }
 
     private fun findStartHash(): String {
-        val diff = model.mergeRequest.diffReference
+        val diff = model.diffReference
         return if (null === diff) "" else diff.startHash
     }
 
@@ -275,7 +275,7 @@ internal class DiffPresenterImpl(
             return model.commits.first().id
         }
 
-        val diff = model.mergeRequest.diffReference
+        val diff = model.diffReference
         return if (null === diff) "" else diff.headHash
     }
 }

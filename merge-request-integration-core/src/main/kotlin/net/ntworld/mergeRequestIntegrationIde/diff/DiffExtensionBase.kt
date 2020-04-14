@@ -13,13 +13,15 @@ import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.actions.diff.ChangeDiffRequestProducer
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 
 open class DiffExtensionBase(
     private val applicationService: ApplicationService
 ) : DiffExtension() {
 
     override fun onViewerCreated(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest) {
-        val presenter = createPresenter(viewer)
+        val presenter = createPresenter(viewer, context, request)
         if (null === presenter) {
             return
         }
@@ -37,10 +39,19 @@ open class DiffExtensionBase(
         )
     }
 
-    private fun createPresenter(viewer: FrameDiffTool.DiffViewer): DiffPresenter? {
+    private fun findReviewContext(viewer: DiffViewerBase, context: DiffContext, request: DiffRequest): ReviewContext? {
+        return ReviewContextManager.findSelectedContext()
+    }
+
+    private fun createPresenter(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest): DiffPresenter? {
         return if (viewer is DiffViewerBase) {
+            val reviewContext = findReviewContext(viewer, context, request)
+            if (null === reviewContext) {
+                return null
+            }
+
             assertViewerIsValid(viewer) { project, change ->
-                val model = DiffFactory.makeDiffModel(applicationService, project, change)
+                val model = DiffFactory.makeDiffModel(applicationService.getProjectService(project), reviewContext, change)
                 val view = DiffFactory.makeView(applicationService, viewer, change)
                 if (null !== view && null !== model) {
                     DiffFactory.makeDiffPresenter(

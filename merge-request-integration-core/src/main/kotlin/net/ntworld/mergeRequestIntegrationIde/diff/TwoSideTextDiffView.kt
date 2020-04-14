@@ -2,11 +2,10 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.Side
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
@@ -61,7 +60,7 @@ class TwoSideTextDiffView(
 
     override fun updateComments(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         visibleLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
@@ -69,12 +68,12 @@ class TwoSideTextDiffView(
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             updateComments(
-                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(visibleLine - 1),
+                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(visibleLine - 1),
                 findGutterIconRenderer(visibleLine - 1, contentType), comments
             )
         } else {
             updateComments(
-                providerData, mergeRequest, viewer.editor2, calcPositionEditor1(visibleLine - 1),
+                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor1(visibleLine - 1),
                 findGutterIconRenderer(visibleLine - 1, contentType), comments
             )
         }
@@ -82,19 +81,19 @@ class TwoSideTextDiffView(
 
     override fun displayEditorOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             displayCommentsAndEditorOnLine(
-                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine),
+                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(logicalLine),
                 logicalLine, contentType, comments
             )
         } else {
             displayCommentsAndEditorOnLine(
-                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine),
+                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor2(logicalLine),
                 logicalLine, contentType, comments
             )
         }
@@ -102,7 +101,7 @@ class TwoSideTextDiffView(
 
     override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
@@ -110,12 +109,12 @@ class TwoSideTextDiffView(
     ) {
         if (contentType == DiffView.ContentType.BEFORE) {
             toggleCommentsOnLine(
-                providerData, mergeRequest, viewer.editor1, calcPositionEditor1(logicalLine),
+                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(logicalLine),
                 logicalLine, contentType, comments, mode
             )
         } else {
             toggleCommentsOnLine(
-                providerData, mergeRequest, viewer.editor2, calcPositionEditor2(logicalLine),
+                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor2(logicalLine),
                 logicalLine, contentType, comments, mode
             )
         }

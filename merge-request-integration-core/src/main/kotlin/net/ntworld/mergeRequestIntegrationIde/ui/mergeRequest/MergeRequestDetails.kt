@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
 import net.ntworld.mergeRequestIntegrationIde.ui.service.FetchService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
@@ -223,6 +224,7 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequestInfo(mergeRequestInfo: MergeRequestInfo) {
+        ReviewContextManager.initContext(ideaProject, providerData, mergeRequestInfo, true)
         FetchService.start(applicationService, ideaProject, providerData, mergeRequestInfo)
 
         myInfoTab.setMergeRequestInfo(mergeRequestInfo)
@@ -236,7 +238,7 @@ class MergeRequestDetails(
         myToolbars.forEach {
             it.setMergeRequestInfo(mergeRequestInfo)
         }
-        FindMergeRequestTask(applicationService, ideaProject, providerData, mergeRequestInfo.id, myFindMRListener)
+        FindMergeRequestTask(applicationService, ideaProject, providerData, mergeRequestInfo, myFindMRListener)
             .start()
         GetPipelinesTask(applicationService, ideaProject, providerData, mergeRequestInfo, myGetPipelinesListener)
             .start()

@@ -1,11 +1,10 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
@@ -83,7 +82,7 @@ class UnifiedDiffView(
 
     override fun updateComments(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         visibleLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,
@@ -92,7 +91,7 @@ class UnifiedDiffView(
         findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
             updateComments(
                 providerData,
-                mergeRequest,
+                mergeRequestInfo,
                 viewer.editor,
                 calcPosition(logicalLine),
                 renderer,
@@ -103,13 +102,13 @@ class UnifiedDiffView(
 
     override fun displayEditorOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>
     ) {
         displayCommentsAndEditorOnLine(
-            providerData, mergeRequest,
+            providerData, mergeRequestInfo,
             viewer.editor,
             calcPosition(logicalLine),
             logicalLine, contentType,
@@ -119,7 +118,7 @@ class UnifiedDiffView(
 
     override fun changeCommentsVisibilityOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequest: MergeRequestInfo,
         logicalLine: Int,
         contentType: DiffView.ContentType,
         comments: List<Comment>,

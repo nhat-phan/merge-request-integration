@@ -15,6 +15,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.internal.option.*
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
@@ -25,7 +26,7 @@ import org.jdom.Element
 import java.net.URL
 
 abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
-    override val watcherManager: WatcherManager = WatcherManagerImpl()
+    final override val watcherManager: WatcherManager = WatcherManagerImpl()
 
     private val publicLegalGrantedDomains = listOf(
         "gitlab.com",
@@ -55,15 +56,12 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
         override fun appClosing() {
             watcherManager.dispose()
         }
-
-        override fun appStarting(projectFromCommandLine: Project?) {
-            println(projectFromCommandLine)
-        }
     }
 
     init {
         val connection = ApplicationManager.getApplication().messageBus.connect()
         connection.subscribe(AppLifecycleListener.TOPIC, myAppLifecycleListener)
+        watcherManager.addWatcher(ReviewContextManager)
 //        private val myBranchChangeListener = object: BranchChangeListener {
 //            override fun branchWillChange(branchName: String) {
 //                println("branchWillChange $branchName")

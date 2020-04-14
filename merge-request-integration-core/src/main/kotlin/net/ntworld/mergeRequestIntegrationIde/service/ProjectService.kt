@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import com.intellij.openapi.project.Project as IdeaProject
 
 interface ProjectService {
@@ -27,6 +28,8 @@ interface ProjectService {
     val codeReviewUtil: CodeReviewUtil
 
     val registeredProviders: List<ProviderData>
+
+    val repositoryFile: RepositoryFileService
 
     fun getApplicationService(): ApplicationService
 

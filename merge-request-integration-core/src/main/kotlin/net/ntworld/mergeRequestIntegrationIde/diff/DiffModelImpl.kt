@@ -8,14 +8,14 @@ import com.intellij.util.messages.MessageBusConnection
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class DiffModelImpl(
     private val projectService: ProjectService,
-    private val codeReviewManager: CodeReviewManager,
+    private val reviewContext: ReviewContext,
     override val change: Change,
     override var displayResolvedComments: Boolean
 ) : AbstractModel<DiffModel.DataListener>(), DiffModel {
@@ -25,7 +25,7 @@ class DiffModelImpl(
         if (null === position || null === position.oldPath) {
             false
         } else {
-            RepositoryUtil.findAbsoluteCrossPlatformsPath(codeReviewManager.repository, position.oldPath!!) ==
+            RepositoryUtil.findAbsoluteCrossPlatformsPath(reviewContext.repository, position.oldPath!!) ==
                 RepositoryUtil.transformToCrossPlatformsPath(revision.file.path)
         }
     }
@@ -34,7 +34,7 @@ class DiffModelImpl(
         if (null === position || null === position.newPath) {
             false
         } else {
-            RepositoryUtil.findAbsoluteCrossPlatformsPath(codeReviewManager.repository, position.newPath!!) ==
+            RepositoryUtil.findAbsoluteCrossPlatformsPath(reviewContext.repository, position.newPath!!) ==
                 RepositoryUtil.transformToCrossPlatformsPath(revision.file.path)
         }
     }
@@ -45,7 +45,7 @@ class DiffModelImpl(
         CommentPoint(position.newLine!!, comment)
     }
 
-    private val messageBusConnection: MessageBusConnection = codeReviewManager.messageBusConnection
+    private val messageBusConnection: MessageBusConnection = reviewContext.messageBusConnection
     private val myMergeRequestDataNotifier = object : MergeRequestDataNotifier {
         override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         }
@@ -55,20 +55,22 @@ class DiffModelImpl(
             mergeRequestInfo: MergeRequestInfo,
             comments: List<Comment>
         ) {
-            if (providerData.id != codeReviewManager.providerData.id ||
-                mergeRequest.id != codeReviewManager.mergeRequest.id) {
+            if (providerData.id != reviewContext.providerData.id ||
+                mergeRequestInfo.id != reviewContext.mergeRequestInfo.id) {
                 return
             }
-            projectService.setCodeReviewComments(providerData, mergeRequest, comments)
             buildCommentsOnBeforeSide(comments)
             buildCommentsOnAfterSide(comments)
             dispatcher.multicaster.onCommentsUpdated(DataChangedSource.NOTIFIER)
         }
     }
 
-    override val providerData = codeReviewManager.providerData
-    override val mergeRequest = codeReviewManager.mergeRequest
-    override val commits = codeReviewManager.commits.toList()
+    override val providerData = reviewContext.providerData
+    override val mergeRequestInfo = reviewContext.mergeRequestInfo
+    override val diffReference: DiffReference?
+        get() = reviewContext.diffReference
+    override val commits
+        get() = reviewContext.commits
 
     override var commentsOnBeforeSide = mutableListOf<CommentPoint>()
         private set
@@ -108,7 +110,7 @@ class DiffModelImpl(
         if (null === revision) {
             return
         }
-        val commits = codeReviewManager.commits.map { it.id }
+        val commitIds = reviewContext.commits.map { it.id }
 
         val list = if (null !== comments) {
             comments.filter {
@@ -119,7 +121,7 @@ class DiffModelImpl(
                 }
             }
         } else {
-            codeReviewManager.getCommentsByPath(revision.file.path).filter {
+            reviewContext.getCommentsByPath(revision.file.path).filter {
                 displayResolvedComments || !it.resolved
             }
         }
@@ -128,7 +130,7 @@ class DiffModelImpl(
             if (null === position) {
                 continue
             }
-            if (matcher.invoke(position, revision, commits)) {
+            if (matcher.invoke(position, revision, commitIds)) {
                 result.add(factory(position, comment))
                 continue
             }

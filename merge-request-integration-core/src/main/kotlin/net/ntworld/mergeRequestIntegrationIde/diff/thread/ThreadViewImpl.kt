@@ -13,7 +13,7 @@ import com.intellij.ui.components.Panel
 import com.intellij.util.EventDispatcher
 import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
@@ -35,7 +35,7 @@ class ThreadViewImpl(
     private val applicationService: ApplicationService,
     private val editor: EditorEx,
     private val providerData: ProviderData,
-    private val mergeRequest: MergeRequest,
+    private val mergeRequestInfo: MergeRequestInfo,
     override val logicalLine: Int,
     override val contentType: DiffView.ContentType,
     override val position: GutterPosition
@@ -164,7 +164,7 @@ class ThreadViewImpl(
 
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
         val group = ComponentFactory.makeGroup(
-            providerData, mergeRequest, editor.project!!, myGroups.isEmpty(), groupId, comments
+            providerData, mergeRequestInfo, editor.project!!, myGroups.isEmpty(), groupId, comments
         )
         group.addListener(myGroupComponentEventListener)
         Disposer.register(this, group)

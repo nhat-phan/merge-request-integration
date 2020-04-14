@@ -3,14 +3,13 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.base.DiffViewerListener
 import com.intellij.diff.util.TextDiffType
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
@@ -138,7 +137,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     protected fun toggleCommentsOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
         position: GutterPosition,
         logicalLine: Int,
@@ -147,7 +146,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         mode: DiffView.DisplayCommentMode
     ) {
         val model = findThreadModelOnLine(
-            providerData, mergeRequest, editor, position, logicalLine, contentType, comments
+            providerData, mergeRequestInfo, editor, position, logicalLine, contentType, comments
         )
         when (mode) {
             DiffView.DisplayCommentMode.TOGGLE -> model.visible = !model.visible
@@ -159,7 +158,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     protected fun displayCommentsAndEditorOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
         position: GutterPosition,
         logicalLine: Int,
@@ -167,7 +166,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         comments: List<Comment>
     ) {
         val model = findThreadModelOnLine(
-            providerData, mergeRequest, editor, position, logicalLine, contentType, comments
+            providerData, mergeRequestInfo, editor, position, logicalLine, contentType, comments
         )
         model.showEditor = true
         setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
@@ -175,7 +174,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     protected fun updateComments(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
         position: GutterPosition,
         renderer: GutterIconRenderer,
@@ -183,7 +182,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     ) {
         val model = findThreadModelOnLine(
             providerData,
-            mergeRequest,
+            mergeRequestInfo,
             editor,
             position,
             renderer.logicalLine,
@@ -229,7 +228,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     private fun findThreadModelOnLine(
         providerData: ProviderData,
-        mergeRequest: MergeRequest,
+        mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
         position: GutterPosition,
         logicalLine: Int,
@@ -240,7 +239,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
             val view = ThreadFactory.makeView(
-                applicationService, editor, providerData, mergeRequest, logicalLine, contentType, position
+                applicationService, editor, providerData, mergeRequestInfo, logicalLine, contentType, position
             )
             val presenter = ThreadFactory.makePresenter(model, view)
 
