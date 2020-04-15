@@ -45,15 +45,14 @@ class CommentEditorPanel(
     private val dispatcher = EventDispatcher.create(Listener::class.java)
 
     private val myDocument = DocumentImpl("")
-    private val myEditorSettingsProvider = object : EditorSettingsProvider {
-        override fun customizeSettings(editor: EditorEx?) {
-            if (null !== editor) {
-                editor.settings.isLineNumbersShown = true
-                editor.settings.isFoldingOutlineShown = true
+    private val myEditorSettingsProvider = EditorSettingsProvider { editor ->
+        if (null !== editor) {
+            editor.settings.isLineNumbersShown = true
+            editor.settings.isFoldingOutlineShown = true
+            editor.settings.isUseSoftWraps = true
 
-                editor.setHorizontalScrollbarVisible(true)
-                editor.setVerticalScrollbarVisible(true)
-            }
+            editor.setHorizontalScrollbarVisible(false)
+            editor.setVerticalScrollbarVisible(true)
         }
     }
     private val myEditorTextField by lazy {

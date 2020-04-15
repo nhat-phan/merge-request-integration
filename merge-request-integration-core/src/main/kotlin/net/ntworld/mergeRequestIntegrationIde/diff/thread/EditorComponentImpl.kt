@@ -30,8 +30,9 @@ class EditorComponentImpl(
         if (null !== editor) {
             editor.settings.isLineNumbersShown = true
             editor.settings.isFoldingOutlineShown = true
+            editor.settings.isUseSoftWraps = true
 
-            editor.setHorizontalScrollbarVisible(true)
+            editor.setHorizontalScrollbarVisible(false)
             editor.setVerticalScrollbarVisible(true)
         }
     }

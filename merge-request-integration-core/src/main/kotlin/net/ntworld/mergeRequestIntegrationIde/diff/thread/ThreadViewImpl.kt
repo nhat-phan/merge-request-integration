@@ -24,6 +24,8 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.ScrollPaneConstants
