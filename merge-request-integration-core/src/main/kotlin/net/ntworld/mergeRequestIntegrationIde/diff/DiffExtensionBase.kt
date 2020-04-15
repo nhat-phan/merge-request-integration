@@ -15,13 +15,14 @@ import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 open class DiffExtensionBase(
     private val applicationService: ApplicationService
 ) : DiffExtension() {
 
     override fun onViewerCreated(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest) {
-        val presenter = createPresenter(viewer, context, request)
+        val presenter = createPresenter(viewer, request)
         if (null === presenter) {
             return
         }
@@ -39,19 +40,27 @@ open class DiffExtensionBase(
         )
     }
 
-    private fun findReviewContext(viewer: DiffViewerBase, context: DiffContext, request: DiffRequest): ReviewContext? {
-        return ReviewContextManager.findSelectedContext()
+    private fun findReviewContext(projectService: ProjectService, request: DiffRequest): ReviewContext? {
+        val reviewContext = request.getUserData(ReviewContext.KEY)
+        if (null !== reviewContext) {
+            return reviewContext
+        }
+
+        return if (projectService.isDoingCodeReview()) {
+            ReviewContextManager.findSelectedContext()
+        } else null
     }
 
-    private fun createPresenter(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest): DiffPresenter? {
+    private fun createPresenter(viewer: FrameDiffTool.DiffViewer, request: DiffRequest): DiffPresenter? {
         return if (viewer is DiffViewerBase) {
-            val reviewContext = findReviewContext(viewer, context, request)
-            if (null === reviewContext) {
-                return null
-            }
-
             assertViewerIsValid(viewer) { project, change ->
-                val model = DiffFactory.makeDiffModel(applicationService.getProjectService(project), reviewContext, change)
+                val projectService = applicationService.getProjectService(project)
+                val reviewContext = findReviewContext(projectService, request)
+                if (null === reviewContext) {
+                    return@assertViewerIsValid null
+                }
+
+                val model = DiffFactory.makeDiffModel(projectService, reviewContext, change)
                 val view = DiffFactory.makeView(applicationService, viewer, change)
                 if (null !== view && null !== model) {
                     DiffFactory.makeDiffPresenter(

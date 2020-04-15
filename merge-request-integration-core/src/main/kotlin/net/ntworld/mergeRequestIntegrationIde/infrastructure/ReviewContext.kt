@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
@@ -30,4 +31,8 @@ interface ReviewContext {
     fun hasAnyChangeOpened(): Boolean
 
     fun closeAllChanges()
+
+    companion object {
+        val KEY = Key.create<ReviewContext>("mri.ReviewContext")
+    }
 }

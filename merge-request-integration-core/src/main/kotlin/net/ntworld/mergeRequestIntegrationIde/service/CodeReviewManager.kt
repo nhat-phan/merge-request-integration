@@ -15,6 +15,4 @@ interface CodeReviewManager : CodeReviewUtil, Disposable {
     var commits: Collection<Commit>
     var changes: Collection<Change>
     var comments: Collection<Comment>
-
-    fun getCommentsByPath(path: String): List<Comment>
 }

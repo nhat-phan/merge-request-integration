@@ -1,11 +1,14 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
+import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile
 import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class ReviewContextImpl(
@@ -15,7 +18,7 @@ class ReviewContextImpl(
     override val messageBusConnection: MessageBusConnection
 ) : ReviewContext {
     private val myLogger = Logger.getInstance(this.javaClass)
-    private val myOpeningChange = mutableListOf<Change>()
+    private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
     private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
 
     override var diffReference: DiffReference? = null
@@ -41,13 +44,27 @@ class ReviewContextImpl(
     }
 
     override fun openChange(change: Change) {
+        val diffFile = myPreviewDiffVirtualFileMap[change]
+        if (null === diffFile) {
+            val provider = DiffPreviewProviderImpl(project, change, this)
+            val created = PreviewDiffVirtualFile(provider)
+            myPreviewDiffVirtualFileMap[change] = created
+            FileEditorManagerEx.getInstanceEx(project).openFile(created, true)
+        } else {
+            FileEditorManagerEx.getInstanceEx(project).openFile(diffFile, true)
+        }
     }
 
     override fun hasAnyChangeOpened(): Boolean {
-        return myOpeningChange.isNotEmpty()
+        return myPreviewDiffVirtualFileMap.isNotEmpty()
     }
 
     override fun closeAllChanges() {
+        val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(project)
+        myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->
+            fileEditorManagerEx.closeFile(diffFile)
+        }
+        myPreviewDiffVirtualFileMap.clear()
     }
 
     private fun buildCommentsMap(value: Collection<Comment>) {

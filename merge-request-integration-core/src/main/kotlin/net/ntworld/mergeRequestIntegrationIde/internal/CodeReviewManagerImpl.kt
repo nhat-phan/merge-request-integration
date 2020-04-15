@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.internal
 
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangesUtil
@@ -20,9 +19,6 @@ internal class CodeReviewManagerImpl(
     override val repository: GitRepository? = RepositoryUtil.findRepository(ideaProject, providerData)
     override val messageBusConnection: MessageBusConnection = ideaProject.messageBus.connect()
 
-    private val myLogger = Logger.getInstance(this.javaClass)
-
-    private var myComments: Collection<Comment> = listOf()
     private var myChanges: Collection<Change> = listOf()
     private var myCommits: Collection<Commit> = listOf()
 
@@ -39,15 +35,8 @@ internal class CodeReviewManagerImpl(
             buildChangesMap(value)
         }
 
-    override var comments: Collection<Comment>
-        get() = myComments
-        set(value) {
-            myComments = value
-            buildCommentsMap(value)
-        }
+    override var comments: Collection<Comment> = listOf()
 
-
-    private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
     private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
 
     private fun buildChangesMap(value: Collection<Change>) {
@@ -66,53 +55,6 @@ internal class CodeReviewManagerImpl(
                 }
             }
         }
-    }
-
-    // TODO: this function will be replaced by ReviewContext
-    private fun buildCommentsMap(value: Collection<Comment>) {
-        if (null === repository) {
-            return
-        }
-        myCommentsMap.clear()
-        for (comment in value) {
-            val position = comment.position
-            if (null === position) {
-                continue
-            }
-            if (null !== position.newPath) {
-                doHashComment(repository, position.newPath!!, comment)
-            }
-            if (null !== position.oldPath) {
-                doHashComment(repository, position.oldPath!!, comment)
-            }
-        }
-        myLogger.info("myCommentsMap was built successfully")
-        myCommentsMap.forEach { (path, comments) ->
-            val commentIds = comments.map { it.id }
-            myLogger.info("$path contains ${commentIds.joinToString(",")}")
-        }
-    }
-
-    private fun doHashComment(repository: GitRepository, path: String, comment: Comment) {
-        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
-        val list = myCommentsMap[fullPath]
-        if (null === list) {
-            myCommentsMap[fullPath] = mutableListOf(comment)
-        } else {
-            if (!list.contains(comment)) {
-                list.add(comment)
-            }
-        }
-    }
-
-    override fun getCommentsByPath(path: String): List<Comment> {
-        val crossPlatformsPath = RepositoryUtil.transformToCrossPlatformsPath(path)
-        val comments = myCommentsMap[crossPlatformsPath]
-        if (null !== comments) {
-            return comments
-        }
-        myLogger.info("There is no comments for $crossPlatformsPath")
-        return listOf()
     }
 
     override fun dispose() {

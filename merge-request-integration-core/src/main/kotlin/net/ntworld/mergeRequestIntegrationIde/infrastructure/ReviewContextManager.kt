@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextImpl
 import net.ntworld.mergeRequestIntegrationIde.watcher.Watcher
 
 object ReviewContextManager : Watcher {

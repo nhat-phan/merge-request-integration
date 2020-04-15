@@ -1,10 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.service
 
-import com.intellij.diff.chains.DiffRequestProducer
-import com.intellij.diff.impl.CacheDiffRequestProcessor
-import com.intellij.diff.impl.DiffRequestProcessor
-import com.intellij.diff.requests.NoDiffRequest
-import com.intellij.diff.util.DiffPlaces
 import com.intellij.ide.ui.UISettings
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
@@ -14,12 +9,12 @@ import com.intellij.ui.tabs.JBTabsPosition
 import com.intellij.vcs.log.Hash
 import com.intellij.vcs.log.impl.VcsLogContentUtil
 import com.intellij.vcs.log.impl.VcsLogManager
-import com.intellij.vcs.log.ui.frame.VcsLogChangesBrowser
 import com.intellij.vcs.log.util.VcsLogUtil
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.DiffPreviewProviderImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.SwingConstants
@@ -199,7 +194,7 @@ object DisplayChangesService {
         try {
             val diffFile = myChangePreviewDiffVirtualFileMap[change]
             if (null === diffFile) {
-                val provider = MyDiffPreviewProvider(ideaProject, change)
+                val provider = DiffPreviewProviderImpl(ideaProject, change)
                 val created = PreviewDiffVirtualFile(provider)
                 myChangePreviewDiffVirtualFileMap[change] = created
                 fileEditorManagerEx.openFile(created, focus)
@@ -252,49 +247,6 @@ object DisplayChangesService {
 
         override fun asString(): String {
             return hash
-        }
-    }
-
-    class MyDiffPreviewProvider(
-        private val project: IdeaProject,
-        val change: Change
-    ) : DiffPreviewProvider {
-        override fun getOwner(): Any {
-            return this
-        }
-
-        override fun createDiffRequestProcessor(): DiffRequestProcessor {
-            return MyDiffRequestProcessor(project, change)
-        }
-
-        override fun getEditorTabName(): String {
-            return ChangesUtil.getFilePath(change).name
-        }
-
-    }
-
-    class MyDiffRequestProcessor(
-        project: IdeaProject,
-        private val change: Change?
-    ) : CacheDiffRequestProcessor.Simple(project, DiffPlaces.DEFAULT), DiffPreviewUpdateProcessor {
-        override fun clear() {
-            applyRequest(NoDiffRequest.INSTANCE, false, null)
-        }
-
-        override fun getFastLoadingTimeMillis(): Int {
-            return 10
-        }
-
-        override fun refresh(fromModelRefresh: Boolean) {
-            updateRequest()
-        }
-
-        override fun getCurrentRequestProvider(): DiffRequestProducer? {
-            return if (null === change) {
-                null
-            } else {
-                VcsLogChangesBrowser.createDiffRequestProducer(project!!, change, HashMap(), true)
-            }
         }
     }
 }
