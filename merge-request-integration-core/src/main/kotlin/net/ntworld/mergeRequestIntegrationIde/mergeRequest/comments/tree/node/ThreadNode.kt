@@ -16,7 +16,7 @@ class ThreadNode(
         super.updatePresentation(presentation)
         if (repliedCount > 0) {
             val text = if (repliedCount == 1) " reply" else " replies"
-            presentation.addText(" ($repliedCount $text)", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            presentation.addText(" · $repliedCount $text", SimpleTextAttributes.GRAYED_ATTRIBUTES)
         }
     }
 

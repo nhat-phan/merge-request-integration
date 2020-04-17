@@ -27,9 +27,11 @@ class CommentsTabModelImpl(
 
     override var displayResolvedComments: Boolean = false
         set(value) {
-            field = value
-            buildComments()
-            dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
+            if (field != value) {
+                field = value
+                buildComments()
+                dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
+            }
         }
 
     private val myMessageBusConnection = projectService.messageBus.connect()

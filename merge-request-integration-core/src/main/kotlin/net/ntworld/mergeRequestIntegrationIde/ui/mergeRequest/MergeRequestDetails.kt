@@ -82,7 +82,7 @@ class MergeRequestDetails(
     private val myCommentsTabPresenter: CommentsTabPresenter by lazy {
         val projectService = applicationService.getProjectService(ideaProject)
         val model = CommentsTabFactory.makeCommentsTabModel(projectService, providerData)
-        val view = CommentsTabFactory.makeCommentsTabView(projectService)
+        val view = CommentsTabFactory.makeCommentsTabView(projectService, providerData)
         CommentsTabFactory.makeCommentsTabPresenter(
             applicationService, projectService, model, view
         )

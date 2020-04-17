@@ -4,6 +4,8 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
+import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.MutableTreeNode
 import com.intellij.openapi.project.Project as IdeaProject
@@ -19,7 +21,7 @@ object NodeFactory {
     }
 
     fun makeThread(parent: Node, threadId: String, repliedCount: Int, comment: Comment): ThreadNode {
-        val node = ThreadNode(threadId, repliedCount, comment, null)
+        val node = ThreadNode(threadId, repliedCount, comment, comment.position)
         parent.add(node)
         return node
     }
@@ -30,8 +32,8 @@ object NodeFactory {
         return node
     }
 
-    fun makeFile(parent: RootNode, path: String, count: Int): FileNode {
-        val node = FileNode(path, count)
+    fun makeFile(parent: RootNode, path: String): FileNode {
+        val node = FileNode(path)
         parent.add(node)
         return node
     }
@@ -42,30 +44,40 @@ object NodeFactory {
         return node
     }
 
-    fun applyToTreeRoot(ideaProject: IdeaProject, root: RootNode, rootTreeNode: DefaultMutableTreeNode) {
+    fun applyToTreeRoot(
+        projectService: ProjectService,
+        providerData: ProviderData,
+        root: RootNode,
+        rootTreeNode: DefaultMutableTreeNode
+    ) {
         rootTreeNode.removeAllChildren()
         root.children.forEach {
-            rootTreeNode.add(generateMutableTreeNode(ideaProject, it))
+            rootTreeNode.add(generateMutableTreeNode(projectService, providerData, it))
         }
     }
 
-    private fun generateMutableTreeNode(ideaProject: IdeaProject, node: Node): MutableTreeNode {
-        val presentation = MyPresentableNodeDescriptor(ideaProject, node)
+    private fun generateMutableTreeNode(
+        projectService: ProjectService,
+        providerData: ProviderData,
+        node: Node
+    ): MutableTreeNode {
+        val presentation = MyPresentableNodeDescriptor(projectService, providerData, node)
         presentation.update()
         val treeNode = DefaultMutableTreeNode(presentation)
         node.children.forEach {
-            treeNode.add(generateMutableTreeNode(ideaProject, it))
+            treeNode.add(generateMutableTreeNode(projectService, providerData, it))
         }
 
         return treeNode
     }
 
     private class MyPresentableNodeDescriptor(
-        ideaProject: IdeaProject,
+        private val projectService: ProjectService,
+        private val providerData: ProviderData,
         private val element: Node
-    ) : PresentableNodeDescriptor<Node>(ideaProject, null) {
+    ) : PresentableNodeDescriptor<Node>(projectService.project, null) {
         override fun update(presentation: PresentationData) {
-            element.updatePresentation(presentation)
+            element.updatePresentation(projectService, providerData, presentation)
         }
 
         override fun getElement(): Node = element

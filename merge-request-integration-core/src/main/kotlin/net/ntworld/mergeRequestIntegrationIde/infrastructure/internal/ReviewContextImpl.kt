@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
+import com.intellij.openapi.vcs.changes.ChangesUtil
 import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile
 import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
@@ -20,6 +21,7 @@ class ReviewContextImpl(
     private val myLogger = Logger.getInstance(this.javaClass)
     private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
     private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
+    private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
 
     override var diffReference: DiffReference? = null
 
@@ -32,6 +34,26 @@ class ReviewContextImpl(
             field = value
             buildCommentsMap(value)
         }
+
+    override var changes: List<Change> = listOf()
+        set(value) {
+            field = value
+            buildChangesMap(value)
+        }
+
+    override fun findChangeByPath(path: String): Change? {
+        val absolutePath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
+        val changes = myChangesMap[absolutePath]
+        if (null === changes) {
+            return null
+        }
+
+        // TODO: do something when has more than 1 change
+        if (changes.size > 1) {
+            myLogger.info("There is more than 1 changes for $path")
+        }
+        return changes.first()
+    }
 
     override fun getCommentsByPath(path: String): List<Comment> {
         val crossPlatformsPath = RepositoryUtil.transformToCrossPlatformsPath(path)
@@ -102,4 +124,23 @@ class ReviewContextImpl(
             }
         }
     }
+
+    private fun buildChangesMap(value: Collection<Change>) {
+        myChangesMap.clear()
+        for (change in value) {
+            val filePaths = ChangesUtil.getPathsCaseSensitive(change)
+            for (filePath in filePaths) {
+                val path = filePath.path
+                val list = myChangesMap.get(path)
+                if (null === list) {
+                    myChangesMap[path] = mutableListOf(change)
+                } else {
+                    if (!list.contains(change)) {
+                        list.add(change)
+                    }
+                }
+            }
+        }
+    }
+
 }

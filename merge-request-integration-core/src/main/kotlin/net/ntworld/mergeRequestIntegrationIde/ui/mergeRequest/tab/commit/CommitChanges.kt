@@ -76,6 +76,7 @@ class CommitChanges(private val projectService: ProjectService) : CommitChangesU
         myTree.isVisible = false
         thread {
             val changes = projectService.repositoryFile.findChanges(providerData, commits.map { it.id })
+            ReviewContextManager.updateChanges(providerData.id, mergeRequestInfo.id, changes)
             ApplicationManager.getApplication().invokeLater {
                 myTree.setChangesToDisplay(changes)
                 myTree.isVisible = true

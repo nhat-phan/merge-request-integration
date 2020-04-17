@@ -1,20 +1,27 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree
 
 import com.intellij.ide.util.treeView.NodeRenderer
-import com.intellij.openapi.project.Project as IdeaProject
+import com.intellij.ide.util.treeView.PresentableNodeDescriptor
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.MergeRequestInfo
+import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.NodeFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.RootNodeBuilder
+import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
+import javax.swing.event.TreeSelectionEvent
+import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class CommentTreeViewImpl(
-    private val ideaProject: IdeaProject
+    private val projectService: ProjectService,
+    private val providerData: ProviderData
 ) : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
 
@@ -36,6 +43,14 @@ class CommentTreeViewImpl(
             hasFocus
         )
     }
+    private val myTreeSelectionListener = TreeSelectionListener {
+        if (null !== it) {
+            val lastPath = it.path.lastPathComponent as? DefaultMutableTreeNode ?: return@TreeSelectionListener
+            val descriptor = lastPath.userObject as? PresentableNodeDescriptor<*> ?: return@TreeSelectionListener
+            val element = descriptor.element as? Node ?: return@TreeSelectionListener
+            dispatcher.multicaster.onTreeNodeSelected(element)
+        }
+    }
 
     init {
         val treeSelectionModel = DefaultTreeSelectionModel()
@@ -46,14 +61,16 @@ class CommentTreeViewImpl(
         myTree.isRootVisible = false
         myTree.selectionModel = treeSelectionModel
 
+        myTree.addTreeSelectionListener(myTreeSelectionListener)
+
         myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree, true))
         myComponent.toolbar = myToolbar.component
     }
 
-    override fun renderTree(comments: List<Comment>) {
+    override fun renderTree(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>) {
         val builder = RootNodeBuilder(comments)
 
-        NodeFactory.applyToTreeRoot(ideaProject, builder.build(), myRoot)
+        NodeFactory.applyToTreeRoot(projectService, providerData, builder.build(), myRoot)
         myModel.nodeStructureChanged(myRoot)
     }
 

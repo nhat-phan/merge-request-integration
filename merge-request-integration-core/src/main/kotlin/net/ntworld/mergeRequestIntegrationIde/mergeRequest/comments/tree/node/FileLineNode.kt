@@ -14,6 +14,6 @@ class FileLineNode(
         presentation.addText("Line $line", SimpleTextAttributes.REGULAR_ATTRIBUTES)
 
         val text = if (count == 1) "comment" else "comments"
-        presentation.addText(" ($count $text)", SimpleTextAttributes.GRAY_SMALL_ATTRIBUTES)
+        presentation.addText(" · $count $text", SimpleTextAttributes.GRAY_ATTRIBUTES)
     }
 }

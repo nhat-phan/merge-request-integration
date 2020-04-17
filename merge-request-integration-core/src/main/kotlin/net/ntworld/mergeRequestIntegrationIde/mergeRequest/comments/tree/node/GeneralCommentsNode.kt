@@ -7,6 +7,6 @@ class GeneralCommentsNode(private val count: Int) : AbstractNode() {
     override fun updatePresentation(presentation: PresentationData) {
         presentation.addText("General ", SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES)
         val text = if (count == 1) "comment" else "comments"
-        presentation.addText("($count $text)", SimpleTextAttributes.GRAY_SMALL_ATTRIBUTES)
+        presentation.addText(" · $count $text", SimpleTextAttributes.GRAY_ATTRIBUTES)
     }
 }

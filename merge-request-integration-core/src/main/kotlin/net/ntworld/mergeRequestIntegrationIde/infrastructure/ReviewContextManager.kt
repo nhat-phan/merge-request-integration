@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextImpl
@@ -63,6 +64,15 @@ object ReviewContextManager : Watcher {
         if (null !== context) {
             myLogger.info("Update commits for $key")
             context.commits = commits
+        }
+    }
+
+    fun updateChanges(providerId: String, mergeRequestId: String, changes: List<Change>) {
+        val key = keyOf(providerId, mergeRequestId)
+        val context = myContexts[key]
+        if (null !== context) {
+            myLogger.info("Update commits for $key")
+            context.changes = changes
         }
     }
 

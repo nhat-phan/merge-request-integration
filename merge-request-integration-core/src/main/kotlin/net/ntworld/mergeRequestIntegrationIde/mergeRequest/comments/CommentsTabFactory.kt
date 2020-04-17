@@ -1,14 +1,15 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 
-import com.intellij.ui.tabs.TabInfo
-import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 object CommentsTabFactory {
-    fun makeCommentsTabView(projectService: ProjectService): CommentsTabView {
-        return CommentsTabViewImpl(projectService)
+    fun makeCommentsTabView(
+        projectService: ProjectService,
+        providerData: ProviderData
+    ): CommentsTabView {
+        return CommentsTabViewImpl(projectService, providerData)
     }
 
     fun makeCommentsTabModel(
