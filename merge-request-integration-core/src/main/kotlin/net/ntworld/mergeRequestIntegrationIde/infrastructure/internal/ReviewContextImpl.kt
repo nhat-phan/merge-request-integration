@@ -2,6 +2,8 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangesUtil
@@ -22,6 +24,7 @@ class ReviewContextImpl(
     private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
     private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
     private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
+    private val myChangesDataMap = mutableMapOf<Change, UserDataHolderBase>()
 
     override var diffReference: DiffReference? = null
 
@@ -87,6 +90,24 @@ class ReviewContextImpl(
             fileEditorManagerEx.closeFile(diffFile)
         }
         myPreviewDiffVirtualFileMap.clear()
+    }
+
+    override fun <T> getChangeData(change: Change, key: Key<T>): T? {
+        val userDataHolder = myChangesDataMap[change]
+        return if (null !== userDataHolder) {
+            userDataHolder.getUserData(key)
+        } else null
+    }
+
+    override fun <T> putChangeData(change: Change, key: Key<T>, value: T?) {
+        val userDataHolder = myChangesDataMap[change]
+        if (null === userDataHolder) {
+            val dataHolder = UserDataHolderBase()
+            dataHolder.putUserData(key, value)
+            myChangesDataMap[change] = dataHolder
+        } else {
+            userDataHolder.putUserData(key, value)
+        }
     }
 
     private fun buildCommentsMap(value: Collection<Comment>) {

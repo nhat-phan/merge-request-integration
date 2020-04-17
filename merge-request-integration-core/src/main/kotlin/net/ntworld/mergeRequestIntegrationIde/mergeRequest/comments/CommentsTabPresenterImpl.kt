@@ -5,8 +5,10 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.FileLineNode
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.FileNode
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.isEmpty
@@ -22,6 +24,7 @@ class CommentsTabPresenterImpl(
 ) : AbstractPresenter<EventListener>(),
     CommentsTabPresenter, CommentsTabModel.DataListener, CommentsTabView.ActionListener {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
+    private val myDiffPublisher = projectService.messageBus.syncPublisher(DiffNotifier.TOPIC)
 
     init {
         model.addDataListener(this)
@@ -53,6 +56,20 @@ class CommentsTabPresenterImpl(
                 val change = reviewContext.findChangeByPath(node.path)
                 if (null !== change) {
                     reviewContext.openChange(change)
+                }
+            }
+        }
+
+        if (node is FileLineNode) {
+            val reviewContext = ReviewContextManager.findContext(model.providerData.id, it.id)
+            if (null !== reviewContext) {
+                val change = reviewContext.findChangeByPath(node.path)
+                if (null !== change) {
+                    reviewContext.putChangeData(change, DiffNotifier.ScrollLine, node.line)
+                    reviewContext.putChangeData(change, DiffNotifier.ScrollSide, null)
+                    reviewContext.putChangeData(change, DiffNotifier.ScrollShowComments, true)
+                    reviewContext.openChange(change)
+                    myDiffPublisher.scrollToLineRequested(reviewContext, change, node.line, null, true)
                 }
             }
         }

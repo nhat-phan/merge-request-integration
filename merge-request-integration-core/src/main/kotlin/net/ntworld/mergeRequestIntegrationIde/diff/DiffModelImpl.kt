@@ -15,7 +15,7 @@ import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class DiffModelImpl(
     private val projectService: ProjectService,
-    private val reviewContext: ReviewContext,
+    override val reviewContext: ReviewContext,
     override val change: Change,
     override var displayResolvedComments: Boolean
 ) : AbstractModel<DiffModel.DataListener>(), DiffModel {
@@ -45,7 +45,7 @@ class DiffModelImpl(
         CommentPoint(position.newLine!!, comment)
     }
 
-    private val messageBusConnection: MessageBusConnection = reviewContext.messageBusConnection
+    override val messageBusConnection: MessageBusConnection = reviewContext.messageBusConnection
     private val myMergeRequestDataNotifier = object : MergeRequestDataNotifier {
         override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         }

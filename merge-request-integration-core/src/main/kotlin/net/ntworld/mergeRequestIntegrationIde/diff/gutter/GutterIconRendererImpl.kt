@@ -1,8 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 
+import com.intellij.diff.util.Side
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import com.intellij.openapi.editor.markup.GutterIconRenderer as GutterIconRendererClass
 
@@ -11,7 +11,7 @@ class GutterIconRendererImpl(
     override val visibleLineLeft: Int?,
     override val visibleLineRight: Int?,
     override val logicalLine: Int,
-    override val contentType: DiffView.ContentType,
+    override val side: Side,
     private val action: ((GutterIconRenderer, GutterActionType) -> Unit)
 ) : GutterIconRenderer, GutterIconRendererClass() {
     private var icon = if (showAddIcon) Icons.Gutter.AddComment else Icons.Gutter.Empty

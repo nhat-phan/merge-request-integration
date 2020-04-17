@@ -1,6 +1,9 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
+import com.intellij.diff.util.Side
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
@@ -8,6 +11,7 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class UnifiedDiffView(
@@ -24,13 +28,38 @@ class UnifiedDiffView(
     private val myCachedLeftLineNumbers = mutableMapOf<Int, Int>()
     private val myCachedRightLineNumbers = mutableMapOf<Int, Int>()
 
-    override fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myCachedLeftLineNumbers else myCachedRightLineNumbers
+    override fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int {
+        val map = if (side == Side.LEFT) myCachedLeftLineNumbers else myCachedRightLineNumbers
         val logicalLine = map[visibleLine - 1]
         if (null === logicalLine) {
             return -1
         }
         return logicalLine
+    }
+
+    private fun initializeByLogicalLine(reviewContext: ReviewContext, line: Int, side: Side, comments: List<Comment>) {
+        initializeThreadModelOnLineIfNotAvailable(
+            reviewContext.providerData, reviewContext.mergeRequestInfo,
+            viewer.editor,
+            calcPosition(line),
+            line, side,
+            comments
+        )
+    }
+
+    override fun initializeLine(reviewContext: ReviewContext, visibleLine: Int, side: Side, comments: List<Comment>) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
+        if (-1 != logicalLine) {
+            initializeByLogicalLine(reviewContext, logicalLine, side, comments)
+            val renderer = findGutterIconRenderer(logicalLine, Side.LEFT)
+            if (null !== renderer) {
+                updateGutterIcon(renderer, comments)
+            }
+        }
+    }
+
+    override fun prepareLine(reviewContext: ReviewContext, renderer: GutterIconRenderer, comments: List<Comment>) {
+        initializeByLogicalLine(reviewContext, renderer.logicalLine, renderer.side, comments)
     }
 
     override fun createGutterIcons() {
@@ -48,90 +77,38 @@ class UnifiedDiffView(
                     visibleLineLeft = left + 1,
                     visibleLineRight = right + 1,
                     // Doesn't matter, unified view only have 1 side
-                    contentType = DiffView.ContentType.BEFORE,
+                    side = Side.LEFT,
                     action = ::dispatchOnGutterActionPerformed
                 )
             )
         }
     }
 
-    private fun findGutterIconRenderer(
-        visibleLine: Int,
-        contentType: DiffView.ContentType,
-        invoker: ((Int, GutterIconRenderer) -> Unit)
-    ) {
-        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, contentType)
+    private fun findGutterIconRenderer(visibleLine: Int, side: Side, invoker: ((Int, GutterIconRenderer) -> Unit)) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
         if (-1 == logicalLine) {
             return
         }
 
         // Doesn't matter, unified view only have 1 side
         // see exact comment above
-        invoker.invoke(logicalLine, findGutterIconRenderer(logicalLine, DiffView.ContentType.BEFORE))
-    }
-
-    override fun changeGutterIconsByComments(
-        visibleLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>
-    ) {
-        findGutterIconRenderer(visibleLine, contentType) {_, renderer ->
-            updateGutterIcon(renderer, comments)
+        val renderer = findGutterIconRenderer(logicalLine, Side.LEFT)
+        if (null !== renderer) {
+            invoker.invoke(logicalLine, renderer)
         }
     }
 
-    override fun updateComments(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        visibleLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>,
-        requestSource: DataChangedSource
-    ) {
-        findGutterIconRenderer(visibleLine, contentType) { logicalLine, renderer ->
-            updateComments(
-                providerData,
-                mergeRequestInfo,
-                viewer.editor,
-                calcPosition(logicalLine),
-                renderer,
-                comments
-            )
+    override fun updateComments(visibleLine: Int, side: Side, comments: List<Comment>) {
+        findGutterIconRenderer(visibleLine, side) { _, renderer ->
+            updateComments(renderer, comments)
         }
     }
 
-    override fun displayEditorOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>
-    ) {
-        displayCommentsAndEditorOnLine(
-            providerData, mergeRequestInfo,
-            viewer.editor,
-            calcPosition(logicalLine),
-            logicalLine, contentType,
-            comments
-        )
-    }
-
-    override fun changeCommentsVisibilityOnLine(
-        providerData: ProviderData,
-        mergeRequest: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>,
-        mode: DiffView.DisplayCommentMode
-    ) {
-        toggleCommentsOnLine(
-            providerData, mergeRequest,
-            viewer.editor,
-            calcPosition(logicalLine),
-            logicalLine, contentType,
-            comments,
-            mode
-        )
+    override fun scrollToLine(visibleLine: Int, side: Side) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
+        if (-1 != logicalLine) {
+            viewer.editor.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+        }
     }
 
     private fun calcPosition(logicalLine: Int): GutterPosition {

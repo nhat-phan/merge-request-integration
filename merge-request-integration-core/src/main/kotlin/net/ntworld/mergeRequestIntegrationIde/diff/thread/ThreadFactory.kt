@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.diff.util.Side
 import com.intellij.openapi.editor.ex.EditorEx
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
@@ -19,11 +20,11 @@ object ThreadFactory {
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
-        contentType: DiffView.ContentType,
+        side: Side,
         position: GutterPosition
     ): ThreadView {
         return ThreadViewImpl(
-            applicationService, editor, providerData, mergeRequestInfo, logicalLine, contentType, position
+            applicationService, editor, providerData, mergeRequestInfo, logicalLine, side, position
         )
     }
 

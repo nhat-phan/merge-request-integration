@@ -2,6 +2,8 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.Side
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
@@ -9,6 +11,7 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 
 class TwoSideTextDiffView(
@@ -17,8 +20,41 @@ class TwoSideTextDiffView(
     private val change: Change
 ) : AbstractDiffView<TwosideTextDiffViewer>(applicationService, viewer) {
 
-    override fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int {
+    override fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int {
         return visibleLine - 1
+    }
+
+    private fun initializeByLogicalLine(reviewContext: ReviewContext, line: Int, side: Side, comments: List<Comment>) {
+        if (side == Side.LEFT) {
+            initializeThreadModelOnLineIfNotAvailable(
+                reviewContext.providerData, reviewContext.mergeRequestInfo,
+                viewer.editor1,
+                calcPositionEditor1(line),
+                line, side,
+                comments
+            )
+        } else {
+            initializeThreadModelOnLineIfNotAvailable(
+                reviewContext.providerData, reviewContext.mergeRequestInfo,
+                viewer.editor2,
+                calcPositionEditor2(line),
+                line, side,
+                comments
+            )
+        }
+    }
+
+    override fun initializeLine(reviewContext: ReviewContext, visibleLine: Int, side: Side, comments: List<Comment>) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
+        initializeByLogicalLine(reviewContext, logicalLine, side, comments)
+        val renderer = findGutterIconRenderer(logicalLine, side)
+        if (null !== renderer) {
+            updateGutterIcon(renderer, comments)
+        }
+    }
+
+    override fun prepareLine(reviewContext: ReviewContext, renderer: GutterIconRenderer, comments: List<Comment>) {
+        initializeByLogicalLine(reviewContext, renderer.logicalLine, renderer.side, comments)
     }
 
     override fun createGutterIcons() {
@@ -30,7 +66,7 @@ class TwoSideTextDiffView(
                     logicalLine,
                     visibleLineLeft = logicalLine + 1,
                     visibleLineRight = null,
-                    contentType = DiffView.ContentType.BEFORE,
+                    side = Side.LEFT,
                     action = ::dispatchOnGutterActionPerformed
                 )
             )
@@ -43,81 +79,24 @@ class TwoSideTextDiffView(
                     logicalLine,
                     visibleLineLeft = null,
                     visibleLineRight = logicalLine + 1,
-                    contentType = DiffView.ContentType.AFTER,
+                    side = Side.RIGHT,
                     action = ::dispatchOnGutterActionPerformed
                 )
             )
         }
     }
 
-    override fun changeGutterIconsByComments(
-        visibleLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>
-    ) {
-        updateGutterIcon(findGutterIconRenderer(visibleLine - 1, contentType), comments)
-    }
-
-    override fun updateComments(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        visibleLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>,
-        requestSource: DataChangedSource
-    ) {
-        if (contentType == DiffView.ContentType.BEFORE) {
-            updateComments(
-                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(visibleLine - 1),
-                findGutterIconRenderer(visibleLine - 1, contentType), comments
-            )
-        } else {
-            updateComments(
-                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor1(visibleLine - 1),
-                findGutterIconRenderer(visibleLine - 1, contentType), comments
-            )
+    override fun updateComments(visibleLine: Int, side: Side, comments: List<Comment>) {
+        val renderer = findGutterIconRenderer(visibleLine - 1, side)
+        if (null !== renderer) {
+            updateComments(renderer, comments)
         }
     }
 
-    override fun displayEditorOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>
-    ) {
-        if (contentType == DiffView.ContentType.BEFORE) {
-            displayCommentsAndEditorOnLine(
-                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(logicalLine),
-                logicalLine, contentType, comments
-            )
-        } else {
-            displayCommentsAndEditorOnLine(
-                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor2(logicalLine),
-                logicalLine, contentType, comments
-            )
-        }
-    }
-
-    override fun changeCommentsVisibilityOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>,
-        mode: DiffView.DisplayCommentMode
-    ) {
-        if (contentType == DiffView.ContentType.BEFORE) {
-            toggleCommentsOnLine(
-                providerData, mergeRequestInfo, viewer.editor1, calcPositionEditor1(logicalLine),
-                logicalLine, contentType, comments, mode
-            )
-        } else {
-            toggleCommentsOnLine(
-                providerData, mergeRequestInfo, viewer.editor2, calcPositionEditor2(logicalLine),
-                logicalLine, contentType, comments, mode
-            )
-        }
+    override fun scrollToLine(visibleLine: Int, side: Side) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
+        val editor = if (side == Side.LEFT) viewer.editor1 else viewer.editor2
+        editor.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
     }
 
     private fun calcPositionEditor1(logicalLine: Int): GutterPosition {

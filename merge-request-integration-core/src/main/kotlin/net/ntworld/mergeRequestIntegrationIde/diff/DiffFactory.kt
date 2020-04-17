@@ -4,6 +4,7 @@ import com.intellij.diff.tools.fragmented.UnifiedDiffViewer
 import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
+import com.intellij.diff.util.Side
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
@@ -34,8 +35,8 @@ object DiffFactory {
         applicationService: ApplicationService, viewer: SimpleOnesideDiffViewer, change: Change
     ): DiffView<SimpleOnesideDiffViewer>? {
         return SimpleOneSideDiffView(applicationService, viewer, change, when(change.type) {
-            Change.Type.NEW -> DiffView.ContentType.AFTER
-            Change.Type.DELETED -> DiffView.ContentType.BEFORE
+            Change.Type.DELETED -> Side.LEFT
+            Change.Type.NEW -> Side.RIGHT
             else -> throw Exception("Invalid change type")
         })
     }

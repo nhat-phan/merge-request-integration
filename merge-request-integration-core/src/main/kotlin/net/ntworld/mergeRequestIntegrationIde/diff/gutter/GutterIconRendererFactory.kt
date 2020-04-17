@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 
+import com.intellij.diff.util.Side
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
@@ -12,11 +13,11 @@ object GutterIconRendererFactory {
         logicalLine: Int,
         visibleLineLeft: Int?,
         visibleLineRight: Int?,
-        contentType: DiffView.ContentType,
+        side: Side,
         action: ((GutterIconRenderer, GutterActionType) -> Unit)
     ): GutterIconRenderer {
         val gutterIconRenderer = GutterIconRendererImpl(
-            showAddIcon, visibleLineLeft, visibleLineRight, logicalLine, contentType, action
+            showAddIcon, visibleLineLeft, visibleLineRight, logicalLine, side, action
         )
         highlighter.gutterIconRenderer = gutterIconRenderer
         return gutterIconRenderer

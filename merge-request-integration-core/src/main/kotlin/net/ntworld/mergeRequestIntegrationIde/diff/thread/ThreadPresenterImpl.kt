@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.diff.util.Side
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
@@ -21,14 +22,14 @@ class ThreadPresenterImpl(
         }
 
         override fun onCreateCommentRequested(
-            content: String, logicalLine: Int, contentType: DiffView.ContentType,
+            content: String, logicalLine: Int, side: Side,
             repliedComment: Comment?, position: GutterPosition?
         ) {
             if (null !== repliedComment) {
-                dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, contentType)
+                dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, side)
             }
             if (null !== position) {
-                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, contentType)
+                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side)
             }
         }
     }

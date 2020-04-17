@@ -1,15 +1,15 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.View
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 interface ThreadView : View<ThreadView.ActionListener>, Disposable {
     val logicalLine: Int
 
-    val contentType: DiffView.ContentType
+    val side: Side
 
     val position: GutterPosition
 
@@ -41,7 +41,7 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
         fun onCreateCommentRequested(
             content: String,
             logicalLine: Int,
-            contentType: DiffView.ContentType,
+            side: Side,
             repliedComment: Comment?,
             position: GutterPosition?
         )

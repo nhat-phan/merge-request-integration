@@ -1,6 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.gutter
 
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
+import com.intellij.diff.util.Side
 
 interface GutterIconRenderer {
     val visibleLineLeft: Int?
@@ -9,7 +9,7 @@ interface GutterIconRenderer {
 
     val logicalLine: Int
 
-    val contentType: DiffView.ContentType
+    val side: Side
 
     fun setState(state: GutterState)
 

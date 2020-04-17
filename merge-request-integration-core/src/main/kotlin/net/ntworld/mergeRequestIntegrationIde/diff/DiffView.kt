@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.FrameDiffTool
+import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
@@ -11,60 +12,42 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.CommentEvent
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 
 interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>, Disposable {
     val viewer: V
+
+    fun initializeLine(reviewContext: ReviewContext, visibleLine: Int, side: Side, comments: List<Comment>)
+
+    fun prepareLine(reviewContext: ReviewContext, renderer: GutterIconRenderer, comments: List<Comment>)
 
     fun createGutterIcons()
 
     fun resetGutterIcons()
 
-    fun destroyExistingComments(excludedVisibleLines: Set<Int>, contentType: ContentType)
+    fun destroyExistingComments(excludedVisibleLines: Set<Int>, side: Side)
 
     fun showAllComments()
 
     fun hideAllComments()
 
-    fun changeGutterIconsByComments(visibleLine: Int, contentType: ContentType, comments: List<Comment>)
+    fun resetEditorOnLine(logicalLine: Int, side: Side, repliedComment: Comment?)
 
-    fun resetEditor(logicalLine: Int, contentType: ContentType, repliedComment: Comment?)
+    fun updateComments(visibleLine: Int, side: Side, comments: List<Comment>)
 
-    fun updateComments(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        visibleLine: Int,
-        contentType: ContentType,
-        comments: List<Comment>,
-        requestSource: DataChangedSource
-    )
+    fun displayEditorOnLine(logicalLine: Int, side: Side)
 
-    fun displayEditorOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: ContentType,
-        comments: List<Comment>
-    )
+    fun displayComments(visibleLine: Int, side: Side, mode: DisplayCommentMode)
 
-    fun changeCommentsVisibilityOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        logicalLine: Int,
-        contentType: ContentType,
-        comments: List<Comment>,
-        mode: DisplayCommentMode
-    )
+    fun displayComments(renderer: GutterIconRenderer, mode: DisplayCommentMode)
+
+    fun scrollToLine(visibleLine: Int, side: Side)
 
     enum class EditorType {
         SINGLE_SIDE,
         TWO_SIDE_LEFT,
         TWO_SIDE_RIGHT,
         UNIFIED
-    }
-
-    enum class ContentType {
-        BEFORE,
-        AFTER
     }
 
     enum class ChangeType {
@@ -93,12 +76,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
         fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType, mode: DisplayCommentMode)
 
-        fun onReplyCommentRequested(
-            content: String, repliedComment: Comment, logicalLine: Int, contentType: ContentType
-        )
+        fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side)
 
-        fun onCreateCommentRequested(
-            content: String, position: GutterPosition, logicalLine: Int, contentType: ContentType
-        )
+        fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side)
     }
 }

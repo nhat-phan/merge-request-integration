@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.diff.thread
 
+import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.ex.util.EditorUtil
@@ -16,7 +17,6 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import java.awt.Cursor
@@ -24,8 +24,6 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
 import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.ScrollPaneConstants
@@ -39,7 +37,7 @@ class ThreadViewImpl(
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     override val logicalLine: Int,
-    override val contentType: DiffView.ContentType,
+    override val side: Side,
     override val position: GutterPosition
 ) : AbstractView<ThreadView.ActionListener>(), ThreadView {
     override val dispatcher = EventDispatcher.create(ThreadView.ActionListener::class.java)
@@ -92,7 +90,7 @@ class ThreadViewImpl(
                 dispatcher.multicaster.onCreateCommentRequested(
                     mainEditor.text,
                     logicalLine,
-                    contentType,
+                    side,
                     repliedComment = null,
                     position = position
                 )
@@ -121,7 +119,7 @@ class ThreadViewImpl(
             dispatcher.multicaster.onCreateCommentRequested(
                 content,
                 logicalLine,
-                contentType,
+                side,
                 repliedComment = comment,
                 position = null
             )

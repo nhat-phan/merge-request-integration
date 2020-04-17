@@ -1,8 +1,10 @@
 package net.ntworld.mergeRequestIntegrationIde.diff
 
+import com.intellij.diff.util.Side
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
@@ -19,6 +21,7 @@ import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
@@ -30,12 +33,14 @@ internal class DiffPresenterImpl(
     private val projectService: ProjectService,
     override val model: DiffModel,
     override val view: DiffView<*>
-) : AbstractPresenter<EventListener>(), DiffPresenter, DiffView.ActionListener, DiffModel.DataListener {
+) : AbstractPresenter<EventListener>(),
+    DiffPresenter, DiffView.ActionListener, DiffModel.DataListener, DiffNotifier {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
 
     init {
         view.addActionListener(this)
         model.addDataListener(this)
+        model.messageBusConnection.subscribe(DiffNotifier.TOPIC, this)
         Disposer.register(model, this)
     }
 
@@ -52,16 +57,24 @@ internal class DiffPresenterImpl(
 
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
         for (item in before) {
-            view.changeGutterIconsByComments(item.key, DiffView.ContentType.BEFORE, item.value)
+            view.initializeLine(model.reviewContext, item.key, Side.LEFT, item.value)
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
         for (item in after) {
-            view.changeGutterIconsByComments(item.key, DiffView.ContentType.AFTER, item.value)
+            view.initializeLine(model.reviewContext, item.key, Side.RIGHT, item.value)
         }
 
         if (applicationService.settings.displayCommentsInDiffView) {
             view.showAllComments()
+        }
+
+        val scrollLine = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollLine)
+        if (null !== scrollLine && scrollLine >= 0) {
+            val side = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollSide)
+            val showComments = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollShowComments)
+            scrollToLine(scrollLine, side, showComments)
+            clearChangeDataOfScrollToLineInReviewContext()
         }
     }
 
@@ -80,29 +93,17 @@ internal class DiffPresenterImpl(
     private fun handleWhenCommentsGetUpdated(source: DataChangedSource) {
         view.resetGutterIcons()
         val before = groupCommentsByLine(model.commentsOnBeforeSide)
-        view.destroyExistingComments(before.keys, DiffView.ContentType.BEFORE)
+        view.destroyExistingComments(before.keys, Side.LEFT)
         for (item in before) {
-            view.updateComments(
-                model.providerData,
-                model.mergeRequestInfo,
-                item.key,
-                DiffView.ContentType.BEFORE,
-                item.value,
-                source
-            )
+            view.initializeLine(model.reviewContext, item.key, Side.LEFT, item.value)
+            view.updateComments(item.key, Side.LEFT, item.value)
         }
 
         val after = groupCommentsByLine(model.commentsOnAfterSide)
-        view.destroyExistingComments(after.keys, DiffView.ContentType.AFTER)
+        view.destroyExistingComments(after.keys, Side.RIGHT)
         for (item in after) {
-            view.updateComments(
-                model.providerData,
-                model.mergeRequestInfo,
-                item.key,
-                DiffView.ContentType.AFTER,
-                item.value,
-                source
-            )
+            view.initializeLine(model.reviewContext, item.key, Side.RIGHT, item.value)
+            view.updateComments(item.key, Side.RIGHT, item.value)
         }
     }
 
@@ -111,31 +112,17 @@ internal class DiffPresenterImpl(
     ) {
         when (type) {
             GutterActionType.ADD -> {
-                view.displayEditorOnLine(
-                    model.providerData,
-                    model.mergeRequestInfo,
-                    renderer.logicalLine,
-                    renderer.contentType,
-                    collectCommentsOfGutterIconRenderer(renderer)
-                )
-
+                view.prepareLine(model.reviewContext, renderer, collectCommentsOfGutterIconRenderer(renderer))
+                view.displayEditorOnLine(renderer.logicalLine, renderer.side)
             }
             GutterActionType.TOGGLE -> {
-                view.changeCommentsVisibilityOnLine(
-                    model.providerData,
-                    model.mergeRequestInfo,
-                    renderer.logicalLine,
-                    renderer.contentType,
-                    collectCommentsOfGutterIconRenderer(renderer),
-                    mode
-                )
+                view.prepareLine(model.reviewContext, renderer, collectCommentsOfGutterIconRenderer(renderer))
+                view.displayComments(renderer, mode)
             }
         }
     }
 
-    override fun onReplyCommentRequested(
-        content: String, repliedComment: Comment, logicalLine: Int, contentType: DiffView.ContentType
-    ) {
+    override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
         applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
@@ -149,12 +136,10 @@ internal class DiffPresenterImpl(
             throw ProviderException(it)
         }
         fetchAndUpdateComments()
-        view.resetEditor(logicalLine, contentType, repliedComment)
+        view.resetEditorOnLine(logicalLine, side, repliedComment)
     }
 
-    override fun onCreateCommentRequested(
-        content: String, position: GutterPosition, logicalLine: Int, contentType: DiffView.ContentType
-    ) {
+    override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
         val commentPosition = convertGutterPositionToCommentPosition(position)
         applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
@@ -169,7 +154,7 @@ internal class DiffPresenterImpl(
             throw ProviderException(it)
         }
         fetchAndUpdateComments()
-        view.resetEditor(logicalLine, contentType, null)
+        view.resetEditorOnLine(logicalLine, side, null)
     }
 
     override fun onDeleteCommentRequested(comment: Comment) {
@@ -197,6 +182,19 @@ internal class DiffPresenterImpl(
             comment = comment
         )
         fetchAndUpdateComments()
+    }
+
+    override fun scrollToLineRequested(
+        reviewContext: ReviewContext,
+        change: Change,
+        line: Int,
+        side: Side?,
+        showComments: Boolean?
+    ) {
+        if (model.reviewContext === reviewContext && model.change === change) {
+            scrollToLine(line, side, showComments)
+            clearChangeDataOfScrollToLineInReviewContext()
+        }
     }
 
     private fun fetchAndUpdateComments() {
@@ -277,5 +275,29 @@ internal class DiffPresenterImpl(
 
         val diff = model.diffReference
         return if (null === diff) "" else diff.headHash
+    }
+
+    private fun scrollToLine(line: Int, side: Side?, showComments: Boolean?) {
+        if (null !== showComments && showComments) {
+            if (null !== side) {
+                view.displayComments(line, side, DiffView.DisplayCommentMode.SHOW)
+            } else {
+                view.displayComments(line, Side.LEFT, DiffView.DisplayCommentMode.SHOW)
+                view.displayComments(line, Side.RIGHT, DiffView.DisplayCommentMode.SHOW)
+            }
+        }
+
+        if (null !== side) {
+            view.scrollToLine(line, side)
+        } else {
+            view.scrollToLine(line, Side.LEFT)
+            view.scrollToLine(line, Side.RIGHT)
+        }
+    }
+
+    private fun clearChangeDataOfScrollToLineInReviewContext() {
+        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollLine, null)
+        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollSide, null)
+        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollShowComments, null)
     }
 }

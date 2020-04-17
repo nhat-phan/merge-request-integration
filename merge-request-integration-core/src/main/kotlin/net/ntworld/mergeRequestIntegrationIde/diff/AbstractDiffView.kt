@@ -2,6 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.base.DiffViewerListener
+import com.intellij.diff.util.Side
 import com.intellij.diff.util.TextDiffType
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
@@ -40,29 +41,27 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     private val myThreadPresenterEventListener = object : ThreadPresenter.EventListener,
         CommentEvent by myCommentEventPropagator {
         override fun onMainEditorClosed(threadPresenter: ThreadPresenter) {
-            val renderer = findGutterIconRenderer(threadPresenter.view.logicalLine, threadPresenter.view.contentType)
-            if (threadPresenter.model.comments.isEmpty()) {
-                renderer.setState(GutterState.NO_COMMENT)
-            } else {
-                renderer.setState(
-                    if (threadPresenter.model.comments.size == 1)
-                        GutterState.THREAD_HAS_SINGLE_COMMENT
-                    else
-                        GutterState.THREAD_HAS_MULTI_COMMENTS
-                )
+            val renderer = findGutterIconRenderer(threadPresenter.view.logicalLine, threadPresenter.view.side)
+            if (null !== renderer) {
+                if (threadPresenter.model.comments.isEmpty()) {
+                    renderer.setState(GutterState.NO_COMMENT)
+                } else {
+                    renderer.setState(
+                        if (threadPresenter.model.comments.size == 1)
+                            GutterState.THREAD_HAS_SINGLE_COMMENT
+                        else
+                            GutterState.THREAD_HAS_MULTI_COMMENTS
+                    )
+                }
             }
         }
 
-        override fun onReplyCommentRequested(
-            content: String, repliedComment: Comment, logicalLine: Int, contentType: DiffView.ContentType
-        ) {
-            dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, contentType)
+        override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
+            dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, side)
         }
 
-        override fun onCreateCommentRequested(
-            content: String, position: GutterPosition, logicalLine: Int, contentType: DiffView.ContentType
-        ) {
-            dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, contentType)
+        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
+            dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side)
         }
     }
 
@@ -70,14 +69,14 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         viewerBase.addListener(diffViewerListener)
     }
 
-    protected abstract fun convertVisibleLineToLogicalLine(visibleLine: Int, contentType: DiffView.ContentType): Int
+    protected abstract fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int
 
-    override fun destroyExistingComments(excludedVisibleLines: Set<Int>, contentType: DiffView.ContentType) {
+    override fun destroyExistingComments(excludedVisibleLines: Set<Int>, side: Side) {
         val excludedLogicalLines = excludedVisibleLines
-            .map { convertVisibleLineToLogicalLine(it, contentType) }
+            .map { convertVisibleLineToLogicalLine(it, side) }
             .filter { it >= 0 }
 
-        val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
+        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
         val removedKeys = mutableListOf<Int>()
         for (entry in map) {
             if (excludedLogicalLines.contains(entry.key)) {
@@ -102,9 +101,8 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
     }
 
-    override fun resetEditor(logicalLine: Int, contentType: DiffView.ContentType, repliedComment: Comment?) {
-        val map = if (contentType == DiffView.ContentType.BEFORE)
-            myThreadModelOfBefore else myThreadModelOfAfter
+    override fun resetEditorOnLine(logicalLine: Int, side: Side, repliedComment: Comment?) {
+        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
 
         val model = map[logicalLine]
         if (null !== model) {
@@ -117,79 +115,86 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         myGutterIconRenderersOfAfter.clear()
     }
 
-    protected fun dispatchOnGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
-        dispatcher.multicaster.onGutterActionPerformed(renderer, type, DiffView.DisplayCommentMode.TOGGLE)
-    }
-
-    protected fun registerGutterIconRenderer(gutterIconRenderer: GutterIconRenderer) {
-        val map = if (gutterIconRenderer.contentType == DiffView.ContentType.BEFORE)
-            myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
-
-        map[gutterIconRenderer.logicalLine] = gutterIconRenderer
-    }
-
-    protected fun findGutterIconRenderer(logicalLine: Int, contentType: DiffView.ContentType): GutterIconRenderer {
-        val map = if (contentType == DiffView.ContentType.BEFORE)
-            myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
-
-        return map[logicalLine]!!
-    }
-
-    protected fun toggleCommentsOnLine(
+    protected fun initializeThreadModelOnLineIfNotAvailable(
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
         position: GutterPosition,
         logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>,
+        side: Side,
+        comments: List<Comment>
+    ) {
+        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
+        if (!map.containsKey(logicalLine)) {
+            val model = ThreadFactory.makeModel(comments)
+            val view = ThreadFactory.makeView(
+                applicationService, editor, providerData, mergeRequestInfo, logicalLine, side, position
+            )
+            val presenter = ThreadFactory.makePresenter(model, view)
+
+            presenter.addListener(myThreadPresenterEventListener)
+            Disposer.register(this, presenter)
+
+            map[logicalLine] = model
+        }
+    }
+
+    protected fun dispatchOnGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
+        dispatcher.multicaster.onGutterActionPerformed(renderer, type, DiffView.DisplayCommentMode.TOGGLE)
+    }
+
+    protected fun registerGutterIconRenderer(renderer: GutterIconRenderer) {
+        val map = if (renderer.side == Side.LEFT) myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+
+        map[renderer.logicalLine] = renderer
+    }
+
+    protected fun findGutterIconRenderer(logicalLine: Int, side: Side): GutterIconRenderer? {
+        val map = if (side == Side.LEFT) myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+
+        return map[logicalLine]
+    }
+
+    override fun displayComments(visibleLine: Int, side: Side, mode: DiffView.DisplayCommentMode) {
+        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
+        if (-1 != logicalLine) {
+            assertThreadModelAvailable(logicalLine, side) {
+                displayComments(it, logicalLine, side, mode)
+            }
+        }
+    }
+
+    override fun displayComments(renderer: GutterIconRenderer, mode: DiffView.DisplayCommentMode) {
+        assertThreadModelAvailable(renderer.logicalLine, renderer.side) {
+            displayComments(it, renderer.logicalLine, renderer.side, mode)
+        }
+    }
+
+    private fun displayComments(
+        model: ThreadModel,
+        logicalLine: Int,
+        side: Side,
         mode: DiffView.DisplayCommentMode
     ) {
-        val model = findThreadModelOnLine(
-            providerData, mergeRequestInfo, editor, position, logicalLine, contentType, comments
-        )
         when (mode) {
             DiffView.DisplayCommentMode.TOGGLE -> model.visible = !model.visible
             DiffView.DisplayCommentMode.SHOW -> model.visible = true
             DiffView.DisplayCommentMode.HIDE -> model.visible = false
         }
-        setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
+        setWritingStateOfGutterIconRenderer(model, logicalLine, side)
     }
 
-    protected fun displayCommentsAndEditorOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        editor: EditorEx,
-        position: GutterPosition,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment>
-    ) {
-        val model = findThreadModelOnLine(
-            providerData, mergeRequestInfo, editor, position, logicalLine, contentType, comments
-        )
-        model.showEditor = true
-        setWritingStateOfGutterIconRenderer(model, logicalLine, contentType)
+    override fun displayEditorOnLine(logicalLine: Int, side: Side) {
+        assertThreadModelAvailable(logicalLine, side) {
+            it.showEditor = true
+            setWritingStateOfGutterIconRenderer(it, logicalLine, side)
+        }
     }
 
-    protected fun updateComments(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        editor: EditorEx,
-        position: GutterPosition,
-        renderer: GutterIconRenderer,
-        comments: List<Comment>
-    ) {
-        val model = findThreadModelOnLine(
-            providerData,
-            mergeRequestInfo,
-            editor,
-            position,
-            renderer.logicalLine,
-            renderer.contentType,
-            comments
-        )
-        model.comments = comments
+    protected fun updateComments(renderer: GutterIconRenderer, comments: List<Comment>) {
+        assertThreadModelAvailable(renderer.logicalLine, renderer.side) {
+            it.comments = comments
+        }
         updateGutterIcon(renderer, comments)
     }
 
@@ -217,38 +222,19 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
     }
 
-    private fun setWritingStateOfGutterIconRenderer(
-        model: ThreadModel, logicalLine: Int, contentType: DiffView.ContentType
-    ) {
-        val renderer = findGutterIconRenderer(logicalLine, contentType)
-        if (model.showEditor) {
+    private fun setWritingStateOfGutterIconRenderer(model: ThreadModel, logicalLine: Int, side: Side) {
+        val renderer = findGutterIconRenderer(logicalLine, side)
+        if (null !== renderer && model.showEditor) {
             renderer.setState(GutterState.WRITING)
         }
     }
 
-    private fun findThreadModelOnLine(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        editor: EditorEx,
-        position: GutterPosition,
-        logicalLine: Int,
-        contentType: DiffView.ContentType,
-        comments: List<Comment> = listOf()
-    ): ThreadModel {
-        val map = if (contentType == DiffView.ContentType.BEFORE) myThreadModelOfBefore else myThreadModelOfAfter
-        if (!map.containsKey(logicalLine)) {
-            val model = ThreadFactory.makeModel(comments)
-            val view = ThreadFactory.makeView(
-                applicationService, editor, providerData, mergeRequestInfo, logicalLine, contentType, position
-            )
-            val presenter = ThreadFactory.makePresenter(model, view)
-
-            presenter.addListener(myThreadPresenterEventListener)
-            Disposer.register(this, presenter)
-
-            map[logicalLine] = model
+    private fun assertThreadModelAvailable(logicalLine: Int, side: Side, invoker: ((ThreadModel) -> Unit)) {
+        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
+        val model = map[logicalLine]
+        if (null !== model) {
+            invoker.invoke(model)
         }
-        return map[logicalLine]!!
     }
 
     protected fun findChangeType(editor: EditorEx, logicalLine: Int): DiffView.ChangeType {

@@ -36,6 +36,10 @@ interface ReviewContext {
 
     fun closeAllChanges()
 
+    fun <T> getChangeData(change: Change, key: Key<T>): T?
+
+    fun <T> putChangeData(change: Change, key: Key<T>, value: T?)
+
     companion object {
         val KEY = Key.create<ReviewContext>("mri.ReviewContext")
     }
