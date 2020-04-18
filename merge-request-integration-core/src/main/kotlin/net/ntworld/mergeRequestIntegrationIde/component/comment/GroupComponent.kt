@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.comment
 
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
@@ -23,7 +23,8 @@ interface GroupComponent : Component, Disposable {
 
     fun addListener(listener: EventListener)
 
-    interface EventListener : java.util.EventListener, CommentEvent {
+    interface EventListener : java.util.EventListener,
+        CommentEvent {
         fun onResized()
 
         fun onEditorCreated(groupId: String, editor: EditorComponent)

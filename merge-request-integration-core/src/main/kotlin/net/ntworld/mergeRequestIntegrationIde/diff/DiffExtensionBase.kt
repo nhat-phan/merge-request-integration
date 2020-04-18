@@ -46,9 +46,7 @@ open class DiffExtensionBase(
             return reviewContext
         }
 
-        return if (projectService.isDoingCodeReview()) {
-            ReviewContextManager.findSelectedContext()
-        } else null
+        return projectService.findReviewContextWhichDoingCodeReview()
     }
 
     private fun createPresenter(viewer: FrameDiffTool.DiffViewer, request: DiffRequest): DiffPresenter? {

@@ -1,8 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 
+import com.intellij.ui.JBColor
 import com.intellij.ui.OnePixelSplitter
+import com.intellij.ui.ScrollPaneFactory
+import com.intellij.ui.components.Panel
 import com.intellij.ui.tabs.TabInfo
 import com.intellij.util.EventDispatcher
+import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
@@ -11,9 +15,14 @@ import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.Comment
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
+import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
+import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
+import java.awt.event.ComponentEvent
+import javax.swing.BoxLayout
 import javax.swing.JComponent
-import javax.swing.JPanel
+import javax.swing.JLabel
 
 class CommentsTabViewImpl(
     private val projectService: ProjectService,
@@ -46,6 +55,15 @@ class CommentsTabViewImpl(
             dispatcher.multicaster.onRefreshButtonClicked()
         }
     }
+    private val myThreadPanel = Panel()
+    private val myThreadBoxLayout = JBUI.Panels.simplePanel()
+    private val myThreadWrapper = ScrollPaneFactory.createScrollPane(myThreadBoxLayout, true)
+    private val myMainEditor by lazy {
+        val editor = ComponentFactory.makeEditor(projectService.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0)
+        editor.isVisible = true
+
+        editor
+    }
 
     override val component: JComponent = mySplitter
 
@@ -57,8 +75,16 @@ class CommentsTabViewImpl(
     }
 
     init {
+        myThreadPanel.background = JBColor.border()
+        myThreadBoxLayout.background = JBColor.border()
+        myThreadWrapper.background = JBColor.border()
+
+        myThreadBoxLayout.addToCenter(myThreadPanel)
+        myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)
+        myThreadBoxLayout.addToBottom(myMainEditor.component)
+
         mySplitter.firstComponent = myTreePresenter.component
-        mySplitter.secondComponent = JPanel()
+        mySplitter.secondComponent = null
 
         myTreePresenter.addListener(myTreeListener)
     }
@@ -77,4 +103,23 @@ class CommentsTabViewImpl(
         myTreePresenter.model.comments = comments
         myTreePresenter.model.displayResolvedComments = displayResolvedComments
     }
+
+    override fun hideThread() {
+        mySplitter.secondComponent = null
+    }
+
+    override fun renderThread(mergeRequestInfo: MergeRequestInfo, groupedComments: Map<String, List<Comment>>) {
+        myThreadPanel.removeAll()
+        groupedComments.forEach { (groupId, comments) ->
+            val group = ComponentFactory.makeGroup(
+                providerData, mergeRequestInfo, projectService.project, false, groupId, comments, 0
+            )
+            myThreadPanel.add(group.component)
+        }
+        mySplitter.secondComponent = myThreadWrapper
+    }
+
+    override fun selectGeneralCommentsTreeNode() = myTreePresenter.selectGeneralCommentsTreeNode()
+
+    override fun focusToMainEditor() = myMainEditor.focus()
 }

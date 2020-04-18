@@ -13,6 +13,8 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEventPropagator
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
@@ -32,11 +34,11 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         override fun onAfterRediff() = dispatcher.multicaster.onAfterRediff()
         override fun onRediffAborted() = dispatcher.multicaster.onRediffAborted()
     }
-    private val myGutterIconRenderersOfBefore = mutableMapOf<Int, GutterIconRenderer>()
-    private val myGutterIconRenderersOfAfter = mutableMapOf<Int, GutterIconRenderer>()
+    private val myGutterIconRenderersOfLeft = mutableMapOf<Int, GutterIconRenderer>()
+    private val myGutterIconRenderersOfRight = mutableMapOf<Int, GutterIconRenderer>()
 
-    private val myThreadModelOfBefore = mutableMapOf<Int, ThreadModel>()
-    private val myThreadModelOfAfter = mutableMapOf<Int, ThreadModel>()
+    private val myThreadOfLeft = mutableMapOf<Int, ThreadPresenter>()
+    private val myThreadOfRight = mutableMapOf<Int, ThreadPresenter>()
     private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
     private val myThreadPresenterEventListener = object : ThreadPresenter.EventListener,
         CommentEvent by myCommentEventPropagator {
@@ -76,13 +78,13 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             .map { convertVisibleLineToLogicalLine(it, side) }
             .filter { it >= 0 }
 
-        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
+        val map = if (side == Side.LEFT) myThreadOfLeft else myThreadOfRight
         val removedKeys = mutableListOf<Int>()
         for (entry in map) {
             if (excludedLogicalLines.contains(entry.key)) {
                 continue
             }
-            entry.value.comments = listOf()
+            entry.value.model.comments = listOf()
             removedKeys.add(entry.key)
         }
         removedKeys.forEach { map.remove(it) }
@@ -93,29 +95,29 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     override fun hideAllComments() = changeAllCommentsVisibility(false)
 
     override fun resetGutterIcons() {
-        for (renderer in myGutterIconRenderersOfBefore.values) {
+        for (renderer in myGutterIconRenderersOfLeft.values) {
             renderer.setState(GutterState.NO_COMMENT)
         }
-        for (renderer in myGutterIconRenderersOfAfter.values) {
+        for (renderer in myGutterIconRenderersOfRight.values) {
             renderer.setState(GutterState.NO_COMMENT)
         }
     }
 
     override fun resetEditorOnLine(logicalLine: Int, side: Side, repliedComment: Comment?) {
-        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
+        val map = if (side == Side.LEFT) myThreadOfLeft else myThreadOfRight
 
-        val model = map[logicalLine]
-        if (null !== model) {
-            model.resetEditor(repliedComment)
+        val thread = map[logicalLine]
+        if (null !== thread) {
+            thread.model.resetEditor(repliedComment)
         }
     }
 
     override fun dispose() {
-        myGutterIconRenderersOfBefore.clear()
-        myGutterIconRenderersOfAfter.clear()
+        myGutterIconRenderersOfLeft.clear()
+        myGutterIconRenderersOfRight.clear()
     }
 
-    protected fun initializeThreadModelOnLineIfNotAvailable(
+    protected fun initializeThreadOnLineIfNotAvailable(
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
         editor: EditorEx,
@@ -124,7 +126,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         side: Side,
         comments: List<Comment>
     ) {
-        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
+        val map = if (side == Side.LEFT) myThreadOfLeft else myThreadOfRight
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
             val view = ThreadFactory.makeView(
@@ -135,7 +137,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             presenter.addListener(myThreadPresenterEventListener)
             Disposer.register(this, presenter)
 
-            map[logicalLine] = model
+            map[logicalLine] = presenter
         }
     }
 
@@ -144,13 +146,13 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     }
 
     protected fun registerGutterIconRenderer(renderer: GutterIconRenderer) {
-        val map = if (renderer.side == Side.LEFT) myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+        val map = if (renderer.side == Side.LEFT) myGutterIconRenderersOfLeft else myGutterIconRenderersOfRight
 
         map[renderer.logicalLine] = renderer
     }
 
     protected fun findGutterIconRenderer(logicalLine: Int, side: Side): GutterIconRenderer? {
-        val map = if (side == Side.LEFT) myGutterIconRenderersOfBefore else myGutterIconRenderersOfAfter
+        val map = if (side == Side.LEFT) myGutterIconRenderersOfLeft else myGutterIconRenderersOfRight
 
         return map[logicalLine]
     }
@@ -158,19 +160,19 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     override fun displayComments(visibleLine: Int, side: Side, mode: DiffView.DisplayCommentMode) {
         val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
         if (-1 != logicalLine) {
-            assertThreadModelAvailable(logicalLine, side) {
-                displayComments(it, logicalLine, side, mode)
+            assertThreadAvailable(logicalLine, side) {
+                displayComments(it.model, logicalLine, side, mode)
             }
         }
     }
 
     override fun displayComments(renderer: GutterIconRenderer, mode: DiffView.DisplayCommentMode) {
-        assertThreadModelAvailable(renderer.logicalLine, renderer.side) {
-            displayComments(it, renderer.logicalLine, renderer.side, mode)
+        assertThreadAvailable(renderer.logicalLine, renderer.side) {
+            displayComments(it.model, renderer.logicalLine, renderer.side, mode)
         }
     }
 
-    private fun displayComments(
+    protected fun displayComments(
         model: ThreadModel,
         logicalLine: Int,
         side: Side,
@@ -185,15 +187,15 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     }
 
     override fun displayEditorOnLine(logicalLine: Int, side: Side) {
-        assertThreadModelAvailable(logicalLine, side) {
-            it.showEditor = true
-            setWritingStateOfGutterIconRenderer(it, logicalLine, side)
+        assertThreadAvailable(logicalLine, side) {
+            it.model.showEditor = true
+            setWritingStateOfGutterIconRenderer(it.model, logicalLine, side)
         }
     }
 
     protected fun updateComments(renderer: GutterIconRenderer, comments: List<Comment>) {
-        assertThreadModelAvailable(renderer.logicalLine, renderer.side) {
-            it.comments = comments
+        assertThreadAvailable(renderer.logicalLine, renderer.side) {
+            it.model.comments = comments
         }
         updateGutterIcon(renderer, comments)
     }
@@ -210,12 +212,12 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
 
     private fun changeAllCommentsVisibility(displayed: Boolean) {
         val mode = if (displayed) DiffView.DisplayCommentMode.SHOW else DiffView.DisplayCommentMode.HIDE
-        for (renderer in myGutterIconRenderersOfBefore.values) {
+        for (renderer in myGutterIconRenderersOfLeft.values) {
             dispatcher.multicaster.onGutterActionPerformed(
                 renderer, GutterActionType.TOGGLE, mode
             )
         }
-        for (renderer in myGutterIconRenderersOfAfter.values) {
+        for (renderer in myGutterIconRenderersOfRight.values) {
             dispatcher.multicaster.onGutterActionPerformed(
                 renderer, GutterActionType.TOGGLE, mode
             )
@@ -229,12 +231,17 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
     }
 
-    private fun assertThreadModelAvailable(logicalLine: Int, side: Side, invoker: ((ThreadModel) -> Unit)) {
-        val map = if (side == Side.LEFT) myThreadModelOfBefore else myThreadModelOfAfter
-        val model = map[logicalLine]
-        if (null !== model) {
-            invoker.invoke(model)
+    private fun assertThreadAvailable(logicalLine: Int, side: Side, invoker: ((ThreadPresenter) -> Unit)) {
+        val map = if (side == Side.LEFT) myThreadOfLeft else myThreadOfRight
+        val thread = map[logicalLine]
+        if (null !== thread) {
+            invoker.invoke(thread)
         }
+    }
+
+    protected fun findThreadPresenter(logicalLine: Int, side: Side): ThreadPresenter? {
+        val map = if (side == Side.LEFT) myThreadOfLeft else myThreadOfRight
+        return map[logicalLine]
     }
 
     protected fun findChangeType(editor: EditorEx, logicalLine: Int): DiffView.ChangeType {

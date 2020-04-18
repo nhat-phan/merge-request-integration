@@ -7,9 +7,7 @@ import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequestInfo
-import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
+import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -26,7 +24,7 @@ class TwoSideTextDiffView(
 
     private fun initializeByLogicalLine(reviewContext: ReviewContext, line: Int, side: Side, comments: List<Comment>) {
         if (side == Side.LEFT) {
-            initializeThreadModelOnLineIfNotAvailable(
+            initializeThreadOnLineIfNotAvailable(
                 reviewContext.providerData, reviewContext.mergeRequestInfo,
                 viewer.editor1,
                 calcPositionEditor1(line),
@@ -34,7 +32,7 @@ class TwoSideTextDiffView(
                 comments
             )
         } else {
-            initializeThreadModelOnLineIfNotAvailable(
+            initializeThreadOnLineIfNotAvailable(
                 reviewContext.providerData, reviewContext.mergeRequestInfo,
                 viewer.editor2,
                 calcPositionEditor2(line),
@@ -93,10 +91,24 @@ class TwoSideTextDiffView(
         }
     }
 
-    override fun scrollToLine(visibleLine: Int, side: Side) {
-        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
-        val editor = if (side == Side.LEFT) viewer.editor1 else viewer.editor2
-        editor.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+    override fun scrollToPosition(position: CommentPosition, showComments: Boolean) {
+        val oldLine = position.oldLine
+        if (oldLine !== null && !viewer.editor1.isDisposed) {
+            val logicalLine = convertVisibleLineToLogicalLine(oldLine, Side.LEFT)
+            viewer.editor1.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+            if (showComments) {
+                displayComments(oldLine, Side.LEFT, DiffView.DisplayCommentMode.SHOW)
+            }
+        }
+
+        val newLine = position.newLine
+        if (newLine !== null && !viewer.editor1.isDisposed) {
+            val logicalLine = convertVisibleLineToLogicalLine(newLine, Side.RIGHT)
+            viewer.editor2.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+            if (showComments) {
+                displayComments(newLine, Side.RIGHT, DiffView.DisplayCommentMode.SHOW)
+            }
+        }
     }
 
     private fun calcPositionEditor1(logicalLine: Int): GutterPosition {

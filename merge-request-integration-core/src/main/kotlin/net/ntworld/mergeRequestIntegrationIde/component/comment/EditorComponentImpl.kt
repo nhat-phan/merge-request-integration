@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.comment
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.editor.impl.DocumentImpl
@@ -21,7 +21,8 @@ import javax.swing.JPanel
 class EditorComponentImpl(
     private val ideaProject: IdeaProject,
     private val type: EditorComponent.Type,
-    val indent: Int
+    val indent: Int,
+    private val borderLeftRight: Int = 1
 ) : EditorComponent {
     private val dispatcher = EventDispatcher.create(EditorComponent.EventListener::class.java)
     private val myPanel = CustomSimpleToolWindowPanel(vertical = true, borderless = false)
@@ -96,7 +97,8 @@ class EditorComponentImpl(
 
         override fun focusGained(e: FocusEvent?) {
             if (myEditorTextField.text.isBlank()) {
-                myEditorTextField.text = EMPTY_TEXT_REPLACED
+                myEditorTextField.text =
+                    EMPTY_TEXT_REPLACED
             }
             myPanel.toolbar!!.isVisible = true
             dispatcher.multicaster.onEditorResized()
@@ -138,7 +140,7 @@ class EditorComponentImpl(
 
     override fun drawBorderTop(display: Boolean) {
         myPanel.border = BorderFactory.createMatteBorder(
-            if (display) 1 else 0, indent * 40 + 1, 1, 1, JBColor.border()
+            if (display) 1 else 0, indent * 40 + borderLeftRight, 1, borderLeftRight, JBColor.border()
         )
     }
 

@@ -20,6 +20,10 @@ class CommentTreePresenterImpl(
         view.setShowResolvedCommentState(model.displayResolvedComments)
     }
 
+    override fun selectGeneralCommentsTreeNode() {
+        view.selectGeneralCommentsTreeNode()
+    }
+
     override fun addListener(listener: CommentTreePresenter.Listener) = view.addActionListener(listener)
     override fun removeListener(listener: CommentTreePresenter.Listener) = view.removeActionListener(listener)
 }

@@ -18,6 +18,8 @@ import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
@@ -76,6 +78,11 @@ abstract class AbstractProjectService(
         }
 
         override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+            val reviewContext = findReviewContextWhichDoingCodeReview()
+            if (null !== reviewContext) {
+                reviewContext.closeAllChanges()
+            }
+
             val codeReviewManager = myCodeReviewManager
             if (null !== codeReviewManager) {
                 codeReviewManager.dispose()
@@ -225,6 +232,12 @@ abstract class AbstractProjectService(
     }
 
     override fun isDoingCodeReview(): Boolean = null !== myCodeReviewManager
+
+    override fun findReviewContextWhichDoingCodeReview(): ReviewContext? {
+        return if (this.isDoingCodeReview()) {
+            return ReviewContextManager.findSelectedContext()
+        } else null
+    }
 
     override fun isReviewing(providerData: ProviderData, mergeRequest: MergeRequest): Boolean {
         val codeReviewService = myCodeReviewManager

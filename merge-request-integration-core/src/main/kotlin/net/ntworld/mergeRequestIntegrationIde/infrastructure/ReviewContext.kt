@@ -30,7 +30,7 @@ interface ReviewContext {
 
     fun getCommentsByPath(path: String): List<Comment>
 
-    fun openChange(change: Change)
+    fun openChange(change: Change, focus: Boolean, displayMergeRequestId: Boolean)
 
     fun hasAnyChangeOpened(): Boolean
 

@@ -16,6 +16,14 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
 
     fun renderTree(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>, displayResolvedComments: Boolean)
 
+    fun hideThread()
+
+    fun renderThread(mergeRequestInfo: MergeRequestInfo, groupedComments: Map<String, List<Comment>>)
+
+    fun selectGeneralCommentsTreeNode()
+
+    fun focusToMainEditor()
+
     interface ActionListener : EventListener {
         fun onTreeNodeSelected(node: Node)
 

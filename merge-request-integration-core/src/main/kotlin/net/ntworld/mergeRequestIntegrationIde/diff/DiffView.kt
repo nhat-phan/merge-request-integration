@@ -4,14 +4,12 @@ import com.intellij.diff.FrameDiffTool
 import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequestInfo
-import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
+import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.View
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.CommentEvent
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 
 interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>, Disposable {
@@ -41,7 +39,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
     fun displayComments(renderer: GutterIconRenderer, mode: DisplayCommentMode)
 
-    fun scrollToLine(visibleLine: Int, side: Side)
+    fun scrollToPosition(position: CommentPosition, showComments: Boolean)
 
     enum class EditorType {
         SINGLE_SIDE,
@@ -63,7 +61,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         HIDE
     }
 
-    interface ActionListener : CommentEvent {
+    interface ActionListener :
+        CommentEvent {
         fun onInit()
 
         fun onDispose()

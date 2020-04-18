@@ -14,6 +14,8 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
 
     fun setShowResolvedCommentState(selected: Boolean)
 
+    fun selectGeneralCommentsTreeNode()
+
     interface ActionListener : EventListener {
         fun onTreeNodeSelected(node: Node)
 

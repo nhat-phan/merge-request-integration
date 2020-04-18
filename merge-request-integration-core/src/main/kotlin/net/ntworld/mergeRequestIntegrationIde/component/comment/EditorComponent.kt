@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.comment
 
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequestIntegrationIde.Component

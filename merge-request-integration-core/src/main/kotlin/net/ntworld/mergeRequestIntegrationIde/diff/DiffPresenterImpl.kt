@@ -69,11 +69,10 @@ internal class DiffPresenterImpl(
             view.showAllComments()
         }
 
-        val scrollLine = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollLine)
-        if (null !== scrollLine && scrollLine >= 0) {
-            val side = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollSide)
+        val scrollPosition = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollPosition)
+        if (null !== scrollPosition) {
             val showComments = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollShowComments)
-            scrollToLine(scrollLine, side, showComments)
+            scrollToLine(scrollPosition, showComments)
             clearChangeDataOfScrollToLineInReviewContext()
         }
     }
@@ -184,16 +183,21 @@ internal class DiffPresenterImpl(
         fetchAndUpdateComments()
     }
 
-    override fun scrollToLineRequested(
+    override fun scrollToPositionRequested(
         reviewContext: ReviewContext,
         change: Change,
-        line: Int,
-        side: Side?,
+        position: CommentPosition,
         showComments: Boolean?
     ) {
-        if (model.reviewContext === reviewContext && model.change === change) {
-            scrollToLine(line, side, showComments)
+        if (model.reviewContext === reviewContext && model.change == change) {
+            scrollToLine(position, showComments)
             clearChangeDataOfScrollToLineInReviewContext()
+        }
+    }
+
+    override fun hideAllCommentsRequested(reviewContext: ReviewContext, change: Change) {
+        if (model.reviewContext === reviewContext && model.change == change) {
+            view.hideAllComments()
         }
     }
 
@@ -277,27 +281,30 @@ internal class DiffPresenterImpl(
         return if (null === diff) "" else diff.headHash
     }
 
-    private fun scrollToLine(line: Int, side: Side?, showComments: Boolean?) {
-        if (null !== showComments && showComments) {
-            if (null !== side) {
-                view.displayComments(line, side, DiffView.DisplayCommentMode.SHOW)
-            } else {
-                view.displayComments(line, Side.LEFT, DiffView.DisplayCommentMode.SHOW)
-                view.displayComments(line, Side.RIGHT, DiffView.DisplayCommentMode.SHOW)
-            }
-        }
-
-        if (null !== side) {
-            view.scrollToLine(line, side)
-        } else {
-            view.scrollToLine(line, Side.LEFT)
-            view.scrollToLine(line, Side.RIGHT)
-        }
+    private fun scrollToLine(position: CommentPosition, showComments: Boolean?) {
+        view.scrollToPosition(position, null !== showComments && showComments)
     }
 
+//    private fun scrollToLine(line: Int, side: Side?, showComments: Boolean?) {
+//        if (null !== showComments && showComments) {
+//            if (null !== side) {
+//                view.displayComments(line, side, DiffView.DisplayCommentMode.SHOW)
+//            } else {
+//                view.displayComments(line, Side.LEFT, DiffView.DisplayCommentMode.SHOW)
+//                view.displayComments(line, Side.RIGHT, DiffView.DisplayCommentMode.SHOW)
+//            }
+//        }
+//
+//        if (null !== side) {
+//            view.scrollToLine(line, side)
+//        } else {
+//            view.scrollToLine(line, Side.LEFT)
+//            view.scrollToLine(line, Side.RIGHT)
+//        }
+//    }
+
     private fun clearChangeDataOfScrollToLineInReviewContext() {
-        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollLine, null)
-        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollSide, null)
+        model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollPosition, null)
         model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollShowComments, null)
     }
 }

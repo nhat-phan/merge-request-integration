@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.comment
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.util.TipUIUtil
@@ -27,7 +27,8 @@ class CommentComponentImpl(
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val comment: Comment,
-    private val indent: Int
+    private val indent: Int,
+    private val borderLeftRight: Int = 1
 ) : CommentComponent {
     private val myPanel = SimpleToolWindowPanel(true, false)
     private val myNameLabel = Label(comment.author.name)
@@ -126,7 +127,9 @@ class CommentComponentImpl(
         myPanel.toolbar = createToolbar()
         myPanel.setContent(myWebView.component)
 
-        myPanel.border = BorderFactory.createMatteBorder(0, indent * 40 + 1, 1, 1, JBColor.border())
+        myPanel.border = BorderFactory.createMatteBorder(
+            0, indent * 40 + borderLeftRight, 1, borderLeftRight, JBColor.border()
+        )
     }
 
     override val component: JComponent = myPanel

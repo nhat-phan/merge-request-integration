@@ -4,8 +4,8 @@ import com.intellij.diff.util.Side
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEventPropagator
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
 
@@ -14,7 +14,8 @@ class ThreadPresenterImpl(
     override val view: ThreadView
 ) : AbstractPresenter<ThreadPresenter.EventListener>(), ThreadPresenter, ThreadModel.DataListener {
     override val dispatcher = EventDispatcher.create(ThreadPresenter.EventListener::class.java)
-    private val myCommentEventPropagator = CommentEventPropagator(dispatcher)
+    private val myCommentEventPropagator =
+        CommentEventPropagator(dispatcher)
     private val myThreadViewActionListener = object : ThreadView.ActionListener,
         CommentEvent by myCommentEventPropagator {
         override fun onMainEditorClosed() {

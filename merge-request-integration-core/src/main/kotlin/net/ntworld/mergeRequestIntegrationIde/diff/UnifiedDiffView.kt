@@ -7,9 +7,7 @@ import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
-import net.ntworld.mergeRequest.MergeRequestInfo
-import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
+import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
@@ -38,7 +36,7 @@ class UnifiedDiffView(
     }
 
     private fun initializeByLogicalLine(reviewContext: ReviewContext, line: Int, side: Side, comments: List<Comment>) {
-        initializeThreadModelOnLineIfNotAvailable(
+        initializeThreadOnLineIfNotAvailable(
             reviewContext.providerData, reviewContext.mergeRequestInfo,
             viewer.editor,
             calcPosition(line),
@@ -104,10 +102,41 @@ class UnifiedDiffView(
         }
     }
 
-    override fun scrollToLine(visibleLine: Int, side: Side) {
-        val logicalLine = convertVisibleLineToLogicalLine(visibleLine, side)
-        if (-1 != logicalLine) {
+    override fun displayComments(renderer: GutterIconRenderer, mode: DiffView.DisplayCommentMode) {
+        // for unified view the line distributed either on left/right, so we have to find both of them
+        val thread = findThreadPresenter(renderer.logicalLine, renderer.side)
+        if (null !== thread) {
+            displayComments(thread.model, renderer.logicalLine, renderer.side, mode)
+        } else {
+            val oppositeSide = if (renderer.side == Side.LEFT) Side.RIGHT else Side.LEFT
+            val oppositeThread = findThreadPresenter(renderer.logicalLine, oppositeSide)
+            if (null !== oppositeThread) {
+                displayComments(oppositeThread.model, renderer.logicalLine, oppositeSide, mode)
+            }
+        }
+    }
+
+    override fun scrollToPosition(position: CommentPosition, showComments: Boolean) {
+        if (viewer.editor.isDisposed) {
+            return
+        }
+
+        val oldLine = position.oldLine
+        val newLine = position.newLine
+        if (null !== newLine && null === oldLine) {
+            return findGutterIconRenderer(newLine, Side.RIGHT) { logicalLine, renderer ->
+                viewer.editor.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+                if (showComments) {
+                    displayComments(renderer, DiffView.DisplayCommentMode.SHOW)
+                }
+            }
+        }
+
+        return findGutterIconRenderer(oldLine!!, Side.LEFT) { logicalLine, renderer ->
             viewer.editor.scrollingModel.scrollTo(LogicalPosition(logicalLine, 0), ScrollType.MAKE_VISIBLE)
+            if (showComments) {
+                displayComments(renderer, DiffView.DisplayCommentMode.SHOW)
+            }
         }
     }
 

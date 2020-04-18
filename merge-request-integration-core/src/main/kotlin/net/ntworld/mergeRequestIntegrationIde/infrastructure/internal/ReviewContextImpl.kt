@@ -68,15 +68,15 @@ class ReviewContextImpl(
         return listOf()
     }
 
-    override fun openChange(change: Change) {
+    override fun openChange(change: Change, focus: Boolean, displayMergeRequestId: Boolean) {
         val diffFile = myPreviewDiffVirtualFileMap[change]
         if (null === diffFile) {
-            val provider = DiffPreviewProviderImpl(project, change, this)
+            val provider = DiffPreviewProviderImpl(project, change, this, displayMergeRequestId)
             val created = PreviewDiffVirtualFile(provider)
             myPreviewDiffVirtualFileMap[change] = created
-            FileEditorManagerEx.getInstanceEx(project).openFile(created, true)
+            FileEditorManagerEx.getInstanceEx(project).openFile(created, focus)
         } else {
-            FileEditorManagerEx.getInstanceEx(project).openFile(diffFile, true)
+            FileEditorManagerEx.getInstanceEx(project).openFile(diffFile, focus)
         }
     }
 

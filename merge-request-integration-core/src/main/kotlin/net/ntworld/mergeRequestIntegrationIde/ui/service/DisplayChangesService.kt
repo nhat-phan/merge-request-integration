@@ -14,7 +14,6 @@ import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.DiffPreviewProviderImpl
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.SwingConstants
@@ -149,60 +148,16 @@ object DisplayChangesService {
         applicationService.getProjectService(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
 
         ApplicationManager.getApplication().invokeLater {
+            val reviewContext = applicationService.getProjectService(ideaProject).findReviewContextWhichDoingCodeReview()
             val max = applicationService.settings.maxDiffChangesOpenedAutomatically
-            if (max != 0 && changes.size < max) {
+            if (null !== reviewContext && max != 0 && changes.size < max) {
                 val limit = UISettings().editorTabLimit
                 changes.forEachIndexed { index, item ->
                     if (index < limit) {
-                        openChange(ideaProject, fileEditorManagerEx, item)
+                        reviewContext.openChange(item, focus = true, displayMergeRequestId = false)
                     }
                 }
             }
-        }
-    }
-
-    fun searchAndOpenChange(
-        ideaProject: IdeaProject,
-        repository: GitRepository?,
-        path: String
-    ) {
-        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
-        val change = myChangePreviewDiffVirtualFileMap.keys.firstOrNull {
-            val beforeRevision = it.beforeRevision
-            if (null !== beforeRevision && beforeRevision.file.path == fullPath) {
-                return@firstOrNull true
-            }
-
-            val afterRevision = it.afterRevision
-            if (null !== afterRevision && afterRevision.file.path == fullPath) {
-                return@firstOrNull true
-            }
-            return@firstOrNull false
-        }
-        if (null === change) {
-            return
-        }
-        openChange(ideaProject, FileEditorManagerEx.getInstanceEx(ideaProject), change, true)
-    }
-
-    fun openChange(
-        ideaProject: IdeaProject,
-        fileEditorManagerEx: FileEditorManagerEx,
-        change: Change,
-        focus: Boolean = false
-    ) {
-        try {
-            val diffFile = myChangePreviewDiffVirtualFileMap[change]
-            if (null === diffFile) {
-                val provider = DiffPreviewProviderImpl(ideaProject, change)
-                val created = PreviewDiffVirtualFile(provider)
-                myChangePreviewDiffVirtualFileMap[change] = created
-                fileEditorManagerEx.openFile(created, focus)
-            } else {
-                fileEditorManagerEx.openFile(diffFile, focus)
-            }
-        } catch (exception: Exception) {
-            println(exception)
         }
     }
 

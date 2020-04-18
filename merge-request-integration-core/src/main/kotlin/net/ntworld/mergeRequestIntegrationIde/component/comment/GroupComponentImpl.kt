@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.comment
 
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.project.Project as IdeaProject
@@ -19,7 +19,8 @@ class GroupComponentImpl(
     private val mergeRequestInfo: MergeRequestInfo,
     private val project: IdeaProject,
     override val id: String,
-    comments: List<Comment>
+    comments: List<Comment>,
+    private val borderLeftRight: Int = 1
 ) : GroupComponent {
     private val dispatcher = EventDispatcher.create(GroupComponent.EventListener::class.java)
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
@@ -119,8 +120,14 @@ class GroupComponentImpl(
     override fun showReplyEditor() {
         val editor = myEditor
         if (null === editor) {
-            val createdEditor = ComponentFactory.makeEditor(project, EditorComponent.Type.REPLY, 1)
+            val createdEditor = ComponentFactory.makeEditor(
+                project,
+                EditorComponent.Type.REPLY,
+                1,
+                borderLeftRight
+            )
             dispatcher.multicaster.onEditorCreated(this.id, createdEditor)
+            // createdEditor.drawBorderTop(true)
             createdEditor.addListener(myEditorEventListener)
 
             myBoxLayoutPanel.addToBottom(createdEditor.component)
@@ -173,8 +180,15 @@ class GroupComponentImpl(
         myCommentComponents.clear()
 
         items.forEachIndexed { index, comment ->
-            val commentComponent = ComponentFactory
-                .makeComment(this, providerData, mergeRequestInfo, comment, if (index == 0) 0 else 1)
+            val commentComponent =
+                ComponentFactory.makeComment(
+                    this,
+                    providerData,
+                    mergeRequestInfo,
+                    comment,
+                    if (index == 0) 0 else 1,
+                    borderLeftRight
+                )
 
             myPanel.add(commentComponent.component)
             myCommentComponents.add(commentComponent)

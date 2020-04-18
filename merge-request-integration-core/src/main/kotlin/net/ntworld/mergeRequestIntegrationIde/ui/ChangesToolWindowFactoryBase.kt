@@ -12,7 +12,7 @@ open class ChangesToolWindowFactoryBase(
 ) : ToolWindowFactory {
     override fun createToolWindowContent(ideaProject: IdeaProject, toolWindow: ToolWindow) {
         val changes = ContentFactory.SERVICE.getInstance().createContent(
-            ChangesToolWindowTab(applicationService, ideaProject).createComponent(),
+            ChangesToolWindowTab(applicationService.getProjectService(ideaProject)).createComponent(),
             "Files",
             true
         )

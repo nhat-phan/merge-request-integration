@@ -4,6 +4,7 @@ import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.View
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 interface ThreadView : View<ThreadView.ActionListener>, Disposable {
@@ -35,7 +36,8 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
 
     fun hide()
 
-    interface ActionListener : CommentEvent {
+    interface ActionListener :
+        CommentEvent {
         fun onMainEditorClosed()
 
         fun onCreateCommentRequested(

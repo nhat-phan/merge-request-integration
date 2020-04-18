@@ -4,6 +4,7 @@ import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.Presenter
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 
 interface ThreadPresenter : Presenter<ThreadPresenter.EventListener>, Disposable {

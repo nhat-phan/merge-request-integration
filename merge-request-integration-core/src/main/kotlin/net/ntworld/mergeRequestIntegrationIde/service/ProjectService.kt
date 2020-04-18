@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import com.intellij.openapi.project.Project as IdeaProject
 
@@ -50,6 +51,8 @@ interface ProjectService {
     fun register(settings: ProviderSettings)
 
     fun isDoingCodeReview(): Boolean
+
+    fun findReviewContextWhichDoingCodeReview(): ReviewContext?
 
     fun isReviewing(providerData: ProviderData, mergeRequest: MergeRequest): Boolean
 

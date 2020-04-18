@@ -10,7 +10,8 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 class DiffPreviewProviderImpl(
     private val project: Project,
     val change: Change,
-    val reviewContext: ReviewContext? = null
+    val reviewContext: ReviewContext? = null,
+    private val showMergeRequestId: Boolean
 ) : DiffPreviewProvider {
 
     override fun getOwner(): Any {
@@ -22,7 +23,7 @@ class DiffPreviewProviderImpl(
     }
 
     override fun getEditorTabName(): String {
-        if (null !== reviewContext) {
+        if (null !== reviewContext && showMergeRequestId) {
             return "!${reviewContext.mergeRequestInfo.id}: ${ChangesUtil.getFilePath(change).name}"
         }
         return ChangesUtil.getFilePath(change).name

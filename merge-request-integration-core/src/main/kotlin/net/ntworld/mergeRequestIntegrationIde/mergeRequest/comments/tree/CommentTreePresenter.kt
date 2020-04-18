@@ -12,5 +12,7 @@ interface CommentTreePresenter : Presenter<CommentTreePresenter.Listener>, Compo
     override val component: JComponent
         get() = view.component
 
+    fun selectGeneralCommentsTreeNode()
+
     interface Listener : CommentTreeView.ActionListener
 }

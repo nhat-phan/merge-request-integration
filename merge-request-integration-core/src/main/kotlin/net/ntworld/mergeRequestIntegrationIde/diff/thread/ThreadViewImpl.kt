@@ -17,6 +17,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
+import net.ntworld.mergeRequestIntegrationIde.component.comment.*
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
 import java.awt.Cursor

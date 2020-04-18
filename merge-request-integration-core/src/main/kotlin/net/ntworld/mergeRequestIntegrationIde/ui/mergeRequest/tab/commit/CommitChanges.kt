@@ -19,6 +19,7 @@ import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPane
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
@@ -27,33 +28,34 @@ class CommitChanges(private val projectService: ProjectService) : CommitChangesU
     private val myTree = MyTree(projectService.project)
     private var myProviderData: ProviderData? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
+    private val myTreeSelectionListener = TreeSelectionListener {
+        if (null !== it && myTree.isVisible) {
+            val lastPath = it.path.lastPathComponent
+            val providerData = myProviderData
+            val mergeRequestInfo = myMergeRequestInfo
+            if (null !== providerData && null !== mergeRequestInfo && lastPath is ChangesBrowserChangeNode) {
+                val selectedContext = ReviewContextManager.findSelectedContext()
+                val reviewContext = ReviewContextManager.findContext(
+                    providerData.id, mergeRequestInfo.id
+                )
+                if (null === reviewContext) {
+                    return@TreeSelectionListener
+                }
+                if (null !== selectedContext) {
+                    if (selectedContext.providerData.id != reviewContext.providerData.id ||
+                        selectedContext.mergeRequestInfo.id != reviewContext.mergeRequestInfo.id) {
+                        return@TreeSelectionListener
+                    }
+                }
+                reviewContext.openChange(lastPath.userObject, focus = false, displayMergeRequestId = !projectService.isDoingCodeReview())
+            }
+        }
+    }
 
     init {
         myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree, true))
         myComponent.toolbar = createToolbar()
-        myTree.addTreeSelectionListener {
-            if (null !== it) {
-                val lastPath = it.path.lastPathComponent
-                val providerData = myProviderData
-                val mergeRequestInfo = myMergeRequestInfo
-                if (null !== providerData && null !== mergeRequestInfo && lastPath is ChangesBrowserChangeNode) {
-                    val selectedContext = ReviewContextManager.findSelectedContext()
-                    val reviewContext = ReviewContextManager.findContext(
-                        providerData.id, mergeRequestInfo.id
-                    )
-                    if (null === reviewContext) {
-                        return@addTreeSelectionListener
-                    }
-                    if (null !== selectedContext) {
-                        if (selectedContext.providerData.id != reviewContext.providerData.id ||
-                            selectedContext.mergeRequestInfo.id != reviewContext.mergeRequestInfo.id) {
-                            return@addTreeSelectionListener
-                        }
-                    }
-                    reviewContext.openChange(lastPath.userObject)
-                }
-            }
-        }
+        myTree.addTreeSelectionListener(myTreeSelectionListener)
     }
 
     override fun clear() {
@@ -73,8 +75,8 @@ class CommitChanges(private val projectService: ProjectService) : CommitChangesU
     override fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
         myProviderData = providerData
         myMergeRequestInfo = mergeRequestInfo
-        myTree.isVisible = false
         thread {
+            myTree.isVisible = false
             val changes = projectService.repositoryFile.findChanges(providerData, commits.map { it.id })
             ReviewContextManager.updateChanges(providerData.id, mergeRequestInfo.id, changes)
             ApplicationManager.getApplication().invokeLater {

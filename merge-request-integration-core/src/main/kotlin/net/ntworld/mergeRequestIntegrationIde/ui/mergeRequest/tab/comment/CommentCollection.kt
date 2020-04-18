@@ -124,7 +124,6 @@ class CommentCollection(
                 }
                 is GroupNode -> {
                     dispatcher.multicaster.commentUnselected()
-                    jumpToDiffViewIfDoingCodeReview(node)
                 }
             }
         }
@@ -558,15 +557,5 @@ class CommentCollection(
         }
 
         override fun getElement(): GroupedComments = data
-    }
-
-    private fun jumpToDiffViewIfDoingCodeReview(node: GroupNode) {
-        if (projectService.isDoingCodeReview()) {
-            DisplayChangesService.searchAndOpenChange(
-                ideaProject,
-                node.repository,
-                node.data.nodeData.fullPath
-            )
-        }
     }
 }

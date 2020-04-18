@@ -31,13 +31,12 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
 class ChangesToolWindowTab(
-    private val applicationService: ApplicationService,
-    private val ideaProject: Project
+    private val projectService: ProjectService
 ) : Component {
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel()
     private val myComponent = SimpleToolWindowPanel(true, true)
-    private val myTree = MyTree(ideaProject)
+    private val myTree = MyTree(projectService.project)
     private val myTreeWrapper = ScrollPaneFactory.createScrollPane(myTree, true)
     private val myToolbar by lazy {
         val panel = JPanel(MigLayout("ins 0, fill", "[left]0[left, fill]push[right]", "center"))
@@ -91,11 +90,13 @@ class ChangesToolWindowTab(
             return@TreeSelectionListener
         }
 
-        DisplayChangesService.openChange(ideaProject, FileEditorManagerEx.getInstanceEx(ideaProject), change)
+        val reviewContext = projectService.findReviewContextWhichDoingCodeReview()
+        if (null !== reviewContext) {
+            reviewContext.openChange(change, focus = true, displayMergeRequestId = false)
+        }
     }
 
     init {
-        val projectService = applicationService.getProjectService(ideaProject)
         myLabelEmpty.text = "Changes will be displayed when you do Code Review"
         myComponentEmpty.background = JBColor.background()
         myComponentEmpty.layout = GridBagLayout()
