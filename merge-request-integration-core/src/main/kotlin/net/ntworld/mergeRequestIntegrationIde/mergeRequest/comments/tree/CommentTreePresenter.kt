@@ -12,6 +12,8 @@ interface CommentTreePresenter : Presenter<CommentTreePresenter.Listener>, Compo
     override val component: JComponent
         get() = view.component
 
+    fun hasGeneralCommentsTreeNode(): Boolean
+
     fun selectGeneralCommentsTreeNode()
 
     interface Listener : CommentTreeView.ActionListener

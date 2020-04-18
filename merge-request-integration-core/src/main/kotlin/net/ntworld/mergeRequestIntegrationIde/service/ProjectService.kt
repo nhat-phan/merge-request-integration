@@ -22,11 +22,7 @@ interface ProjectService {
 
     val notification: NotificationGroup
 
-    val commentStore: CommentStore
-
     val codeReviewManager: CodeReviewManager?
-
-    val codeReviewUtil: CodeReviewUtil
 
     val registeredProviders: List<ProviderData>
 

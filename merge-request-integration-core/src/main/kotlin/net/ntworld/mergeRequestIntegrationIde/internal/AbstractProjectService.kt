@@ -49,15 +49,13 @@ abstract class AbstractProjectService(
         "Merge Request Integration", NotificationDisplayType.BALLOON, true
     )
 
-    override val commentStore: CommentStore = CommentStoreImpl()
     override val codeReviewManager: CodeReviewManager?
         get() = myCodeReviewManager
-    override val codeReviewUtil: CodeReviewUtil = CodeReviewUtilImpl
 
     private val myProjectEventListener = object : ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             val service = CodeReviewManagerImpl(
-                project, providerData, mergeRequest, codeReviewUtil
+                project, providerData, mergeRequest
             )
             val comments = myComments
             if (null !== comments) {

@@ -28,7 +28,10 @@ class GroupComponentImpl(
     private val myCommentComponents = mutableListOf<CommentComponent>()
     private var myEditor: EditorComponent? = null
     private var myEditorEventListener = object : EditorComponent.EventListener {
-        override fun onEditorResized() {
+        override fun onEditorFocused(editor: EditorComponent) {
+        }
+
+        override fun onEditorResized(editor: EditorComponent) {
             dispatcher.multicaster.onResized()
         }
 

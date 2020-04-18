@@ -45,7 +45,7 @@ class EditorComponentImpl(
     }
     private val myComponentListener = object: ComponentAdapter() {
         override fun componentResized(e: ComponentEvent?) {
-            dispatcher.multicaster.onEditorResized()
+            dispatcher.multicaster.onEditorResized(this@EditorComponentImpl)
         }
     }
     private val myCancelAction = object : AnAction(
@@ -69,8 +69,8 @@ class EditorComponentImpl(
         override fun update(e: AnActionEvent) {
             when (type) {
                 EditorComponent.Type.NEW_DISCUSSION -> {
-                    e.presentation.text = "Add comment"
-                    e.presentation.description = "Add comment to the current position"
+                    e.presentation.text = addCommentButtonText
+                    e.presentation.description = addCommentButtonDesc
                 }
                 EditorComponent.Type.REPLY -> {
                     e.presentation.text = "Reply"
@@ -91,17 +91,17 @@ class EditorComponentImpl(
             if (myEditorTextField.text.isBlank() || myEditorTextField.text == EMPTY_TEXT_REPLACED) {
                 myEditorTextField.text = ""
                 myPanel.toolbar!!.isVisible = false
-                dispatcher.multicaster.onEditorResized()
+                dispatcher.multicaster.onEditorResized(this@EditorComponentImpl)
             }
         }
 
         override fun focusGained(e: FocusEvent?) {
             if (myEditorTextField.text.isBlank()) {
-                myEditorTextField.text =
-                    EMPTY_TEXT_REPLACED
+                myEditorTextField.text = EMPTY_TEXT_REPLACED
             }
             myPanel.toolbar!!.isVisible = true
-            dispatcher.multicaster.onEditorResized()
+            dispatcher.multicaster.onEditorResized(this@EditorComponentImpl)
+            dispatcher.multicaster.onEditorFocused(this@EditorComponentImpl)
         }
     }
 
@@ -127,6 +127,9 @@ class EditorComponentImpl(
         set(value) {
             myEditorTextField.text = value
         }
+
+    override var addCommentButtonText: String = "Add comment"
+    override var addCommentButtonDesc: String = "Add comment to the current position"
 
     override var isVisible: Boolean
         get() = myPanel.isVisible

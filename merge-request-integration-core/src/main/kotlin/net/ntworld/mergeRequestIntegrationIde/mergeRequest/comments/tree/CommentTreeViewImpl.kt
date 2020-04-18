@@ -28,7 +28,6 @@ class CommentTreeViewImpl(
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
 
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
-    private val myToolbar = CommentTreeViewToolbar(dispatcher)
 
     private val myTree = Tree()
     private val myRoot = DefaultMutableTreeNode()
@@ -54,6 +53,8 @@ class CommentTreeViewImpl(
             dispatcher.multicaster.onTreeNodeSelected(element)
         }
     }
+
+    private val myToolbar = CommentTreeViewToolbar(myTree, dispatcher)
 
     init {
         val treeSelectionModel = DefaultTreeSelectionModel()
@@ -83,16 +84,30 @@ class CommentTreeViewImpl(
         myToolbar.showResolved = selected
     }
 
+    override fun hasGeneralCommentsTreeNode(): Boolean {
+        val children = myRoot.children()
+        for (child in children) {
+            if (isGeneralCommentsTreeNode(child)) {
+                return true
+            }
+        }
+        return false
+    }
+
     override fun selectGeneralCommentsTreeNode() {
         val children = myRoot.children()
         for (child in children) {
-            val treeNode = child as? DefaultMutableTreeNode ?: continue
-            val descriptor = treeNode.userObject as? PresentableNodeDescriptor<*> ?: continue
-            val element = descriptor.element as? GeneralCommentsNode ?: continue
-
-            myTree.selectionPath = TreeUtil.getPath(myRoot, treeNode)
-            break
+            if (isGeneralCommentsTreeNode(child)) {
+                myTree.selectionPath = TreeUtil.getPath(myRoot, child)
+                break
+            }
         }
+    }
+
+    private fun isGeneralCommentsTreeNode(node: TreeNode) : Boolean {
+        val treeNode = node as? DefaultMutableTreeNode ?: return false
+        val descriptor = treeNode.userObject as? PresentableNodeDescriptor<*> ?: return false
+        return descriptor.element is GeneralCommentsNode
     }
 
     override val component: JComponent = myComponent

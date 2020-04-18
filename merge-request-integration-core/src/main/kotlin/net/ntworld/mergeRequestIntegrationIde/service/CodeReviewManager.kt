@@ -6,7 +6,7 @@ import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
 
-interface CodeReviewManager : CodeReviewUtil, Disposable {
+interface CodeReviewManager : Disposable {
     val providerData: ProviderData
     val mergeRequest: MergeRequest
     val messageBusConnection: MessageBusConnection

@@ -21,4 +21,7 @@ object Github : ProviderInfo {
         return "$mergeRequestUrl#comment_${comment.id}"
     }
 
+    override fun formatMergeRequestId(mergeRequestId: String): String {
+        return mergeRequestId
+    }
 }

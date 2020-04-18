@@ -70,6 +70,7 @@ class MergeRequestCollectionTree(
         myRoot.removeAllChildren()
         collection.forEach {
             val item = MergeRequestCollectionTreeNode(
+                providerData,
                 ideaProject,
                 it
             )

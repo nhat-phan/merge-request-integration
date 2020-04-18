@@ -15,5 +15,7 @@ interface ProviderInfo {
 
     fun createCommentUrl(mergeRequestUrl: String, comment: Comment): String
 
+    fun formatMergeRequestId(mergeRequestId: String): String
+
     companion object
 }

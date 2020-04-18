@@ -3,9 +3,11 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 import com.intellij.openapi.Disposable
 import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequestIntegrationIde.Component
 import net.ntworld.mergeRequestIntegrationIde.View
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import java.util.*
 
@@ -20,11 +22,15 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
 
     fun renderThread(mergeRequestInfo: MergeRequestInfo, groupedComments: Map<String, List<Comment>>)
 
+    fun hasGeneralCommentsTreeNode(): Boolean
+
     fun selectGeneralCommentsTreeNode()
 
     fun focusToMainEditor()
 
-    interface ActionListener : EventListener {
+    fun clearMainEditorText()
+
+    interface ActionListener : EventListener, CommentEvent {
         fun onTreeNodeSelected(node: Node)
 
         fun onShowResolvedCommentsToggled(displayResolvedComments: Boolean)
@@ -32,5 +38,9 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
         fun onCreateGeneralCommentClicked()
 
         fun onRefreshButtonClicked()
+
+        fun onReplyCommentRequested(repliedComment: Comment, content: String)
+
+        fun onCreateCommentRequested(content: String, position: CommentPosition?)
     }
 }

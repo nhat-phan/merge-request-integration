@@ -28,6 +28,7 @@ class MergeRequestItemPanel(
     var myContentWrapperPanel: JPanel? = null
     var myApprovalStatusWrapperPanel: JPanel? = null
     var myTimeWrapper: JPanel? = null
+    var myId: JLabel? = null
     var myTitle: JLabel? = null
     var myCreated: JLabel? = null
     var myUpdated: JLabel? = null
@@ -60,6 +61,7 @@ class MergeRequestItemPanel(
     }
 
     init {
+        myId!!.text = providerData.info.formatMergeRequestId(mergeRequestInfo.id)
         myTitle!!.text = mergeRequestInfo.title
         val created = DateTimeUtil.toDate(mergeRequestInfo.createdAt)
         myCreated!!.text = "Created ${DateTimeUtil.toPretty(created)}"

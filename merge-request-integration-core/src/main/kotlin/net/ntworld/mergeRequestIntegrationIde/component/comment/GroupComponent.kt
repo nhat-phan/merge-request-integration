@@ -23,8 +23,7 @@ interface GroupComponent : Component, Disposable {
 
     fun addListener(listener: EventListener)
 
-    interface EventListener : java.util.EventListener,
-        CommentEvent {
+    interface EventListener : java.util.EventListener, CommentEvent {
         fun onResized()
 
         fun onEditorCreated(groupId: String, editor: EditorComponent)

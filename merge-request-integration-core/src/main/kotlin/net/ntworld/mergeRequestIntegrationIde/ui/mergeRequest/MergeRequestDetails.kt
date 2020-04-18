@@ -10,8 +10,6 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabPresenter
 import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.CommentStore
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.task.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
@@ -59,24 +57,6 @@ class MergeRequestDetails(
         tabInfo.icon = AllIcons.Vcs.CommitNode
 
         tabInfo
-    }
-
-    private val myLegacyCommentsTab: MergeRequestCommentsTabUI = MergeRequestCommentsTab(applicationService, ideaProject)
-    private val myLegacyCommentsTabInfo: TabInfo by lazy {
-        val tabInfo = TabInfo(myLegacyCommentsTab.createComponent())
-        tabInfo.text = "Comments"
-        tabInfo.icon = Icons.Comments
-
-        tabInfo
-    }
-    private val myCommentsTabListener = object: MergeRequestCommentsTabUI.Listener {
-        override fun commentsDisplayed(total: Int) {
-            displayCommentsCount(total)
-        }
-
-        override fun refreshRequested(mergeRequest: MergeRequest) {
-            GetLegacyCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
-        }
     }
 
     private val myCommentsTabPresenter: CommentsTabPresenter by lazy {
@@ -158,7 +138,6 @@ class MergeRequestDetails(
                 myToolbars.forEach {
                     it.setComments(mergeRequest, comments)
                 }
-                myLegacyCommentsTab.setComments(providerData, mergeRequest, comments)
             }
         }
     }
@@ -176,23 +155,6 @@ class MergeRequestDetails(
         }
     }
 
-    private val myProjectEventListener = object : ProjectEventListener {
-        override fun newCommentRequested(
-            providerData: ProviderData,
-            mergeRequest: MergeRequest,
-            position: CommentPosition,
-            item: CommentStore.Item
-        ) {
-            myTabs.getTabs().select(myLegacyCommentsTabInfo, true)
-        }
-
-        override fun displayCommentRequested(comment: Comment) {
-            if (applicationService.getProjectService(ideaProject).isDoingCodeReview()) {
-                myTabs.getTabs().select(myLegacyCommentsTabInfo, true)
-            }
-        }
-    }
-
     private val myToolbarListener = object : MergeRequestDetailsToolbarUI.Listener {
         override fun refreshRequested(mergeRequestInfo: MergeRequestInfo) {
             setMergeRequestInfo(mergeRequestInfo)
@@ -202,13 +164,10 @@ class MergeRequestDetails(
     init {
         myTabs.addTab(myInfoTabInfo)
         myTabs.addTab(myDescriptionTabInfo)
-        myTabs.addTab(myLegacyCommentsTabInfo)
         myTabs.addTab(myCommentsTabPresenter.tabInfo)
         myTabs.addTab(myCommitsTabInfo)
 
         myCommitsTab.dispatcher.addListener(mySelectCommitsListener)
-        myLegacyCommentsTab.dispatcher.addListener(myCommentsTabListener)
-        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
     }
 
     override fun hide() {
@@ -227,9 +186,8 @@ class MergeRequestDetails(
         ReviewContextManager.initContext(ideaProject, providerData, mergeRequestInfo, true)
         FetchService.start(applicationService, ideaProject, providerData, mergeRequestInfo)
 
-        myInfoTab.setMergeRequestInfo(mergeRequestInfo)
+        myInfoTab.setMergeRequestInfo(providerData, mergeRequestInfo)
         myDescriptionTab.setMergeRequestInfo(providerData, mergeRequestInfo)
-        myLegacyCommentsTabInfo.text = "Comments"
 
         myCommentsTabPresenter.model.mergeRequestInfo = mergeRequestInfo
 
@@ -251,14 +209,6 @@ class MergeRequestDetails(
     }
 
     override fun createComponent(): JComponent = myTabs.component
-
-    private fun displayCommentsCount(count: Int) {
-        if (count == 0) {
-            myLegacyCommentsTabInfo.text = "Comments"
-        } else {
-            myLegacyCommentsTabInfo.text = "Comments · $count"
-        }
-    }
 
     private fun toolbarCommonCenterActionGroupFactory(): ActionGroup {
         return DefaultActionGroup()

@@ -16,6 +16,7 @@ class MergeRequestInfoPanel {
     var myClosedByWrapperPanel: JPanel? = null
     var myAssignedWrapperPanel: JPanel? = null
     var myAuthorWrapperPanel: JPanel? = null
+    var myId: JLabel? = null
     var myTitle: JLabel? = null
     var myCreatedAt: JLabel? = null
     var myUpdatedAt: JLabel? = null
@@ -55,7 +56,8 @@ class MergeRequestInfoPanel {
         myAuthorWrapperPanel!!.background = JBColor.background()
     }
 
-    fun setMergeRequestInfo(mr: MergeRequestInfo) {
+    fun setMergeRequestInfo(providerData: ProviderData, mr: MergeRequestInfo) {
+        myId!!.text = providerData.info.formatMergeRequestId(mr.id)
         myTitle!!.text = mr.title
         displayTime(mr.createdAt, myCreatedAt!!)
         displayTime(mr.updatedAt, myUpdatedAt!!)

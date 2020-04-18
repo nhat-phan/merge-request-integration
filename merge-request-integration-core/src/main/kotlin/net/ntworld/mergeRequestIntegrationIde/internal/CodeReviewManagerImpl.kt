@@ -6,15 +6,13 @@ import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
-import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewUtil
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 internal class CodeReviewManagerImpl(
     private val ideaProject: IdeaProject,
     override val providerData: ProviderData,
-    override val mergeRequest: MergeRequest,
-    val util: CodeReviewUtil
-) : CodeReviewManager, CodeReviewUtil by util {
+    override val mergeRequest: MergeRequest
+) : CodeReviewManager {
     override val repository: GitRepository? = RepositoryUtil.findRepository(ideaProject, providerData)
     override val messageBusConnection: MessageBusConnection = ideaProject.messageBus.connect()
 

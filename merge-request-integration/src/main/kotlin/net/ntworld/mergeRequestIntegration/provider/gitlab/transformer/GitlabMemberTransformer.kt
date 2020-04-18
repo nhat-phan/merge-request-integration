@@ -6,8 +6,7 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegration.provider.Transformer
 import org.gitlab4j.api.models.AbstractUser
 
-object GitlabMemberTransformer:
-    Transformer<AbstractUser<*>, UserInfo> {
+object GitlabMemberTransformer : Transformer<AbstractUser<*>, UserInfo> {
     override fun transform(input: AbstractUser<*>): UserInfo = UserInfoImpl(
         id = input.getId().toString(),
         name = input.getName(),

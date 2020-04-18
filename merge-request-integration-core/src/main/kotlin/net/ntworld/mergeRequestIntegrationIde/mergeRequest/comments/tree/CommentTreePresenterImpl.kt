@@ -20,6 +20,10 @@ class CommentTreePresenterImpl(
         view.setShowResolvedCommentState(model.displayResolvedComments)
     }
 
+    override fun hasGeneralCommentsTreeNode(): Boolean {
+        return view.hasGeneralCommentsTreeNode()
+    }
+
     override fun selectGeneralCommentsTreeNode() {
         view.selectGeneralCommentsTreeNode()
     }

@@ -20,15 +20,4 @@ interface ProjectEventListener : EventListener {
 
     fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {}
 
-    fun newCommentRequested(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        position: CommentPosition,
-        item: CommentStore.Item
-    ) {
-    }
-
-    fun displayCommentRequested(comment: Comment) {
-    }
-
 }

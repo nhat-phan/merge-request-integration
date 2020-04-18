@@ -1,11 +1,18 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 
-import com.intellij.diff.util.Side
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequest.MergeRequestInfo
+import net.ntworld.mergeRequest.command.DeleteCommentCommand
+import net.ntworld.mergeRequest.command.ResolveCommentCommand
+import net.ntworld.mergeRequest.command.UnresolveCommentCommand
+import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffNotifier
@@ -118,12 +125,77 @@ class CommentsTabPresenterImpl(
 
     override fun onCreateGeneralCommentClicked() {
         assertMergeRequestInfoIsAvailable {
-            view.selectGeneralCommentsTreeNode()
+            if (view.hasGeneralCommentsTreeNode()) {
+                view.selectGeneralCommentsTreeNode()
+            } else {
+                view.renderThread(it, mapOf())
+            }
             view.focusToMainEditor()
         }
     }
 
     override fun onRefreshButtonClicked() = requestFetchComments()
+
+    override fun onDeleteCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
+        applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
+            providerId = model.providerData.id,
+            mergeRequestId = it.id,
+            comment = comment
+        )
+        requestFetchComments()
+    }
+
+    override fun onResolveCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
+        applicationService.infrastructure.commandBus() process ResolveCommentCommand.make(
+            providerId = model.providerData.id,
+            mergeRequestId = it.id,
+            comment = comment
+        )
+        requestFetchComments()
+    }
+
+    override fun onUnresolveCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
+        applicationService.infrastructure.commandBus() process UnresolveCommentCommand.make(
+            providerId = model.providerData.id,
+            mergeRequestId = it.id,
+            comment = comment
+        )
+        requestFetchComments()
+    }
+
+    override fun onReplyCommentRequested(repliedComment: Comment, content: String) = assertMergeRequestInfoIsAvailable {
+        applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = it.id,
+            repliedComment = repliedComment,
+            body = content
+        ) ifError { exception ->
+            projectService.notify(
+                "There was an error from server. \n\n ${exception.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(exception)
+        }
+        view.clearMainEditorText()
+        requestFetchComments()
+    }
+
+    override fun onCreateCommentRequested(content: String, position: CommentPosition?) = assertMergeRequestInfoIsAvailable {
+        applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = model.mergeRequestInfo.id,
+            position = position,
+            body = content
+        ) ifError {
+            projectService.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        view.clearMainEditorText()
+        requestFetchComments()
+    }
 
     private fun requestFetchComments() = assertMergeRequestInfoIsAvailable {
         projectService.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(

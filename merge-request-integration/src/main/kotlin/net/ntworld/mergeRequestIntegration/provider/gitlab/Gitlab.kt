@@ -21,4 +21,7 @@ object Gitlab : ProviderInfo {
         return "$mergeRequestUrl#note_${comment.id}"
     }
 
+    override fun formatMergeRequestId(mergeRequestId: String): String {
+        return "!$mergeRequestId"
+    }
 }

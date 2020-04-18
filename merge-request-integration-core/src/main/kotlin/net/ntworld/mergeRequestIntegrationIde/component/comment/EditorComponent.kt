@@ -6,6 +6,10 @@ import net.ntworld.mergeRequestIntegrationIde.Component
 interface EditorComponent : Component, Disposable {
     var text: String
 
+    var addCommentButtonText: String
+
+    var addCommentButtonDesc: String
+
     var isVisible: Boolean
 
     fun focus()
@@ -15,7 +19,9 @@ interface EditorComponent : Component, Disposable {
     fun addListener(listener: EventListener)
 
     interface EventListener: java.util.EventListener {
-        fun onEditorResized()
+        fun onEditorFocused(editor: EditorComponent)
+
+        fun onEditorResized(editor: EditorComponent)
 
         fun onCancelClicked(editor: EditorComponent)
 

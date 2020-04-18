@@ -2,14 +2,18 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
+import com.intellij.ui.treeStructure.actions.CollapseAllAction
+import com.intellij.ui.treeStructure.actions.ExpandAllAction
 import com.intellij.util.EventDispatcher
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequestIntegrationIde.Component
-import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.comment.CommentCollectionFilter
+import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.JTree
 
 internal class CommentTreeViewToolbar(
+    private val myTree: JTree,
     private val dispatcher: EventDispatcher<CommentTreeView.ActionListener>
 ) : Component {
     var showResolved: Boolean = false
@@ -50,23 +54,26 @@ internal class CommentTreeViewToolbar(
         val mainActionGroup = DefaultActionGroup()
         mainActionGroup.add(mySkipResolvedButton)
         val mainToolbar = ActionManager.getInstance().createActionToolbar(
-            "${CommentCollectionFilter::class.java.canonicalName}/toolbar",
+            "${this::class.java.canonicalName}/toolbar",
             mainActionGroup,
             true
         )
 
-        val rightCornerActionGroup = DefaultActionGroup()
-        rightCornerActionGroup.add(myRefreshButton)
-        rightCornerActionGroup.addSeparator()
-        rightCornerActionGroup.add(myAddGeneralComment)
-        val rightCornerToolbar = ActionManager.getInstance().createActionToolbar(
-            "${CommentCollectionFilter::class.java.canonicalName}/toolbar-right",
-            rightCornerActionGroup,
+        val rightActionGroup = DefaultActionGroup()
+        rightActionGroup.add(myRefreshButton)
+        rightActionGroup.addSeparator()
+        rightActionGroup.add(ExpandAllAction(myTree))
+        rightActionGroup.add(CollapseAllAction(myTree))
+        rightActionGroup.addSeparator()
+        rightActionGroup.add(myAddGeneralComment)
+        val rightToolbar = ActionManager.getInstance().createActionToolbar(
+            "${this::class.java.canonicalName}/toolbar-right",
+            rightActionGroup,
             true
         )
 
         panel.add(mainToolbar.component)
-        panel.add(rightCornerToolbar.component)
+        panel.add(rightToolbar.component)
         panel
     }
 

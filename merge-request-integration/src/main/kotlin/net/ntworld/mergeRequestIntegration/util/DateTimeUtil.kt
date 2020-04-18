@@ -30,7 +30,7 @@ object DateTimeUtil {
         return parser.parseDateTime(datetime).withZone(localTimeZone).toDate()
     }
 
-    fun formatDate(date: Date) = toStringDateFormat.format(date)
+    fun formatDate(date: Date): String = toStringDateFormat.format(date) ?: ""
 
     fun toPretty(date: Date): String {
         return prettyTime.format(date)

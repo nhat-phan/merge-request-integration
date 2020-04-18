@@ -60,7 +60,9 @@ class ThreadViewImpl(
         editorComponent
     }
     private val myEditorComponentEventListener = object : EditorComponent.EventListener {
-        override fun onEditorResized() {
+        override fun onEditorFocused(editor: EditorComponent) {}
+
+        override fun onEditorResized(editor: EditorComponent) {
             myEditorWidthWatcher.updateWidthForAllInlays()
         }
 

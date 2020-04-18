@@ -61,8 +61,7 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
         HIDE
     }
 
-    interface ActionListener :
-        CommentEvent {
+    interface ActionListener : CommentEvent {
         fun onInit()
 
         fun onDispose()

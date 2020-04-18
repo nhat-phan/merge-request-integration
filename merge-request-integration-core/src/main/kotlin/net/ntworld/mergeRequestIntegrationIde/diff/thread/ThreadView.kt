@@ -36,8 +36,7 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
 
     fun hide()
 
-    interface ActionListener :
-        CommentEvent {
+    interface ActionListener : CommentEvent {
         fun onMainEditorClosed()
 
         fun onCreateCommentRequested(
