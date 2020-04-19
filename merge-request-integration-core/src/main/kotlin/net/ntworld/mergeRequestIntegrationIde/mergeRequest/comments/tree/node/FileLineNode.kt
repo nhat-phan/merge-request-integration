@@ -10,6 +10,8 @@ class FileLineNode(
     val position: CommentPosition,
     private val count: Int
 ) : AbstractNode() {
+    override val id: String = "line[$path:$line]"
+
     override fun updatePresentation(presentation: PresentationData) {
         presentation.addText("Line $line", SimpleTextAttributes.REGULAR_ATTRIBUTES)
 

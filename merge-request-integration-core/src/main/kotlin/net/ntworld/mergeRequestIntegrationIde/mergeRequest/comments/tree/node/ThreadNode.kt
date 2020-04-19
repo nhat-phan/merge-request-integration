@@ -11,6 +11,7 @@ class ThreadNode(
     comment: Comment,
     position: CommentPosition?
 ) : CommentNode(comment, position) {
+    override val id: String = "thread[${comment.id}]"
 
     override fun updatePresentation(presentation: PresentationData) {
         super.updatePresentation(presentation)

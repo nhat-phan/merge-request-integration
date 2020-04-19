@@ -11,6 +11,7 @@ open class CommentNode(
     val comment: Comment,
     val position: CommentPosition?
 ) : AbstractNode() {
+    override val id: String = "comment[${comment.id}]"
 
     override fun updatePresentation(presentation: PresentationData) {
         presentation.setIcon(if (comment.resolved) Icons.TreeNode.ResolvedComment else Icons.TreeNode.UnresolvedComment)

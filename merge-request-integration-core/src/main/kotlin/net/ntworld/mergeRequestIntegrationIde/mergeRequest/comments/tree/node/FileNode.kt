@@ -17,6 +17,8 @@ class FileNode(
         presentation.setIcon(projectService.repositoryFile.findIcon(providerData, path))
     }
 
+    override val id: String = "file[$path]"
+
     override fun updatePresentation(presentation: PresentationData) {
         val fileName = findFileName(path)
         presentation.addText(fileName, SimpleTextAttributes.REGULAR_ATTRIBUTES)

@@ -5,9 +5,14 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 
 interface Node {
+    val id: String
+
     var parent: Node?
 
     val children: List<Node>
+
+    val childCount
+        get() = children.size
 
     fun add(node: Node)
 

@@ -9,6 +9,7 @@ val gitlab4jVersion: String by project
 val githubApiVersion: String by project
 val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
+val mockkVersion: String by project
 
 group = artifactGroup
 version = artifactVersion
@@ -32,6 +33,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 intellij {

@@ -10,10 +10,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
-import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.GeneralCommentsNode
-import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
-import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.NodeFactory
-import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.RootNodeBuilder
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
@@ -55,6 +52,12 @@ class CommentTreeViewImpl(
     }
 
     private val myToolbar = CommentTreeViewToolbar(myTree, dispatcher)
+    private val nodeSyncManager: NodeSyncManager by lazy {
+        NodeSyncManagerImpl(NodeDescriptorServiceImpl(projectService, providerData))
+    }
+    private val mySyncedTree: NodeSyncManager.SyncedTree by lazy {
+        nodeSyncManager.makeSyncedTree(myTree, myRoot)
+    }
 
     init {
         val treeSelectionModel = DefaultTreeSelectionModel()
@@ -74,8 +77,10 @@ class CommentTreeViewImpl(
     override fun renderTree(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>) {
         myIsTreeRendering = true
         val builder = RootNodeBuilder(comments)
+        val root = builder.build()
+        nodeSyncManager.sync(mergeRequestInfo, root, mySyncedTree)
 
-        NodeFactory.applyToTreeRoot(projectService, providerData, builder.build(), myRoot)
+        // NodeFactory.applyToTreeRoot(projectService, providerData, builder.build(), myRoot)
         myModel.nodeStructureChanged(myRoot)
         myIsTreeRendering = false
     }

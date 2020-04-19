@@ -41,7 +41,7 @@ abstract class AbstractProjectService(
     private var myChanges: Collection<Change>? = null
     private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
 
-    final override val messageBus: MessageBus = project.messageBus
+    final override val messageBus: MessageBus by lazy { project.messageBus }
 
     final override val dispatcher = EventDispatcher.create(ProjectEventListener::class.java)
 
