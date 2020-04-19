@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val artifactGroup: String by project
+val targetIDEVersion: String by project
 val enterpriseEditionVersion: String by project
 val intellijVersion: String by project
 val jvmTarget: String by project
@@ -13,7 +14,7 @@ val intellijSinceBuild: String by project
 val intellijUntilBuild: String by project
 
 group = artifactGroup
-version = enterpriseEditionVersion
+version = "$enterpriseEditionVersion-built-for-ide-$targetIDEVersion"
 
 repositories {
     jcenter()
