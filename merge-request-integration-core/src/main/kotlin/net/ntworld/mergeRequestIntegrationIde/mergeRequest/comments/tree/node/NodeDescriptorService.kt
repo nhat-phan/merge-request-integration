@@ -5,5 +5,7 @@ import com.intellij.ide.util.treeView.PresentableNodeDescriptor
 interface NodeDescriptorService {
     fun make(node: Node): PresentableNodeDescriptor<Node>
 
+    fun findNode(input: Any?): Node?
+
     fun isHolding(input: Any?, node: Node): Boolean
 }

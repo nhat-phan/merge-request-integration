@@ -44,10 +44,7 @@ class CommentTreeViewImpl(
     }
     private val myTreeSelectionListener = TreeSelectionListener {
         if (null !== it && !myIsTreeRendering) {
-            val lastPath = it.path.lastPathComponent as? DefaultMutableTreeNode ?: return@TreeSelectionListener
-            val descriptor = lastPath.userObject as? PresentableNodeDescriptor<*> ?: return@TreeSelectionListener
-            val element = descriptor.element as? Node ?: return@TreeSelectionListener
-            dispatcher.multicaster.onTreeNodeSelected(element)
+            handleOnTreeNodeSelectedEvent(it.path)
         }
     }
 
@@ -55,8 +52,8 @@ class CommentTreeViewImpl(
     private val nodeSyncManager: NodeSyncManager by lazy {
         NodeSyncManagerImpl(NodeDescriptorServiceImpl(projectService, providerData))
     }
-    private val mySyncedTree: NodeSyncManager.SyncedTree by lazy {
-        nodeSyncManager.makeSyncedTree(myTree, myRoot)
+    private val mySyncedTree: SyncedTree by lazy {
+        nodeSyncManager.makeSyncedTree(myTree, myModel, myRoot)
     }
 
     init {
@@ -79,9 +76,10 @@ class CommentTreeViewImpl(
         val builder = RootNodeBuilder(comments)
         val root = builder.build()
         nodeSyncManager.sync(mergeRequestInfo, root, mySyncedTree)
+        handleOnTreeNodeSelectedEvent(myTree.selectionPath)
 
         // NodeFactory.applyToTreeRoot(projectService, providerData, builder.build(), myRoot)
-        myModel.nodeStructureChanged(myRoot)
+        // myModel.nodeStructureChanged(myRoot)
         myIsTreeRendering = false
     }
 
@@ -113,6 +111,17 @@ class CommentTreeViewImpl(
         val treeNode = node as? DefaultMutableTreeNode ?: return false
         val descriptor = treeNode.userObject as? PresentableNodeDescriptor<*> ?: return false
         return descriptor.element is GeneralCommentsNode
+    }
+
+    private fun handleOnTreeNodeSelectedEvent(selectedPath: TreePath?) {
+        if (null === selectedPath) {
+            return
+        }
+
+        val lastPath = selectedPath.lastPathComponent as? DefaultMutableTreeNode ?: return
+        val descriptor = lastPath.userObject as? PresentableNodeDescriptor<*> ?: return
+        val element = descriptor.element as? Node ?: return
+        dispatcher.multicaster.onTreeNodeSelected(element)
     }
 
     override val component: JComponent = myComponent

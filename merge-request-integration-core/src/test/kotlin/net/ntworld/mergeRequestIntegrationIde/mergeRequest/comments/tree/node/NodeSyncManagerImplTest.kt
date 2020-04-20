@@ -115,6 +115,58 @@ class NodeSyncManagerImplTest {
         """.trimIndent(), generateStructureFootprint(rootTreeNode))
     }
 
+    @Test
+    fun `testSyncStructure can remove items and delete correct indexes`() {
+        val service = makeService()
+        val root = generateFullList()
+        val rootTreeNode = DefaultMutableTreeNode()
+        service.syncStructure(root, rootTreeNode, DEFAULT_INVOKER)
+
+        (root.children[1].children as MutableList<Node>).removeAt(0)
+        service.syncStructure(root, rootTreeNode, DEFAULT_INVOKER)
+
+        assertEquals("""
+            --root
+            ----general-comments
+            ------thread[1]
+            --------comment[2]
+            ------thread[3]
+            ----file[/dir/file-1]
+            ------line[/dir/file-1:2]
+            --------thread[5]
+            ----------comment[6]
+            ----------comment[7]
+            --------thread[8]
+            ----------comment[9]
+            ----------comment[10]
+            ----------comment[11]
+            ----file[/file-2]
+            ------line[/file-2:3]
+            --------thread[12]
+            !END
+        """.trimIndent(), generateStructureFootprint(rootTreeNode))
+
+        (root.children as MutableList<Node>).removeAt(0)
+        service.syncStructure(root, rootTreeNode, DEFAULT_INVOKER)
+
+        assertEquals("""
+            --root
+            ----file[/dir/file-1]
+            ------line[/dir/file-1:2]
+            --------thread[5]
+            ----------comment[6]
+            ----------comment[7]
+            --------thread[8]
+            ----------comment[9]
+            ----------comment[10]
+            ----------comment[11]
+            ----file[/file-2]
+            ------line[/file-2:3]
+            --------thread[12]
+            !END
+        """.trimIndent(), generateStructureFootprint(rootTreeNode))
+    }
+
     private fun generateStructureFootprint(treeNode: DefaultMutableTreeNode): String {
         val stringBuilder = StringBuilder()
         generateStructureFootprint(stringBuilder, treeNode, 0)
@@ -214,6 +266,10 @@ class NodeSyncManagerImplTest {
     private class DummyNodeDescriptorService: NodeDescriptorService {
         override fun make(node: Node): PresentableNodeDescriptor<Node> {
             return DummyPresentableNodeDescriptor(node)
+        }
+
+        override fun findNode(input: Any?): Node? {
+            return null
         }
 
         override fun isHolding(input: Any?, node: Node): Boolean {

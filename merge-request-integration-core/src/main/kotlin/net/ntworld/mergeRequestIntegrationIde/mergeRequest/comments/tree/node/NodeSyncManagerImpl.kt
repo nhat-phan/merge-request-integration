@@ -1,32 +1,61 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 
+import com.intellij.ide.util.treeView.PresentableNodeDescriptor
 import com.intellij.util.ui.tree.TreeUtil
 import net.ntworld.mergeRequest.MergeRequestInfo
+import java.lang.NullPointerException
 import javax.swing.JTree
-import javax.swing.tree.DefaultMutableTreeNode
-import javax.swing.tree.TreeNode
+import javax.swing.tree.*
 import kotlin.math.min
 
 class NodeSyncManagerImpl(
     private val nodeDescriptorService: NodeDescriptorService
 ) : NodeSyncManager {
-    val myExpandingTreeNodeMap = mutableMapOf<String, MutableSet<String>>()
-    val mySelectedTreeNodeMap = mutableMapOf<String, String>()
+    override fun sync(mergeRequestInfo: MergeRequestInfo, root: RootNode, tree: SyncedTree) {
+        val expandingNodes = mutableSetOf<String>()
+        val selectedNodeToTopIds = mutableSetOf<String>()
+        val selectedTreeNode = tree.selectedTreeNode()
+        if (null !== selectedTreeNode) {
+            val node = nodeDescriptorService.findNode(selectedTreeNode.userObject)
+            var currentNode: Node? = node
+            while (null !== currentNode) {
+                selectedNodeToTopIds.add(currentNode.id)
+                currentNode = currentNode.parent
+            }
+        }
 
-    override fun clear(mergeRequestInfo: MergeRequestInfo) {
-        myExpandingTreeNodeMap.remove(mergeRequestInfo.id)
-        mySelectedTreeNodeMap.remove(mergeRequestInfo.id)
-    }
-
-    override fun sync(mergeRequestInfo: MergeRequestInfo, root: RootNode, tree: NodeSyncManager.SyncedTree) {
         syncStructure(root, tree.treeRoot) { node, treeNode ->
-            // TODO: do something when visit all nodes
-            println("node ${node.id} is ${if(tree.isExpand(treeNode)) "expanding" else "collapsing"}")
+            if (tree.isExpand(treeNode)) {
+                expandingNodes.add(node.id)
+            }
+        }
+
+        tree.nodeStructureChanged(tree.treeRoot)
+        loopStructure(tree.treeRoot) { node, treeNode ->
+            if (expandingNodes.contains(node.id)) {
+                tree.expand(treeNode)
+            }
+            if (selectedNodeToTopIds.contains(node.id)) {
+                tree.select(treeNode)
+            }
         }
     }
 
-    override fun makeSyncedTree(tree: JTree, treeRoot: DefaultMutableTreeNode): NodeSyncManager.SyncedTree {
-        return MySyncedTree(tree, treeRoot)
+    private fun loopStructure(treeNode: DefaultMutableTreeNode, visitor: (Node, DefaultMutableTreeNode) -> Unit) {
+        visitor((treeNode.userObject as PresentableNodeDescriptor<Node>).element, treeNode)
+        val children = treeNode.children();
+        if (children != null) {
+            while (children.hasMoreElements()) {
+                val child = children.nextElement()
+                loopStructure(child as DefaultMutableTreeNode, visitor)
+            }
+        }
+    }
+
+    override fun makeSyncedTree(
+        tree: JTree, treeModel: DefaultTreeModel, treeRoot: DefaultMutableTreeNode
+    ): SyncedTree {
+        return MySyncedTree(tree, treeModel, treeRoot)
     }
 
     fun syncStructure(
@@ -52,16 +81,17 @@ class NodeSyncManagerImpl(
                 val child = parent.children[i]
                 val userObject = nodeDescriptorService.make(child)
                 val childTreeNode = DefaultMutableTreeNode(userObject)
-                treeNode.add(childTreeNode)
                 syncStructure(child, childTreeNode, visitor)
+                treeNode.add(childTreeNode)
             }
             return
         }
 
-        // TODO: add a test for case "index >= treeNodeChildCount" (resolved comment in line which has 1 thread)
-        if (treeNodeChildCount > parent.childCount && index < treeNodeChildCount) {
+        if (treeNodeChildCount > parent.childCount && index < treeNode.childCount) {
             for (i in index until treeNodeChildCount) {
-                treeNode.remove(i)
+                // Always remove index because after removing 1 item the list is has 1 item less, then index
+                // is the same :D
+                treeNode.remove(index)
             }
             return
         }
@@ -69,10 +99,46 @@ class NodeSyncManagerImpl(
 
     private class MySyncedTree(
         private val tree: JTree,
+        private val treeModel: DefaultTreeModel,
         override val treeRoot: DefaultMutableTreeNode
-    ) : NodeSyncManager.SyncedTree {
-        override fun isExpand(treeNode: TreeNode) = tree.isExpanded(
-            TreeUtil.getPath(treeRoot, treeNode)
-        )
+    ) : SyncedTree {
+        private fun findPath(treeNode: TreeNode): TreePath? {
+            return try {
+                TreeUtil.getPath(treeRoot, treeNode)
+            } catch (exception: NullPointerException) {
+                null
+            }
+        }
+
+        override fun isExpand(treeNode: TreeNode): Boolean {
+            val path = findPath(treeNode)
+            return if (null !== path) tree.isExpanded(path) else false
+        }
+
+        override fun selectedTreeNode(): DefaultMutableTreeNode? {
+            return if (null === tree.selectionPath) {
+                null
+            } else {
+                tree.selectionPath!!.lastPathComponent as DefaultMutableTreeNode?
+            }
+        }
+
+        override fun select(treeNode: TreeNode) {
+            val path = findPath(treeNode)
+            if (null !== path) {
+                tree.selectionPath = path
+            }
+        }
+
+        override fun expand(treeNode: TreeNode) {
+            val path = findPath(treeNode)
+            if (null !== path) {
+                tree.expandPath(path)
+            }
+        }
+
+        override fun nodeStructureChanged(treeNode: TreeNode) {
+            treeModel.nodeStructureChanged(treeNode)
+        }
     }
 }

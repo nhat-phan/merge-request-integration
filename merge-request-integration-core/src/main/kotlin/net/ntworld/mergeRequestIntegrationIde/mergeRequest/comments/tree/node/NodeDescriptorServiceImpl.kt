@@ -16,6 +16,12 @@ class NodeDescriptorServiceImpl(
         return presentation
     }
 
+    override fun findNode(input: Any?): Node? {
+        return if (null !== input && input is MyPresentableNodeDescriptor) {
+            input.element
+        } else null
+    }
+
     override fun isHolding(input: Any?, node: Node): Boolean {
         if (null !== input && input is MyPresentableNodeDescriptor) {
             return node.id == input.element.id
