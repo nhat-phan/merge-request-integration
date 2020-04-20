@@ -89,7 +89,9 @@ class CommentsTabViewImpl(
         }
     }
     private val myMainEditor by lazy {
-        val editor = ComponentFactory.makeEditor(projectService.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0)
+        val editor = ComponentFactory.makeEditor(
+            projectService.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0, false
+        )
         editor.isVisible = true
         editor.addListener(myMainEditorEventListener)
 

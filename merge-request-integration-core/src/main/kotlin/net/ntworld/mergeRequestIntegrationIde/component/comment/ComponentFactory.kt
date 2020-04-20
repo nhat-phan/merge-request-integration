@@ -50,13 +50,15 @@ object ComponentFactory {
         ideaProject: IdeaProject,
         type: EditorComponent.Type,
         indent: Int,
-        borderLeftRight: Int = 1
+        borderLeftRight: Int = 1,
+        showCancelAction: Boolean = true
     ): EditorComponent {
         return EditorComponentImpl(
             ideaProject,
             type,
             indent,
-            borderLeftRight
+            borderLeftRight,
+            showCancelAction
         )
     }
 }

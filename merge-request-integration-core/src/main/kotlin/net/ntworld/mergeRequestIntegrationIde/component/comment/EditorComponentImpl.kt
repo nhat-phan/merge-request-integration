@@ -22,7 +22,8 @@ class EditorComponentImpl(
     private val ideaProject: IdeaProject,
     private val type: EditorComponent.Type,
     val indent: Int,
-    private val borderLeftRight: Int = 1
+    private val borderLeftRight: Int = 1,
+    private val showCancelAction: Boolean = true
 ) : EditorComponent {
     private val dispatcher = EventDispatcher.create(EditorComponent.EventListener::class.java)
     private val myPanel = CustomSimpleToolWindowPanel(vertical = true, borderless = false)
@@ -158,8 +159,10 @@ class EditorComponentImpl(
 
         val leftActionGroup = DefaultActionGroup()
         leftActionGroup.add(myAddCommentAction)
-        leftActionGroup.addSeparator()
-        leftActionGroup.add(myCancelAction)
+        if (showCancelAction) {
+            leftActionGroup.addSeparator()
+            leftActionGroup.add(myCancelAction)
+        }
 
         val leftToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-left",
