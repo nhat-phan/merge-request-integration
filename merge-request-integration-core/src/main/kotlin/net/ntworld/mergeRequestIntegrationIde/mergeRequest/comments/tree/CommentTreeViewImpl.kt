@@ -14,7 +14,6 @@ import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
-import javax.swing.event.TreeSelectionEvent
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
@@ -78,8 +77,6 @@ class CommentTreeViewImpl(
         nodeSyncManager.sync(mergeRequestInfo, root, mySyncedTree)
         handleOnTreeNodeSelectedEvent(myTree.selectionPath)
 
-        // NodeFactory.applyToTreeRoot(projectService, providerData, builder.build(), myRoot)
-        // myModel.nodeStructureChanged(myRoot)
         myIsTreeRendering = false
     }
 

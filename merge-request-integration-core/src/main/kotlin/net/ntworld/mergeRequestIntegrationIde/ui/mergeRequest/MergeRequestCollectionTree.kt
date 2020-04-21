@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
 import com.intellij.ide.util.treeView.NodeRenderer
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.openapi.project.Project as IdeaProject
@@ -67,18 +68,20 @@ class MergeRequestCollectionTree(
     }
 
     override fun dataReceived(collection: List<MergeRequestInfo>) {
-        myRoot.removeAllChildren()
-        collection.forEach {
-            val item = MergeRequestCollectionTreeNode(
-                providerData,
-                ideaProject,
-                it
-            )
-            myRoot.add(DefaultMutableTreeNode(item))
-            item.update()
+        ApplicationManager.getApplication().invokeLater {
+            myRoot.removeAllChildren()
+            collection.forEach {
+                val item = MergeRequestCollectionTreeNode(
+                    providerData,
+                    ideaProject,
+                    it
+                )
+                myRoot.add(DefaultMutableTreeNode(item))
+                item.update()
+            }
+            myModel.nodeStructureChanged(myRoot)
+            myTree.isVisible = true
         }
-        myModel.nodeStructureChanged(myRoot)
-        myTree.isVisible = true
     }
 
     override fun getTreeCellRendererComponent(
