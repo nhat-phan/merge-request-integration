@@ -36,21 +36,29 @@ class ProviderCollectionToolbar : ProviderCollectionToolbarUI, Component {
         panel.add(rightCornerToolbar.component)
         panel
     }
-    private val myAddAction = object : AnAction(null, null, AllIcons.General.Add) {
+    private class MyAddAction(private val self: ProviderCollectionToolbar) :
+        AnAction(null, null, AllIcons.General.Add) {
         override fun actionPerformed(e: AnActionEvent) {
-            eventDispatcher.multicaster.addClicked()
+            self.eventDispatcher.multicaster.addClicked()
         }
     }
-    private val myHelpAction = object : AnAction("Help", null, AllIcons.Actions.Help) {
+    private val myAddAction = MyAddAction(this)
+
+    private class MyHelpAction(private val self: ProviderCollectionToolbar) :
+        AnAction("Help", null, AllIcons.Actions.Help) {
         override fun actionPerformed(e: AnActionEvent) {
-            eventDispatcher.multicaster.helpClicked()
+            self.eventDispatcher.multicaster.helpClicked()
         }
     }
-    private val myRefreshAction = object : AnAction("Refresh", null, AllIcons.Actions.Refresh) {
+    private val myHelpAction = MyHelpAction(this)
+
+    private class MyRefreshAction(private val self: ProviderCollectionToolbar) :
+        AnAction("Refresh", null, AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent) {
-            eventDispatcher.multicaster.refreshClicked()
+            self.eventDispatcher.multicaster.refreshClicked()
         }
     }
+    private val myRefreshAction = MyRefreshAction(this)
 
     override fun createComponent(): JComponent = myPanel
 }

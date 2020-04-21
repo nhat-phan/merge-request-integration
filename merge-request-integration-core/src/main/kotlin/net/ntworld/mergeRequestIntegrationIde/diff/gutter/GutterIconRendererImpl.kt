@@ -17,15 +17,17 @@ class GutterIconRendererImpl(
     private var icon = if (showAddIcon) Icons.Gutter.AddComment else Icons.Gutter.Empty
     private var desc = ""
 
-    private val clickAction = object : AnAction() {
+    private class MyClickAction(private val self: GutterIconRendererImpl) : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
-            if (icon == Icons.Gutter.AddComment || icon == Icons.Gutter.Empty) {
-                action.invoke(this@GutterIconRendererImpl, GutterActionType.ADD)
+            if (self.icon == Icons.Gutter.AddComment || self.icon == Icons.Gutter.Empty) {
+                self.action.invoke(self, GutterActionType.ADD)
             } else {
-                action.invoke(this@GutterIconRendererImpl, GutterActionType.TOGGLE)
+                self.action.invoke(self, GutterActionType.TOGGLE)
             }
         }
     }
+
+    private val clickAction = MyClickAction(this)
 
     override fun setState(state: GutterState) {
         when (state) {
@@ -56,7 +58,7 @@ class GutterIconRendererImpl(
         action.invoke(this, GutterActionType.TOGGLE)
     }
 
-    override fun getClickAction() = clickAction
+    override fun getClickAction(): AnAction = clickAction
     override fun getIcon() = icon
     override fun isNavigateAction() = icon != Icons.Gutter.Empty
     override fun hashCode(): Int = System.identityHashCode(this)

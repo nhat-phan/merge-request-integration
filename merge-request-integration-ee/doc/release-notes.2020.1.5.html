@@ -1,252 +1,43 @@
 <html lang="en">
     <h2>Notable changes</h2>
     <ul>
+        <li>Support IDEA 2020.1, Android Studio 4.0.0</li>
         <li>
-            Introduce brand new Comments tab, functionality
+            Introduce new Comments tab which
             <ul>
-                <li></li>
+                <li>Has all current functionalities</li>
+                <li>Can open diff view when you select a file</li>
+                <li>Can jump to code when you travel the Comments tree</li>
             </ul>
         </li>
-        <li>Display merge request id in Home tab, merge request tree and info tab</li>
+        <li>Open diff view when you click to Changes tree in Commits tab</li>
+        <li>Display merge request id in Home tab, Merge Request tree and Info tab</li>
+        <li>Fix #17: Cannot do Code Review on Android Studio</li>
+        <li>Fix #54: Merge Request tree should be invoked in application thread when get reloaded</li>
         <li>Bug fixes</li>
     </ul>
 
-    <hr />
-    <h2>Legacy versions (no longer available)</h2>
-
-    <h3>2020.1.4/2020.1.4eap</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Bug fixed: comments are not shown in diff view on Windows</li>
-        <li>Bug fixed: comments are filtered out when the MR has too many commits</li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2020.1.3/2020.1.3eap</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Branch project based on IDE versions, deploy plugin to EAP channel for 2020.1 EAP IDEs</li>
-        <li>Display approval status in merge request list</li>
-        <li>Improve UI response when deleting and adding a new comment</li>
-        <li>Sync comment collection when a comment gets changed in diff view</li>
-        <li>Fix #44: error when comments get destroyed in the event thread</li>
-    </ul>
-    <h4>Acknowledgement</h4>
+    <h3>Acknowledgement</h3>
     <ul>
         <li>
             Thank
-            <a target="_blank" href="https://github.com/PlatonovLex">PlatonovLex</a>
-            for reporting issue
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/44">#44</a>
-        </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2020.1.2</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Feature: Display, resolve, delete, reply, write comments in diff view</li>
-        <li>Feature: Open diff view when selecting a group in comments tree</li>
-        <li>Bug fix: Duplicated/wrong comment position</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
-        <li>
-            Thank <a target="_blank" href="https://github.com/turnik">turnik</a>
-            for contributing the new comment architecture
-        </li>
-        <li>
-            Thank
-            <a target="_blank" href="https://github.com/theotherp">theotherp</a>,
-            <a target="_blank" href="https://github.com/BlacKCaT27">BlacKCaT27</a>
+            <a target="_blank" href="https://github.com/peper0">peper0</a>,
+            <a target="_blank" href="https://github.com/smec-cgint">smec-cgint</a>
             for requesting feature
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/3">#3</a>
+            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/14">#14</a>
         </li>
         <li>
             Thank
-            <a target="_blank" href="https://github.com/Pegietix">Pegietix</a>,
-            <a target="_blank" href="https://github.com/s-hildebrandt">s-hildebrandt</a>
+            <a target="_blank" href="https://github.com/LionZXY">LionZXY</a>,
+            <a target="_blank" href="https://github.com/mochadwi">mochadwi</a>
             for reporting issue
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/23">#23</a>
+            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/17">#17</a>
         </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2020.1.1</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Hotfix: Crashes on Intellij IDEs v2020.1 EAP</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
         <li>
             Thank
-            <a target="_blank" href="https://github.com/alexeyzimarev">alexeyzimarev</a>,
-            <a target="_blank" href="https://github.com/tyger">tyger</a>
-            for reporting problem
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/41">#41</a>
+            <a target="_blank" href="https://github.com/JaimeFreireB3I">JaimeFreireB3I</a>
+            for reporting issue
+            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/54">#54</a>
         </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2020.1.0</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Feature: introduce create-general-comment button</li>
-        <li>Option: allow doing code review without checking out the target branch</li>
-        <li>Option: open diff changes if the number of changes is less than configurable value</li>
-        <li>Option: keep selected values of filters and order state in Merge Request list</li>
-        <li>UX: display a comment after creating/replying comment</li>
-        <li>UX: select project automatically based on remote url in configuration</li>
-        <li>UX: remove left border of Tabs</li>
-        <li>Bug fix: cannot start an IDE if CE and EE are installed simultaneously</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
-        <li>
-            Thank <a target="_blank" href="https://github.com/riclucio">riclucio</a>
-            for requesting features
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/33">#31</a>,
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/33">#33</a>,
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/35">#35</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/turnik">turnik</a>
-            for requesting option
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/40">#40</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/riclucio">riclucio</a>
-            for reporting problem
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/37">#37</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/Tillerino">Tillerino</a>
-            for reporting problem
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/37">#37</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/intgr">intgr</a>
-            for reporting problem
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/20">#20</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/zlodes">zlodes</a>
-            for contributing to source code, the commit
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/commit/dfdc4f9e0c4366cc555fb723e82bc922eb06cdfc">dfdc4f9</a>,
-            Pull Request
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/pull/30">#30</a>
-        </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2019.3.5</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Hot-fix #21: Gitlab configuration page is empty for new users who have no connections data</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
-        <li>
-            Thank
-            <a target="_blank" href="https://github.com/Tillerino">Tillerino</a>,
-            <a target="_blank" href="https://github.com/Alzhurav">Alzhurav</a>,
-            <a target="_blank" href="https://github.com/dylanfontaine">dylanfontaine</a>,
-            <a target="_blank" href="https://github.com/evangalen">evangalen</a>,
-            <a target="_blank" href="https://plugins.jetbrains.com/author/894191e2-5627-4e8a-a5ac-ee79b15f955a">Ahsan Javed</a>
-            for reporting bug
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/21">#21</a>
-        </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2019.3.4</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Supported self-signed certificate</li>
-        <li>Supported cache option for finding merge request to improve performance</li>
-        <li>New implementation of configuration panel</li>
-        <li>Fixed #1: Support multi repositories project</li>
-        <li>Fixed #9: Connection list cannot be saved</li>
-        <li>Fixed #16: Pipeline is not displayed on Gitlab v12.2.4</li>
-        <li>Fixed bug: Empty description string on some actions</li>
-        <li>Fixed bug: UpdateManager requires weird format of metadata</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
-        <li>
-            Thank <a target="_blank" href="https://github.com/answer-huang">answer-huang</a>
-            for contributing to source code, the commit
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/commit/e0bdc259785fad3f11ecde1849acf32a36dc4281">e0bdc25</a>,
-            Pull Request
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/pull/11">#11</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/turnik">turnik</a>
-            for contributing to source code, the commit
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/commit/9e4f7b6824963c46af1fee595de53d6363dac9f2">9e4f7b6</a>,
-            Pull Request
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/pull/18">#18</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/Marthym">Marthym</a>
-            for reporting bug
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/1">#1</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/mmjurov">mmjurov</a>
-            for reporting bug
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/9">#9</a>
-        </li>
-        <li>
-            Thank <a target="_blank" href="https://github.com/vdsirotkin">vdsirotkin</a>
-            for reporting bug
-            <a target="_blank" href="https://github.com/nhat-phan/merge-request-integration/issues/16">#16</a>
-        </li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2019.3.3</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Improved style of list</li>
-        <li>Improved approval panel which only opens if there is information to be displayed</li>
-        <li>Replaced deprecated api</li>
-        <li>Fixed bug #4: Cannot leave a comment in unified view or on Windows</li>
-        <li>Fixed bug #5: Cannot open comment editor if IDE does not support Markdown</li>
-        <li>Fixed bug: Token on Windows cannot be saved</li>
-        <li>Fixed grammatical error on GitLab configuration panel</li>
-    </ul>
-    <h4>Acknowledgement</h4>
-    <ul>
-        <li>Thank <a href="https://github.com/Savak">@Savak</a>, <a href="https://github.com/SToto98">@SToto98</a> for reporting bug #4</li>
-        <li>Thank <a href="https://github.com/smallcreep">@smallcreep</a> for reporting bug #5</li>
-        <li>Thank <a href="https://plugins.jetbrains.com/author/7857882b-94e6-4d52-a3fd-801afb8ca0e2">Artem Kuchyn</a> for reporting "Token on Windows cannot be saved" bug.</li>
-        <li>Thank Jay for correcting grammar.</li>
-    </ul>
-
-
-    <br /><br />
-    <h3>2019.3.2</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Introduce commit list and changes tree</li>
-        <li>Resolve and delete comments</li>
-        <li>Display comments on editors</li>
-        <li>Bug fixes</li>
-    </ul>
-
-    <br /><br />
-    <h3>2019.3.1</h3>
-    <h4>Notable changes</h4>
-    <ul>
-        <li>Initial release :)</li>
     </ul>
 </html>

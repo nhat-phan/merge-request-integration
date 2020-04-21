@@ -42,7 +42,8 @@ abstract class AbstractConnectionsConfigurable(
 
         tabs
     }
-    private val myAddTabAction = object : AnAction(
+
+    private class MyAddTabAction(private val self: AbstractConnectionsConfigurable) : AnAction(
         "New Connection", "Add new connection", AllIcons.Actions.OpenNewTab
     ) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -50,15 +51,17 @@ abstract class AbstractConnectionsConfigurable(
         }
 
         fun perform() {
-            var count = myTabs.getTabs().tabCount + 1
+            var count = self.myTabs.getTabs().tabCount + 1
             var name = "Connection $count"
-            while (myData.containsKey(findIdFromName(name))) {
+            while (self.myData.containsKey(self.findIdFromName(name))) {
                 count++
                 name = "Connection $count"
             }
-            addNewConnection(name)
+            self.addNewConnection(name)
         }
     }
+    private val myAddTabAction = MyAddTabAction(this)
+
     private val myConnectionListener = object : ConnectionUI.Listener {
         override fun test(connectionUI: ConnectionUI, name: String, connection: ApiConnection, shared: Boolean) {
             logger.debug("Start testing connection $name")

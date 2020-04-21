@@ -40,37 +40,44 @@ class CommentComponentImpl(
     private val myHtmlTemplate = CommentComponentImpl::class.java.getResource(
         "/templates/mr.comment.html"
     ).readText()
-    private val myTimeAction = object : AnAction(null, null, null) {
+
+    private class MyTimeAction(private val self: CommentComponentImpl) : AnAction(null, null, null) {
         override fun actionPerformed(e: AnActionEvent) {
-            myUsePrettyTime = !myUsePrettyTime
+            self.myUsePrettyTime = !self.myUsePrettyTime
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.text = if (myUsePrettyTime) {
-                DateTimeUtil.toPretty(DateTimeUtil.toDate(comment.updatedAt))
+            e.presentation.text = if (self.myUsePrettyTime) {
+                DateTimeUtil.toPretty(DateTimeUtil.toDate(self.comment.updatedAt))
             } else {
-                DateTimeUtil.formatDate(DateTimeUtil.toDate(comment.updatedAt))
+                DateTimeUtil.formatDate(DateTimeUtil.toDate(self.comment.updatedAt))
             }
         }
 
         override fun useSmallerFontForTextInToolbar(): Boolean = false
         override fun displayTextInToolbar() = true
     }
-    private val myOpenInBrowserAction = object : AnAction(
+    private val myTimeAction = MyTimeAction(this)
+
+    private class MyOpenInBrowserAction(private val self: CommentComponentImpl): AnAction(
         "View in browser", "Open and view the comment in browser", Icons.ExternalLink
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            BrowserUtil.open(providerData.info.createCommentUrl(mergeRequestInfo.url, comment))
+            BrowserUtil.open(self.providerData.info.createCommentUrl(self.mergeRequestInfo.url, self.comment))
         }
     }
-    private val myReplyAction = object : AnAction(
+    private val myOpenInBrowserAction = MyOpenInBrowserAction(this)
+
+    private class MyReplyAction(private val self: CommentComponentImpl): AnAction(
         "Reply", "Reply this comment", Icons.ReplyComment
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            groupComponent.showReplyEditor()
+            self.groupComponent.showReplyEditor()
         }
     }
-    private val myDeleteAction = object : AnAction(
+    private val myReplyAction = MyReplyAction(this)
+
+    private class MyDeleteAction(private val self: CommentComponentImpl) : AnAction(
         "Delete comment", "Delete comment", Icons.Trash
     ) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -78,21 +85,23 @@ class CommentComponentImpl(
                 "Do you want to delete the comment?", "Are you sure", Messages.getQuestionIcon()
             )
             if (result == Messages.YES) {
-                groupComponent.requestDeleteComment(comment)
+                self.groupComponent.requestDeleteComment(self.comment)
             }
         }
     }
-    private val myResolveAction = object : AnAction() {
+    private val myDeleteAction = MyDeleteAction(this)
+
+    private class MyResolveAction(private val self: CommentComponentImpl) : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
-            groupComponent.requestToggleResolvedStateOfComment(comment)
+            self.groupComponent.requestToggleResolvedStateOfComment(self.comment)
         }
 
         override fun update(e: AnActionEvent) {
             super.update(e)
-            if (comment.resolved) {
+            if (self.comment.resolved) {
                 e.presentation.icon = Icons.Resolved
                 e.presentation.description = "Unresolve thread"
-                val resolvedBy = comment.resolvedBy
+                val resolvedBy = self.comment.resolvedBy
                 if (null !== resolvedBy) {
                     e.presentation.text = "Resolved by ${resolvedBy.name}"
                 }
@@ -103,6 +112,8 @@ class CommentComponentImpl(
             }
         }
     }
+    private val myResolveAction = MyResolveAction(this)
+
     private val myNameMouseListener = object : MouseListener {
         override fun mouseReleased(e: MouseEvent?) {}
         override fun mouseEntered(e: MouseEvent?) {}

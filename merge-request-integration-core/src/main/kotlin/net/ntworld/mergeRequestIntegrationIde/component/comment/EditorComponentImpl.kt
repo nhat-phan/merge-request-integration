@@ -49,29 +49,32 @@ class EditorComponentImpl(
             dispatcher.multicaster.onEditorResized(this@EditorComponentImpl)
         }
     }
-    private val myCancelAction = object : AnAction(
+
+    private class MyCancelAction(private val self: EditorComponentImpl) : AnAction(
         "Cancel", "Cancel and delete this comment", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            dispatcher.multicaster.onCancelClicked(this@EditorComponentImpl)
+            self.dispatcher.multicaster.onCancelClicked(self)
         }
 
         override fun displayTextInToolbar() = true
     }
-    private val myAddCommentAction = object : AnAction(
+    private val myCancelAction = MyCancelAction(this)
+
+    private class MyAddCommentAction(private val self: EditorComponentImpl) : AnAction(
         "Add comment", "Add comment to the current position", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            if (myEditorTextField.text.trim().isNotBlank()) {
-                dispatcher.multicaster.onSubmitClicked(this@EditorComponentImpl)
+            if (self.myEditorTextField.text.trim().isNotBlank()) {
+                self.dispatcher.multicaster.onSubmitClicked(self)
             }
         }
 
         override fun update(e: AnActionEvent) {
-            when (type) {
+            when (self.type) {
                 EditorComponent.Type.NEW_DISCUSSION -> {
-                    e.presentation.text = addCommentButtonText
-                    e.presentation.description = addCommentButtonDesc
+                    e.presentation.text = self.addCommentButtonText
+                    e.presentation.description = self.addCommentButtonDesc
                 }
                 EditorComponent.Type.REPLY -> {
                     e.presentation.text = "Reply"
@@ -83,6 +86,8 @@ class EditorComponentImpl(
         override fun useSmallerFontForTextInToolbar(): Boolean = false
         override fun displayTextInToolbar() = true
     }
+    private val myAddCommentAction = MyAddCommentAction(this)
+
     private val myEditorFocusListener = object: FocusListener {
         override fun focusLost(e: FocusEvent?) {
             val editor = myEditorTextField.editor

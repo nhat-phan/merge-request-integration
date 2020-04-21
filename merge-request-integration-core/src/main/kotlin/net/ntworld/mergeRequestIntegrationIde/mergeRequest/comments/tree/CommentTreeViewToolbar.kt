@@ -18,36 +18,41 @@ internal class CommentTreeViewToolbar(
 ) : Component {
     var showResolved: Boolean = false
 
-    private val mySkipResolvedButton = object : ToggleAction(
-        "Show resolved comments", "Show resolved comments", null
-    ) {
+    private class MySkipResolvedButton(private val self: CommentTreeViewToolbar) :
+        ToggleAction("Show resolved comments", "Show resolved comments", null) {
         override fun isSelected(e: AnActionEvent): Boolean {
-            return showResolved
+            return self.showResolved
         }
 
         override fun setSelected(e: AnActionEvent, state: Boolean) {
-            showResolved = state
-            dispatcher.multicaster.onShowResolvedCommentsToggled(showResolved)
+            self.showResolved = state
+            self.dispatcher.multicaster.onShowResolvedCommentsToggled(self.showResolved)
         }
 
         override fun displayTextInToolbar() = true
         override fun useSmallerFontForTextInToolbar() = true
     }
-    private val myRefreshButton = object : AnAction("Refresh", "Refresh comment list", AllIcons.Actions.Refresh) {
+    private val mySkipResolvedButton = MySkipResolvedButton(this)
+
+    private class MyRefreshButton(private val self: CommentTreeViewToolbar) :
+        AnAction("Refresh", "Refresh comment list", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent) {
-            dispatcher.multicaster.onRefreshButtonClicked()
+            self.dispatcher.multicaster.onRefreshButtonClicked()
         }
     }
-    private val myAddGeneralComment = object : AnAction(
+    private val myRefreshButton = MyRefreshButton(this)
+
+    private class MyAddGeneralComment(private val self: CommentTreeViewToolbar) : AnAction(
         "General Comment", "Add a general comment", AllIcons.General.Add
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            dispatcher.multicaster.onCreateGeneralCommentClicked()
+            self.dispatcher.multicaster.onCreateGeneralCommentClicked()
         }
 
         override fun displayTextInToolbar(): Boolean = true
         override fun useSmallerFontForTextInToolbar() = true
     }
+    private val myAddGeneralComment = MyAddGeneralComment(this)
 
     private val myPanel by lazy {
         val panel = JPanel(MigLayout("ins 0, fill", "[left]push[right]", "center"))

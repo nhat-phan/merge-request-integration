@@ -25,33 +25,37 @@ class CommitCollection : CommitCollectionUI {
     private val myItems = mutableListOf<CommitItemPanel>()
     private var myProviderData: ProviderData? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
-    private val mySelectAllButton = object : AnAction(
+    private class MySelectAllButton(private val self: CommitCollection) : AnAction(
         "Select all", "Select all commits to see changes or do code review", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            val commits = myItems.map {
+            val commits = self.myItems.map {
                 it.isSelectable(selectable = true, selected = true)
                 it.commit
             }
-            dispatchCommitSelectedEvent(commits)
+            self.dispatchCommitSelectedEvent(commits)
         }
 
         override fun displayTextInToolbar() = true
         override fun useSmallerFontForTextInToolbar() = true
     }
-    private val myUnselectAllButton = object : AnAction(
+    private val mySelectAllButton = MySelectAllButton(this)
+
+    private class MyUnselectAllButton(private val self: CommitCollection): AnAction(
         "Unselect all", "Unselect all commits then pick a single one to see changes or do code review", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            myItems.forEach {
+            self.myItems.forEach {
                 it.isSelectable(selectable = true, selected = false)
             }
-            dispatchCommitSelectedEvent(listOf())
+            self.dispatchCommitSelectedEvent(listOf())
         }
 
         override fun displayTextInToolbar() = true
         override fun useSmallerFontForTextInToolbar() = true
     }
+    private val myUnselectAllButton = MyUnselectAllButton(this)
+
     private val myCommitSelectChangeListener = ChangeListener {
         val list = myItems.map {
             Pair(it.commit, it.isSelected())

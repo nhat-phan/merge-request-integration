@@ -44,19 +44,21 @@ class ProviderDetails(
     private val myCommonCenterActionGroupFactory: () -> ActionGroup = {
         DefaultActionGroup()
     }
+    private class MyOpenAction(private val self: ProviderDetails):
+        AnAction("Open", "Open provider in new tab", AllIcons.Actions.Menu_open) {
+        override fun actionPerformed(e: AnActionEvent) {
+            self.dispatcher.multicaster.providerOpened(self.providerData)
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isVisible = self.providerData.status == ProviderStatus.ACTIVE
+        }
+
+        override fun displayTextInToolbar(): Boolean = true
+    }
     private val myCommonSideComponentFactory: () -> JComponent = {
         val actionGroup = DefaultActionGroup()
-        actionGroup.add(object : AnAction("Open", "Open provider in new tab", AllIcons.Actions.Menu_open) {
-            override fun actionPerformed(e: AnActionEvent) {
-                dispatcher.multicaster.providerOpened(providerData)
-            }
-
-            override fun update(e: AnActionEvent) {
-                e.presentation.isVisible = providerData.status == ProviderStatus.ACTIVE
-            }
-
-            override fun displayTextInToolbar(): Boolean = true
-        })
+        actionGroup.add(MyOpenAction(this))
 
         val toolbar = ActionManager.getInstance().createActionToolbar(
             "${ProviderDetails::class.java.canonicalName}/toolbar-right", actionGroup, true

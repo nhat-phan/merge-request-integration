@@ -21,59 +21,70 @@ class PaginationToolbar(private val allowRefreshBtn: Boolean = false) : Paginati
     private var myTotalPages: Int = 0
     private var myTotalItems: Int = 0
 
-    private val myRefreshButtonAction = object : AnAction("Refresh", "Refresh", AllIcons.Actions.Refresh) {
+    private class MyRefreshButtonAction(private val self: PaginationToolbar) :
+        AnAction("Refresh", "Refresh", AllIcons.Actions.Refresh) {
+
         override fun actionPerformed(e: AnActionEvent) {
-            eventDispatcher.multicaster.changePage(myPage)
+            self.eventDispatcher.multicaster.changePage(self.myPage)
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = myEnabled && myIsValid
+            e.presentation.isEnabled = self.myEnabled && self.myIsValid
         }
     }
+    private val myRefreshButtonAction = MyRefreshButtonAction(this)
 
-    private val myFirstAction = object : AnAction("First", "Go to the first page", AllIcons.Actions.Play_first) {
+    private class MyFirstAction(private val self: PaginationToolbar) :
+        AnAction("First", "Go to the first page", AllIcons.Actions.Play_first) {
         override fun actionPerformed(e: AnActionEvent) {
-            setData(1, myTotalPages, myTotalItems)
-            eventDispatcher.multicaster.changePage(myPage)
+            self.setData(1, self.myTotalPages, self.myTotalItems)
+            self.eventDispatcher.multicaster.changePage(self.myPage)
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = myEnabled && myIsValid && myPage != 1
+            e.presentation.isEnabled = self.myEnabled && self.myIsValid && self.myPage != 1
         }
     }
+    private val myFirstAction = MyFirstAction(this)
 
-    private val myPrevAction = object : AnAction("Previous", "Previous page", AllIcons.Actions.Play_back) {
+    private class MyPrevAction(private val self: PaginationToolbar) :
+        AnAction("Previous", "Previous page", AllIcons.Actions.Play_back) {
         override fun actionPerformed(e: AnActionEvent) {
-            setData(myPage - 1, myTotalPages, myTotalItems)
-            eventDispatcher.multicaster.changePage(myPage)
+            self.setData(self.myPage - 1, self.myTotalPages, self.myTotalItems)
+            self.eventDispatcher.multicaster.changePage(self.myPage)
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = myEnabled && myIsValid && myPage > 1 && myTotalPages > 1
+            e.presentation.isEnabled = self.myEnabled && self.myIsValid && self.myPage > 1 && self.myTotalPages > 1
         }
     }
+    private val myPrevAction = MyPrevAction(this)
 
-    private val myNextAction = object : AnAction("Next", "Next page", AllIcons.Actions.Play_forward) {
+    private class MyNextAction(private val self: PaginationToolbar) :
+        AnAction("Next", "Next page", AllIcons.Actions.Play_forward) {
         override fun actionPerformed(e: AnActionEvent) {
-            setData(myPage + 1, myTotalPages, myTotalItems)
-            eventDispatcher.multicaster.changePage(myPage)
+            self.setData(self.myPage + 1, self.myTotalPages, self.myTotalItems)
+            self.eventDispatcher.multicaster.changePage(self.myPage)
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = myEnabled && myIsValid && myPage < myTotalPages
+            e.presentation.isEnabled = self.myEnabled && self.myIsValid && self.myPage < self.myTotalPages
         }
     }
+    private val myNextAction = MyNextAction(this)
 
-    private val myLastAction = object : AnAction("Last", "Go to the last page", AllIcons.Actions.Play_last) {
+    private class MyLastAction(private val self: PaginationToolbar) :
+        AnAction("Last", "Go to the last page", AllIcons.Actions.Play_last) {
         override fun actionPerformed(e: AnActionEvent) {
-            setData(myTotalPages, myTotalPages, myTotalItems)
-            eventDispatcher.multicaster.changePage(myPage)
+            self.setData(self.myTotalPages, self.myTotalPages, self.myTotalItems)
+            self.eventDispatcher.multicaster.changePage(self.myPage)
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isEnabled = myEnabled && myIsValid && myPage < myTotalPages
+            e.presentation.isEnabled = self.myEnabled && self.myIsValid && self.myPage < self.myTotalPages
         }
     }
+    private val myLastAction = MyLastAction(this)
 
     private val myInfo = JLabel()
 
