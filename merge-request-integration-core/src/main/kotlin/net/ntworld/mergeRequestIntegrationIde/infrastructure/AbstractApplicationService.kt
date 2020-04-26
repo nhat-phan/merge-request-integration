@@ -1,9 +1,7 @@
-package net.ntworld.mergeRequestIntegrationIde.internal
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
@@ -15,11 +13,10 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.*
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.internal.option.*
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
-import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.option.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManagerImpl
 import org.jdom.Element

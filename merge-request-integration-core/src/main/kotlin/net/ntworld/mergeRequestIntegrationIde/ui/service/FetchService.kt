@@ -4,8 +4,7 @@ import git4idea.GitVcs
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.RepositoryFetchAllRemotesTask
 import java.util.*
 import com.intellij.openapi.project.Project as IdeaProject

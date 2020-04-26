@@ -3,7 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.SimpleTextAttributes
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 class FileNode(
     val path: String

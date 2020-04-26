@@ -11,11 +11,10 @@ import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.actions.diff.ChangeDiffRequestProducer
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 open class DiffExtensionBase(
     private val applicationService: ApplicationService

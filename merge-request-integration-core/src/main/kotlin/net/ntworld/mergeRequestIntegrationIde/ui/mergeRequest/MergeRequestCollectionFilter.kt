@@ -14,11 +14,7 @@ import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegration.provider.github.Github
-import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
-import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestFilterPropertiesPanel
 import java.awt.Point
 import java.awt.event.KeyEvent

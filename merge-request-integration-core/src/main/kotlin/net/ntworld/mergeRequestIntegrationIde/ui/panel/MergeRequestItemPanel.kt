@@ -7,7 +7,7 @@ import net.ntworld.mergeRequest.Approval
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.FindApprovalTask
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.provider.ProviderDetailsMRList

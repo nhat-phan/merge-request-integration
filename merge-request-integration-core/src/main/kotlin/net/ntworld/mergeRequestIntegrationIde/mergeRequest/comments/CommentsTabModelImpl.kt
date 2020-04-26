@@ -6,7 +6,7 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.Empty
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 class CommentsTabModelImpl(
     private val projectService: ProjectService,

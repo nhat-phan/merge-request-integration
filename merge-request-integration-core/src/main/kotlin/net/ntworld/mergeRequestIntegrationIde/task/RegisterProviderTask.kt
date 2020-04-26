@@ -7,8 +7,8 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProviderSettings
 
 class RegisterProviderTask(
     private val applicationService: ApplicationService,

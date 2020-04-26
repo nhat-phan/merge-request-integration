@@ -11,7 +11,7 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
 import javax.swing.event.TreeSelectionListener

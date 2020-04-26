@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.internal
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
 import net.ntworld.mergeRequest.api.ApiCredentials
 

@@ -14,7 +14,7 @@ import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.SwingConstants
 import kotlin.concurrent.thread

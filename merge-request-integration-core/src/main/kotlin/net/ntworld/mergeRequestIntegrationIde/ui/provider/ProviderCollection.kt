@@ -7,9 +7,8 @@ import com.intellij.openapi.wm.ToolWindow
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
@@ -28,7 +27,8 @@ class ProviderCollection(
     private val myToolbarUI: ProviderCollectionToolbarUI by lazy {
         ProviderCollectionToolbar()
     }
-    private val myProjectEventListener = object: ProjectEventListener {
+    private val myProjectEventListener = object:
+        ProjectEventListener {
         override fun providersClear() {
             myListUI.clear()
             myListUI.setProviders(myProjectService.registeredProviders)

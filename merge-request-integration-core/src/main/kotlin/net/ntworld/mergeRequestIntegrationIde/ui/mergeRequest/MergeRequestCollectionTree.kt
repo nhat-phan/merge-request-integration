@@ -7,7 +7,7 @@ import com.intellij.ui.treeStructure.Tree
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import java.awt.Component
 import javax.swing.JComponent
 import javax.swing.JTree

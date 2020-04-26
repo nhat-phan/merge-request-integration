@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.UserStatus
 import net.ntworld.mergeRequest.query.GetProjectMembersQuery
 import net.ntworld.mergeRequestIntegration.internal.UserInfoImpl
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import com.intellij.openapi.project.Project as IdeaProject
 
 class FetchProjectMembersTask(

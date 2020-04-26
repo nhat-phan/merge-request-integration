@@ -12,7 +12,7 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.ApproveMergeRequestCommand
 import net.ntworld.mergeRequest.command.UnapproveMergeRequestCommand
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ApprovalPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.service.CodeReviewService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons

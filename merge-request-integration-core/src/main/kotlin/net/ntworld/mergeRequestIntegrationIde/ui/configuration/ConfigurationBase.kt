@@ -2,8 +2,8 @@ package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.openapi.options.SearchableConfigurable
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
 import javax.swing.JComponent
 
 abstract class ConfigurationBase(

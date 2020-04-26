@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.Pipeline
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetPipelinesQuery
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class GetPipelinesTask(
     private val applicationService: ApplicationService,

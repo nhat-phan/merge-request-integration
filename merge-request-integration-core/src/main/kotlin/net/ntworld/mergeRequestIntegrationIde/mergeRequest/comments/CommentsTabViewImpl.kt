@@ -15,17 +15,14 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
-import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
-import java.awt.event.ComponentEvent
 import javax.swing.BoxLayout
 import javax.swing.JComponent
-import javax.swing.JLabel
 
 class CommentsTabViewImpl(
     private val projectService: ProjectService,

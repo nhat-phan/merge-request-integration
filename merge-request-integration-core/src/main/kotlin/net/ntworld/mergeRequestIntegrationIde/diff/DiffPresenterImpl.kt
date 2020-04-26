@@ -23,8 +23,8 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.util.*
 

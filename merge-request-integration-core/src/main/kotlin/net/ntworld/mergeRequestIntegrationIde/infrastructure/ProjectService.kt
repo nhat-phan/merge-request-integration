@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.service
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
@@ -9,8 +9,8 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import com.intellij.openapi.project.Project as IdeaProject
 
 interface ProjectService {

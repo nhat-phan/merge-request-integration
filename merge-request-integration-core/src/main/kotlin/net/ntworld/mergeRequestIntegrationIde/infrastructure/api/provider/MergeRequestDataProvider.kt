@@ -6,7 +6,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
 
 class MergeRequestDataProvider(

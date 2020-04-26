@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.service
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.*

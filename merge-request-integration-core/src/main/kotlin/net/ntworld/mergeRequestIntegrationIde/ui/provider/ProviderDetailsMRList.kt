@@ -7,7 +7,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.AbstractMergeRequestCollection
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestItemPanel

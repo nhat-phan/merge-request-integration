@@ -4,15 +4,14 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.github.Github
-import net.ntworld.mergeRequestIntegration.provider.github.GithubUtil
 import net.ntworld.mergeRequestIntegration.provider.github.request.GithubFindCurrentUserRequest
 import net.ntworld.mergeRequestIntegration.provider.github.request.GithubFindRepositoryRequest
 import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubRepositoryTransformer
 import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubProjectId
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
-import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
 import com.intellij.openapi.project.Project as IdeaProject
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 open class GithubConnectionsConfigurableBase(
     private val applicationService: ApplicationService,

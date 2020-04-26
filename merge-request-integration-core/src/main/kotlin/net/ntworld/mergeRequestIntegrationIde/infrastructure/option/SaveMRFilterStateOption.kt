@@ -1,6 +1,6 @@
-package net.ntworld.mergeRequestIntegrationIde.internal.option
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.option
 
-import net.ntworld.mergeRequestIntegrationIde.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
 
 class SaveMRFilterStateOption : BooleanOption() {
     override val name: String = "save-mr-filter-state"

@@ -5,10 +5,9 @@ import com.intellij.ui.JBColor
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ENTERPRISE_EDITION_URL
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.awt.Color
-import java.awt.event.ActionListener
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel

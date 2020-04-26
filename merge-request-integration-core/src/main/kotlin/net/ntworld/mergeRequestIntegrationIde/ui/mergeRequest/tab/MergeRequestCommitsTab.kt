@@ -6,9 +6,8 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChangesUI
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitCollection
@@ -38,7 +37,8 @@ class MergeRequestCommitsTab(
             dispatcher.multicaster.commitSelected(providerData, mergeRequestInfo, commits)
         }
     }
-    private val myProjectEventListener = object : ProjectEventListener {
+    private val myProjectEventListener = object :
+        ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             myCollection.disable()
             myChanges.disable()

@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.FindApprovalQuery
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class FindApprovalTask(
     private val applicationService: ApplicationService,

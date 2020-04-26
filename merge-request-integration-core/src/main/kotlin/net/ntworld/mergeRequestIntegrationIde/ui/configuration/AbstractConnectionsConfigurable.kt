@@ -15,9 +15,9 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.configuration.vos.GitRemotePathInfo
-import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProviderSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProviderSettings
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent

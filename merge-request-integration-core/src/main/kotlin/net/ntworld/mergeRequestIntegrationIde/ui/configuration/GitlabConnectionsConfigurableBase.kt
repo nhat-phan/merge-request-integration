@@ -9,8 +9,8 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabFindPro
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
-import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 open class GitlabConnectionsConfigurableBase(
     private val applicationService: ApplicationService,

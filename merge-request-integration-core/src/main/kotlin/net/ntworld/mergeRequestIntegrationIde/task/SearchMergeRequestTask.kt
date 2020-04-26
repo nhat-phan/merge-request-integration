@@ -12,7 +12,7 @@ import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequest.query.GetMergeRequestsQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.SEARCH_MERGE_REQUEST_ITEMS_PER_PAGE
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class SearchMergeRequestTask(
     private val applicationService: ApplicationService,

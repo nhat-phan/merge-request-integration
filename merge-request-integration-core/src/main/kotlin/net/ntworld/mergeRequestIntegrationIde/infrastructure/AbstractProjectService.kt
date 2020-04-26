@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.internal
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
@@ -18,13 +18,14 @@ import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.internal.CodeReviewManagerImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.service.*
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase

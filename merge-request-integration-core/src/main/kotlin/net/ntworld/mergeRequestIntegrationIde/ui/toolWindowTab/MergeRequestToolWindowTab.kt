@@ -4,7 +4,7 @@ import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.content.ContentManager
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.*
 import javax.swing.JComponent

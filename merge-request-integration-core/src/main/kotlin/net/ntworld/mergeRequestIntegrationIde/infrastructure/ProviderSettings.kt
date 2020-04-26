@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.service
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials

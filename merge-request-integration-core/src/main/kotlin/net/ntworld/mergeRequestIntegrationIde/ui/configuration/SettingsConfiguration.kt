@@ -1,9 +1,9 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.util.EventDispatcher
-import net.ntworld.mergeRequestIntegrationIde.internal.ApplicationSettingsImpl
-import net.ntworld.mergeRequestIntegrationIde.internal.option.MaxDiffChangesOpenedAutomaticallyOption
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.option.MaxDiffChangesOpenedAutomaticallyOption
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -50,17 +50,18 @@ class SettingsConfiguration : SettingsUI {
     }
 
     private fun dispatchSettingsUpdated() {
-        val settings = ApplicationSettingsImpl(
-            enableRequestCache = myEnableRequestCache!!.isSelected,
-            saveMRFilterState = mySaveMRFilterState!!.isSelected,
-            groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
-            displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
-            showAddCommentIconsInDiffViewGutter = myShowAddCommentIconsInDiffViewGutter!!.isSelected,
-            checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected,
-            maxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption.parse(
-                myMaxDiffChangesOpenedAutomatically!!.text
+        val settings =
+            ApplicationSettingsImpl(
+                enableRequestCache = myEnableRequestCache!!.isSelected,
+                saveMRFilterState = mySaveMRFilterState!!.isSelected,
+                groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
+                displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
+                showAddCommentIconsInDiffViewGutter = myShowAddCommentIconsInDiffViewGutter!!.isSelected,
+                checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected,
+                maxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption.parse(
+                    myMaxDiffChangesOpenedAutomatically!!.text
+                )
             )
-        )
         dispatcher.multicaster.change(settings)
     }
 

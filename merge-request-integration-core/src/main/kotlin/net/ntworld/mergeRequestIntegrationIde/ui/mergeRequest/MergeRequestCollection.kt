@@ -2,16 +2,13 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
-import net.ntworld.mergeRequestIntegrationIde.ui.Component
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import javax.swing.JComponent
 
 class MergeRequestCollection(
@@ -46,7 +43,8 @@ class MergeRequestCollection(
             myTree.fetchData()
         }
     }
-    private val myProjectEventListener = object: ProjectEventListener {
+    private val myProjectEventListener = object:
+        ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             myComponent.isVisible = false
         }

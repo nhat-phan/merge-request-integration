@@ -1,8 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 object CommentsTabFactory {
     fun makeCommentsTabView(

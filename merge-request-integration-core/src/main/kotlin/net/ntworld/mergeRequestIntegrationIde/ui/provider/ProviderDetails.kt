@@ -14,7 +14,7 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.MergeRequestCollectionEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProviderInformationPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs

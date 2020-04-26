@@ -8,9 +8,8 @@ import com.intellij.ui.content.ContentManagerListener
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.MergeRequestCollectionEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.provider.*
@@ -28,7 +27,8 @@ class HomeToolWindowTab(
     private val myDetailPanels = mutableMapOf<String, ProviderDetailsUI>()
     private val myContents = mutableMapOf<String, Content>()
     private val myMRToolWindowTabs = mutableMapOf<String, MergeRequestToolWindowTab>()
-    private val myProjectEventListener = object: ProjectEventListener {
+    private val myProjectEventListener = object:
+        ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             myDetailPanels.forEach { it.value.hide() }
             myContents.forEach {

@@ -2,7 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 
 import com.intellij.ide.projectView.PresentationData
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 interface Node {
     val id: String

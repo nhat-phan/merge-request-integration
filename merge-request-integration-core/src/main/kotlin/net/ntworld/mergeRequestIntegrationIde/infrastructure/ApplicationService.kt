@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.service
+package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus

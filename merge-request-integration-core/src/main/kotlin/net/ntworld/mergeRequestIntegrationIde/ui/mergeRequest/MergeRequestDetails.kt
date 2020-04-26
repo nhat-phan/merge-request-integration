@@ -9,7 +9,7 @@ import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabPresenter
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.*
 import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*

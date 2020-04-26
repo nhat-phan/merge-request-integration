@@ -5,9 +5,8 @@ import com.intellij.openapi.editor.ex.EditorEx
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 object ThreadFactory {
     fun makeModel(comments: List<Comment>): ThreadModel {

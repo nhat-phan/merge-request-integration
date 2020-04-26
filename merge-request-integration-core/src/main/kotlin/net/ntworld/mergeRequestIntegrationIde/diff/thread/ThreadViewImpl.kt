@@ -19,7 +19,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.component.comment.*
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font

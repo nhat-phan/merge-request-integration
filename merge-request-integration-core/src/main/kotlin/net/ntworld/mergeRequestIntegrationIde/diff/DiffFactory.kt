@@ -5,11 +5,10 @@ import com.intellij.diff.tools.simple.SimpleOnesideDiffViewer
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.tools.util.side.TwosideTextDiffViewer
 import com.intellij.diff.util.Side
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 object DiffFactory {
     fun makeDiffPresenter(

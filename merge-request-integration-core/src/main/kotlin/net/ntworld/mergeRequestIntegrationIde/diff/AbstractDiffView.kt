@@ -20,7 +20,7 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.*
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 abstract class AbstractDiffView<V : DiffViewerBase>(
     private val applicationService: ApplicationService,

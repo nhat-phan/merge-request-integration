@@ -8,8 +8,8 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
-import net.ntworld.mergeRequestIntegrationIde.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
 import javax.swing.event.DocumentEvent
@@ -204,7 +204,8 @@ class GitlabConnection(
     private fun updateFieldsState() {
         myRepository!!.isEnabled = myIsTested
         myProjectFinder.setEnabled(
-            myIsTested, ApiCredentialsImpl(
+            myIsTested,
+            ApiCredentialsImpl(
                 url = myUrl!!.text.trim(),
                 login = "",
                 token = getToken().trim(),

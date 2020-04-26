@@ -1,7 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree
 
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 
 object CommentTreeFactory {
     fun makeModel(providerData: ProviderData): CommentTreeModel {

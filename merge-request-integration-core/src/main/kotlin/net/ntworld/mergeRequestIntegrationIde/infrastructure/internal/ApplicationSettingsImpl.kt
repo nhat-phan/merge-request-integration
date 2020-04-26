@@ -1,6 +1,6 @@
-package net.ntworld.mergeRequestIntegrationIde.internal
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
 
 data class ApplicationSettingsImpl(
     override val enableRequestCache: Boolean,

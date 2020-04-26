@@ -3,7 +3,6 @@ package net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.vcs.changes.Change
@@ -14,18 +13,15 @@ import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
-import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import java.awt.GridBagLayout
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
-import javax.swing.event.TreeSelectionEvent
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
@@ -58,7 +54,8 @@ class ChangesToolWindowTab(
         )
         panel
     }
-    private val myProjectEventListener = object : ProjectEventListener {
+    private val myProjectEventListener = object :
+        ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             showChanges()
         }

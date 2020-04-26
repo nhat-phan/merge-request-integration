@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProjectPanel
 import java.awt.Component
 import java.awt.event.FocusEvent

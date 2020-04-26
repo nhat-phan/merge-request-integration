@@ -11,7 +11,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.FindMergeRequestQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class FindMergeRequestTask(
     private val applicationService: ApplicationService,

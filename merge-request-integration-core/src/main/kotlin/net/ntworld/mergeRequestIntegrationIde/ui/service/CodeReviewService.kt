@@ -5,7 +5,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import kotlin.Exception
 import com.intellij.openapi.project.Project as IdeaProject
 

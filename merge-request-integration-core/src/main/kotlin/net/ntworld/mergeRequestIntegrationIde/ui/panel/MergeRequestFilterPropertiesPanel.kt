@@ -8,7 +8,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.UserInfo
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.FetchProjectMembersTask
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.awt.event.ActionListener

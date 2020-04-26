@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class TwoSideTextDiffView(
     private val applicationService: ApplicationService,

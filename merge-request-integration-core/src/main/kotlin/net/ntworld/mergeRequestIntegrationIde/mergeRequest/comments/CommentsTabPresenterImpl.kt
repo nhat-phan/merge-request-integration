@@ -20,8 +20,8 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManage
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.isEmpty
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import java.util.*
 
 class CommentsTabPresenterImpl(

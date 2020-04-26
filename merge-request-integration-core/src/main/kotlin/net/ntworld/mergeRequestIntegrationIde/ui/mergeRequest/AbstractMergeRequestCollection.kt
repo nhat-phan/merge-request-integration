@@ -9,11 +9,11 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.component.ComponentFactory
+import net.ntworld.mergeRequestIntegrationIde.component.PaginationToolbar
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.SearchMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
-import net.ntworld.mergeRequestIntegrationIde.ui.util.PaginationToolbar
-import net.ntworld.mergeRequestIntegrationIde.ui.util.PaginationToolbarUI
 import javax.swing.JComponent
 
 abstract class AbstractMergeRequestCollection(
@@ -34,7 +34,7 @@ abstract class AbstractMergeRequestCollection(
 
     override val eventDispatcher = EventDispatcher.create(MergeRequestCollectionEventListener::class.java)
     private val mySplitter = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
-    private val myPaginator: PaginationToolbarUI = PaginationToolbar(allowRefreshBtn = true)
+    private val myPaginator: PaginationToolbar = ComponentFactory.makePaginationToolbar(displayRefreshButton = true)
     private val myContentDelegate = lazy {
         makeContent()
     }
@@ -68,15 +68,15 @@ abstract class AbstractMergeRequestCollection(
             myPaginator.setData(page, totalPages, totalItems)
         }
     }
-    private val myPaginatorListener = object: PaginationToolbarUI.PaginationEventListener {
+    private val myPaginatorListener = object: PaginationToolbar.Listener {
         override fun changePage(page: Int) {
             fetchPage(page)
         }
     }
 
     init {
-        myPaginator.eventDispatcher.addListener(myPaginatorListener)
-        mySplitter.toolbar = myPaginator.createComponent()
+        myPaginator.addListener(myPaginatorListener)
+        mySplitter.toolbar = myPaginator.component
     }
 
     final override fun setFilter(filter: GetMergeRequestFilter) {

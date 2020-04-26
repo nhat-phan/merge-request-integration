@@ -11,7 +11,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommentsQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.service.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class GetCommentsTask(
     private val applicationService: ApplicationService,

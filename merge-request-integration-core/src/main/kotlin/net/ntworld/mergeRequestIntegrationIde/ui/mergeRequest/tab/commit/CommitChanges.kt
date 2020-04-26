@@ -14,7 +14,7 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent

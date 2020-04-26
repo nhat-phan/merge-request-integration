@@ -10,7 +10,7 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.service.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class DiffModelImpl(
