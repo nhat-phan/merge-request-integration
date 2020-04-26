@@ -6,18 +6,16 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChangesUI
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitCollection
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitCollectionUI
 import javax.swing.JComponent
-import com.intellij.openapi.project.Project as IdeaProject
 
 class MergeRequestCommitsTab(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject
+    private val projectServiceProvider: ProjectServiceProvider
 ) : MergeRequestCommitsTabUI {
     override val dispatcher = EventDispatcher.create(MergeRequestCommitsTabUI.Listener::class.java)
 
@@ -26,7 +24,7 @@ class MergeRequestCommitsTab(
         0.5f
     )
     private val myCollection: CommitCollectionUI = CommitCollection()
-    private val myChanges: CommitChangesUI = CommitChanges(applicationService.getProjectService(ideaProject))
+    private val myChanges: CommitChangesUI = CommitChanges(projectServiceProvider)
     private val myCollectionListener = object : CommitCollectionUI.Listener {
         override fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
             if (commits.isEmpty()) {
@@ -55,7 +53,7 @@ class MergeRequestCommitsTab(
         mySplitter.secondComponent = myChanges.createComponent()
 
         myCollection.dispatcher.addListener(myCollectionListener)
-        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
+        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
     }
 
     override fun clear() {

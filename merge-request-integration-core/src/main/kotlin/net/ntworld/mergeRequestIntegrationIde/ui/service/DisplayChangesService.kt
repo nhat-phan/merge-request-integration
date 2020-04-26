@@ -14,7 +14,7 @@ import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.SwingConstants
 import kotlin.concurrent.thread
@@ -30,7 +30,7 @@ object DisplayChangesService {
     }
 
     fun start(
-        applicationService: ApplicationService,
+        applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
@@ -55,7 +55,7 @@ object DisplayChangesService {
             thread {
                 val hash = if (commits.isEmpty()) diff.headHash else commits.first().id
                 displayChangesForOneCommit(
-                    applicationService,
+                    applicationServiceProvider,
                     ideaProject,
                     fileEditorManagerEx,
                     providerData,
@@ -68,7 +68,7 @@ object DisplayChangesService {
         } else {
             thread {
                 displayChangesForCommits(
-                    applicationService,
+                    applicationServiceProvider,
                     ideaProject,
                     fileEditorManagerEx,
                     providerData,
@@ -83,7 +83,7 @@ object DisplayChangesService {
     }
 
     private fun displayChangesForOneCommit(
-        applicationService: ApplicationService,
+        applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
         fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
@@ -95,7 +95,7 @@ object DisplayChangesService {
         // TODO: Reduce repetition
         val details = VcsLogUtil.getDetails(log.dataManager, repository.root, MyHash(hash))
         displayChanges(
-            applicationService,
+            applicationServiceProvider,
             ideaProject,
             fileEditorManagerEx,
             providerData,
@@ -105,7 +105,7 @@ object DisplayChangesService {
     }
 
     private fun displayChangesForCommits(
-        applicationService: ApplicationService,
+        applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
         fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
@@ -126,7 +126,7 @@ object DisplayChangesService {
 
         if (details.size == 1) {
             return displayChanges(
-                applicationService, ideaProject, fileEditorManagerEx,
+                applicationServiceProvider, ideaProject, fileEditorManagerEx,
                 providerData, mergeRequest, details.first().changes
             )
         }
@@ -134,22 +134,22 @@ object DisplayChangesService {
         val changes = VcsLogUtil.collectChanges(details) {
             it.changes
         }
-        displayChanges(applicationService, ideaProject, fileEditorManagerEx, providerData, mergeRequest, changes)
+        displayChanges(applicationServiceProvider, ideaProject, fileEditorManagerEx, providerData, mergeRequest, changes)
     }
 
     private fun displayChanges(
-        applicationService: ApplicationService,
+        applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
         fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         changes: Collection<Change>
     ) {
-        applicationService.getProjectService(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
+        applicationServiceProvider.findProjectServiceProvider(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
 
         ApplicationManager.getApplication().invokeLater {
-            val reviewContext = applicationService.getProjectService(ideaProject).findReviewContextWhichDoingCodeReview()
-            val max = applicationService.settings.maxDiffChangesOpenedAutomatically
+            val reviewContext = applicationServiceProvider.findProjectServiceProvider(ideaProject).findReviewContextWhichDoingCodeReview()
+            val max = applicationServiceProvider.settings.maxDiffChangesOpenedAutomatically
             if (null !== reviewContext && max != 0 && changes.size < max) {
                 val limit = UISettings().editorTabLimit
                 changes.forEachIndexed { index, item ->

@@ -7,15 +7,14 @@ import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.popup.AbstractPopup
 import com.intellij.util.EventDispatcher
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.command.ApproveMergeRequestCommand
 import net.ntworld.mergeRequest.command.UnapproveMergeRequestCommand
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ApprovalPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.service.CodeReviewService
-import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.ui.util.findVisibilityIconAndTextForApproval
 import java.awt.Dimension
 import java.awt.Point
@@ -23,8 +22,7 @@ import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
 class MergeRequestDetailsToolbar(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val details: MergeRequestDetailsUI
 ) : MergeRequestDetailsToolbarUI {
@@ -34,7 +32,6 @@ class MergeRequestDetailsToolbar(
     private var myMergeRequest: MergeRequest? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
     private var myComments: List<Comment>? = null
-    private val projectService = applicationService.getProjectService(ideaProject)
 
     private class MyRefreshAction(private val self: MergeRequestDetailsToolbar) :
         AnAction("Refresh", "Refresh merge request info", AllIcons.Actions.Refresh) {
@@ -46,7 +43,7 @@ class MergeRequestDetailsToolbar(
         }
 
         override fun update(e: AnActionEvent) {
-            e.presentation.isVisible = !self.projectService.isDoingCodeReview()
+            e.presentation.isVisible = !self.projectServiceProvider.isDoingCodeReview()
         }
     }
     private val myRefreshAction = MyRefreshAction(this)
@@ -132,7 +129,7 @@ class MergeRequestDetailsToolbar(
             val mr = myMergeRequest
             if (null !== approval && null !== mr) {
                 myApprovalPanel.hide()
-                applicationService.infrastructure.commandBus() process ApproveMergeRequestCommand.make(
+                projectServiceProvider.infrastructure.commandBus() process ApproveMergeRequestCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mr.id,
                     sha = mr.diffReference!!.headHash
@@ -146,7 +143,7 @@ class MergeRequestDetailsToolbar(
             val mr = myMergeRequest
             if (null !== approval && null !== mr) {
                 myApprovalPanel.hide()
-                applicationService.infrastructure.commandBus() process UnapproveMergeRequestCommand.make(
+                projectServiceProvider.infrastructure.commandBus() process UnapproveMergeRequestCommand.make(
                     providerId = providerData.id,
                     mergeRequestId = mr.id
                 )
@@ -259,7 +256,7 @@ class MergeRequestDetailsToolbar(
     private var myReviewCommits: List<Commit> = listOf()
     private class MyCodeReviewAction(private val self: MergeRequestDetailsToolbar) : ToggleAction(null, null, null) {
         override fun isSelected(e: AnActionEvent): Boolean {
-            return self.projectService.isDoingCodeReview()
+            return self.projectServiceProvider.isDoingCodeReview()
         }
 
         override fun setSelected(e: AnActionEvent, state: Boolean) {
@@ -270,11 +267,16 @@ class MergeRequestDetailsToolbar(
             if (state) {
                 val comments = self.myComments
                 if (null !== comments) {
-                    self.projectService.setCodeReviewComments(self.providerData, mr, comments)
+                    self.projectServiceProvider.setCodeReviewComments(self.providerData, mr, comments)
                 }
-                CodeReviewService.start(self.applicationService, self.ideaProject, self.providerData, mr, self.myReviewCommits)
+                CodeReviewService.start(
+                    self.projectServiceProvider.applicationServiceProvider,
+                    self.projectServiceProvider.project, self.providerData, mr, self.myReviewCommits
+                )
             } else {
-                CodeReviewService.stop(self.applicationService, self.ideaProject, self.providerData, mr)
+                CodeReviewService.stop(
+                    self.projectServiceProvider.applicationServiceProvider,
+                    self.projectServiceProvider.project, self.providerData, mr)
             }
         }
 
@@ -301,9 +303,9 @@ class MergeRequestDetailsToolbar(
                 // }
             }
 
-            val isDoingCodeReview = self.projectService.isDoingCodeReview()
+            val isDoingCodeReview = self.projectServiceProvider.isDoingCodeReview()
             if (isDoingCodeReview) {
-                val isReviewing = self.projectService.isReviewing(self.providerData, mr)
+                val isReviewing = self.projectServiceProvider.isReviewing(self.providerData, mr)
                 e.presentation.text = "Stop Reviewing"
                 e.presentation.description = "End reviewing and show other MRs"
                 e.presentation.isEnabled = isReviewing
@@ -372,8 +374,8 @@ class MergeRequestDetailsToolbar(
         val currentMR = myMergeRequest
         if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
             myComments = comments
-            if (projectService.isDoingCodeReview()) {
-                projectService.setCodeReviewComments(providerData, currentMR, comments)
+            if (projectServiceProvider.isDoingCodeReview()) {
+                projectServiceProvider.setCodeReviewComments(providerData, currentMR, comments)
             }
         }
     }

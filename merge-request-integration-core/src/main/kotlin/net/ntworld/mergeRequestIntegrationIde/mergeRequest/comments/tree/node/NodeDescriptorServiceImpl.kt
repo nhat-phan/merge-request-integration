@@ -3,15 +3,15 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 class NodeDescriptorServiceImpl(
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : NodeDescriptorService {
 
     override fun make(node: Node): PresentableNodeDescriptor<Node> {
-        val presentation = MyPresentableNodeDescriptor(projectService, providerData, node)
+        val presentation = MyPresentableNodeDescriptor(projectServiceProvider, providerData, node)
         presentation.update()
         return presentation
     }
@@ -30,12 +30,12 @@ class NodeDescriptorServiceImpl(
     }
 
     private class MyPresentableNodeDescriptor(
-        private val projectService: ProjectService,
+        private val projectServiceProvider: ProjectServiceProvider,
         private val providerData: ProviderData,
         private val element: Node
-    ) : PresentableNodeDescriptor<Node>(projectService.project, null) {
+    ) : PresentableNodeDescriptor<Node>(projectServiceProvider.project, null) {
         override fun update(presentation: PresentationData) {
-            element.updatePresentation(projectService, providerData, presentation)
+            element.updatePresentation(projectServiceProvider, providerData, presentation)
         }
 
         override fun getElement(): Node = element

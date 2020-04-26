@@ -8,20 +8,22 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRendererFactory
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class UnifiedDiffView(
-    private val applicationService: ApplicationService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val viewer: UnifiedDiffViewer,
     private val change: Change
-) : AbstractDiffView<UnifiedDiffViewer>(applicationService, viewer) {
+) : AbstractDiffView<UnifiedDiffViewer>(projectServiceProvider, viewer) {
     private val myLeftLineNumberConverter by lazy {
-        applicationService.intellijIdeApi.findLeftLineNumberConverter(viewer.editor)
+        projectServiceProvider.intellijIdeApi.findLeftLineNumberConverter(viewer.editor)
     }
     private val myRightLineNumberConverter by lazy {
-        applicationService.intellijIdeApi.findRightLineNumberConverter(viewer.editor)
+        projectServiceProvider.intellijIdeApi.findRightLineNumberConverter(viewer.editor)
     }
     private val myCachedLeftLineNumbers = mutableMapOf<Int, Int>()
     private val myCachedRightLineNumbers = mutableMapOf<Int, Int>()
@@ -70,7 +72,7 @@ class UnifiedDiffView(
             registerGutterIconRenderer(
                 GutterIconRendererFactory.makeGutterIconRenderer(
                     viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                    applicationService.settings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
+                    projectServiceProvider.applicationSettings.showAddCommentIconsInDiffViewGutter && (-1 != left || -1 != right),
                     logicalLine,
                     visibleLineLeft = left + 1,
                     visibleLineRight = right + 1,

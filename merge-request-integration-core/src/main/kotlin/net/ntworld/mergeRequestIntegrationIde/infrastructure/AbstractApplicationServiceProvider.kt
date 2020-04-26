@@ -22,7 +22,7 @@ import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManagerImpl
 import org.jdom.Element
 import java.net.URL
 
-abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
+abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, ServiceBase() {
     final override val watcherManager: WatcherManager = WatcherManagerImpl()
 
     private val publicLegalGrantedDomains = listOf(
@@ -70,8 +70,6 @@ abstract class AbstractApplicationService : ApplicationService, ServiceBase() {
 //        }
 //        connection.subscribe(BranchChangeListener.VCS_BRANCH_CHANGED, myBranchChangeListener)
     }
-
-    override fun supported(): List<ProviderInfo> = supportedProviders
 
     override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure())
 

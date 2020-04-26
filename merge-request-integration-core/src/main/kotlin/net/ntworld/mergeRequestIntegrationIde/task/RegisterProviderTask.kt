@@ -7,11 +7,11 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProviderSettings
 
 class RegisterProviderTask(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     ideaProject: Project,
     private val id: String,
     private val name: String,
@@ -29,7 +29,7 @@ class RegisterProviderTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             val providerData = ApiProviderManager.register(
-                infrastructure = applicationService.infrastructure,
+                infrastructure = applicationServiceProvider.infrastructure,
                 id = id,
                 key = settings.id,
                 name = name,

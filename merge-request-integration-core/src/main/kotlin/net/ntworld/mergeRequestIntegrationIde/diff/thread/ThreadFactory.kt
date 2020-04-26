@@ -6,7 +6,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 object ThreadFactory {
     fun makeModel(comments: List<Comment>): ThreadModel {
@@ -14,7 +14,7 @@ object ThreadFactory {
     }
 
     fun makeView(
-        applicationService: ApplicationService,
+        projectServiceProvider: ProjectServiceProvider,
         editor: EditorEx,
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
@@ -23,7 +23,7 @@ object ThreadFactory {
         position: GutterPosition
     ): ThreadView {
         return ThreadViewImpl(
-            applicationService, editor, providerData, mergeRequestInfo, logicalLine, side, position
+            projectServiceProvider, editor, providerData, mergeRequestInfo, logicalLine, side, position
         )
     }
 

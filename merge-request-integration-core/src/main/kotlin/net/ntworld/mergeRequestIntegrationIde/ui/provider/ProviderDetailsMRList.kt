@@ -7,8 +7,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
-import com.intellij.openapi.project.Project as IdeaProject
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.AbstractMergeRequestCollection
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestItemPanel
 import java.awt.event.MouseAdapter
@@ -18,21 +17,19 @@ import javax.swing.ListCellRenderer
 import javax.swing.ListSelectionModel
 
 class ProviderDetailsMRList(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val filterBy: GetMergeRequestFilter,
     private val orderBy:  MergeRequestOrdering,
     private val displayType: ApprovalStatusDisplayType
-): AbstractMergeRequestCollection(applicationService, ideaProject, providerData) {
+): AbstractMergeRequestCollection(projectServiceProvider, providerData) {
     private var isLoaded = false
     private val myList = JBList<MergeRequestInfo>()
     private val myItemPanels = mutableMapOf<Int, MergeRequestItemPanel>()
     private val myCellRenderer = ListCellRenderer<MergeRequestInfo> { list, value, index, isSelected, cellHasFocus ->
         if (null === myItemPanels[index]) {
             myItemPanels[index] = MergeRequestItemPanel(
-                applicationService,
-                ideaProject,
+                projectServiceProvider,
                 providerData,
                 value,
                 displayType

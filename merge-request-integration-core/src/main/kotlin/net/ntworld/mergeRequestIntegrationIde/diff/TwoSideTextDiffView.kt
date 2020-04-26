@@ -8,15 +8,17 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRendererFactory
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class TwoSideTextDiffView(
-    private val applicationService: ApplicationService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val viewer: TwosideTextDiffViewer,
     private val change: Change
-) : AbstractDiffView<TwosideTextDiffViewer>(applicationService, viewer) {
+) : AbstractDiffView<TwosideTextDiffViewer>(projectServiceProvider, viewer) {
 
     override fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int {
         return visibleLine - 1
@@ -60,7 +62,7 @@ class TwoSideTextDiffView(
             registerGutterIconRenderer(
                 GutterIconRendererFactory.makeGutterIconRenderer(
                     viewer.editor1.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                    applicationService.settings.showAddCommentIconsInDiffViewGutter,
+                    projectServiceProvider.applicationSettings.showAddCommentIconsInDiffViewGutter,
                     logicalLine,
                     visibleLineLeft = logicalLine + 1,
                     visibleLineRight = null,
@@ -73,7 +75,7 @@ class TwoSideTextDiffView(
             registerGutterIconRenderer(
                 GutterIconRendererFactory.makeGutterIconRenderer(
                     viewer.editor2.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                    applicationService.settings.showAddCommentIconsInDiffViewGutter,
+                    projectServiceProvider.applicationSettings.showAddCommentIconsInDiffViewGutter,
                     logicalLine,
                     visibleLineLeft = null,
                     visibleLineRight = logicalLine + 1,

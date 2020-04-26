@@ -20,19 +20,18 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManage
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.isEmpty
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.util.*
 
 class CommentsTabPresenterImpl(
-    private val applicationService: ApplicationService,
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val model: CommentsTabModel,
     override val view: CommentsTabView
 ) : AbstractPresenter<EventListener>(),
     CommentsTabPresenter, CommentsTabModel.DataListener, CommentsTabView.ActionListener {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
-    private val myDiffPublisher = projectService.messageBus.syncPublisher(DiffNotifier.TOPIC)
+    private val myDiffPublisher = projectServiceProvider.messageBus.syncPublisher(DiffNotifier.TOPIC)
 
     init {
         model.addDataListener(this)
@@ -95,7 +94,7 @@ class CommentsTabPresenterImpl(
             if (null !== reviewContext) {
                 val change = reviewContext.findChangeByPath(node.path)
                 if (null !== change) {
-                    reviewContext.openChange(change, focus = false, displayMergeRequestId = !projectService.isDoingCodeReview())
+                    reviewContext.openChange(change, focus = false, displayMergeRequestId = !projectServiceProvider.isDoingCodeReview())
                     view.hideThread()
                 }
             }
@@ -110,7 +109,7 @@ class CommentsTabPresenterImpl(
                 if (null !== change) {
                     reviewContext.putChangeData(change, DiffNotifier.ScrollPosition, node.position)
                     reviewContext.putChangeData(change, DiffNotifier.ScrollShowComments, true)
-                    reviewContext.openChange(change, focus = false, displayMergeRequestId = !projectService.isDoingCodeReview())
+                    reviewContext.openChange(change, focus = false, displayMergeRequestId = !projectServiceProvider.isDoingCodeReview())
                     myDiffPublisher.hideAllCommentsRequested(reviewContext, change)
                     myDiffPublisher.scrollToPositionRequested(reviewContext, change, node.position, true)
                 }
@@ -137,7 +136,7 @@ class CommentsTabPresenterImpl(
     override fun onRefreshButtonClicked() = requestFetchComments()
 
     override fun onDeleteCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
-        applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process DeleteCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = it.id,
             comment = comment
@@ -146,7 +145,7 @@ class CommentsTabPresenterImpl(
     }
 
     override fun onResolveCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
-        applicationService.infrastructure.commandBus() process ResolveCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process ResolveCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = it.id,
             comment = comment
@@ -155,7 +154,7 @@ class CommentsTabPresenterImpl(
     }
 
     override fun onUnresolveCommentRequested(comment: Comment) = assertMergeRequestInfoIsAvailable {
-        applicationService.infrastructure.commandBus() process UnresolveCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process UnresolveCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = it.id,
             comment = comment
@@ -164,13 +163,13 @@ class CommentsTabPresenterImpl(
     }
 
     override fun onReplyCommentRequested(repliedComment: Comment, content: String) = assertMergeRequestInfoIsAvailable {
-        applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
+        projectServiceProvider.infrastructure.serviceBus() process ReplyCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = it.id,
             repliedComment = repliedComment,
             body = content
         ) ifError { exception ->
-            projectService.notify(
+            projectServiceProvider.notify(
                 "There was an error from server. \n\n ${exception.message}",
                 NotificationType.ERROR
             )
@@ -181,13 +180,13 @@ class CommentsTabPresenterImpl(
     }
 
     override fun onCreateCommentRequested(content: String, position: CommentPosition?) = assertMergeRequestInfoIsAvailable {
-        applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+        projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             position = position,
             body = content
         ) ifError {
-            projectService.notify(
+            projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",
                 NotificationType.ERROR
             )
@@ -198,7 +197,7 @@ class CommentsTabPresenterImpl(
     }
 
     private fun requestFetchComments() = assertMergeRequestInfoIsAvailable {
-        projectService.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(
+        projectServiceProvider.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(
             model.providerData, it
         )
     }

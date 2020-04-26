@@ -2,27 +2,26 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionGroup
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabPresenter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.*
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
 import net.ntworld.mergeRequestIntegrationIde.ui.service.FetchService
-import net.ntworld.mergeRequestIntegrationIde.component.Icons
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
 
 class MergeRequestDetails(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val disposable: Disposable,
     private val providerData: ProviderData
 ) : MergeRequestDetailsUI {
@@ -50,7 +49,7 @@ class MergeRequestDetails(
         tabInfo
     }
 
-    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab(applicationService, ideaProject)
+    private val myCommitsTab: MergeRequestCommitsTabUI = MergeRequestCommitsTab(projectServiceProvider)
     private val myCommitsTabInfo: TabInfo by lazy {
         val tabInfo = TabInfo(myCommitsTab.createComponent())
         tabInfo.text = "Commit"
@@ -60,16 +59,13 @@ class MergeRequestDetails(
     }
 
     private val myCommentsTabPresenter: CommentsTabPresenter by lazy {
-        val projectService = applicationService.getProjectService(ideaProject)
-        val model = CommentsTabFactory.makeCommentsTabModel(projectService, providerData)
-        val view = CommentsTabFactory.makeCommentsTabView(projectService, providerData)
-        CommentsTabFactory.makeCommentsTabPresenter(
-            applicationService, projectService, model, view
-        )
+        val model = CommentsTabFactory.makeCommentsTabModel(projectServiceProvider, providerData)
+        val view = CommentsTabFactory.makeCommentsTabView(projectServiceProvider, providerData)
+        CommentsTabFactory.makeCommentsTabPresenter(projectServiceProvider, model, view)
     }
 
     private val myTabs: TabsUI by lazy {
-        val tabs = Tabs(ideaProject, disposable)
+        val tabs = Tabs(projectServiceProvider.project, disposable)
         tabs.setCommonCenterActionGroupFactory(this::toolbarCommonCenterActionGroupFactory)
         tabs.setCommonSideComponentFactory(this::toolbarCommonSideComponentFactory)
         tabs
@@ -175,7 +171,9 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequest(mergeRequest: MergeRequest) {
-        GetLegacyCommentsTask(applicationService, ideaProject, providerData, mergeRequest, myGetCommentsListener).start()
+        GetLegacyCommentsTask(
+            projectServiceProvider.applicationServiceProvider,
+            projectServiceProvider.project, providerData, mergeRequest, myGetCommentsListener).start()
         myInfoTab.setMergeRequest(mergeRequest)
         myToolbars.forEach {
             it.setMergeRequest(mergeRequest)
@@ -183,8 +181,11 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequestInfo(mergeRequestInfo: MergeRequestInfo) {
-        ReviewContextManager.initContext(ideaProject, providerData, mergeRequestInfo, true)
-        FetchService.start(applicationService, ideaProject, providerData, mergeRequestInfo)
+        ReviewContextManager.initContext(projectServiceProvider.project, providerData, mergeRequestInfo, true)
+        FetchService.start(
+            projectServiceProvider.applicationServiceProvider,
+            projectServiceProvider.project, providerData, mergeRequestInfo
+        )
 
         myInfoTab.setMergeRequestInfo(providerData, mergeRequestInfo)
         myDescriptionTab.setMergeRequestInfo(providerData, mergeRequestInfo)
@@ -196,15 +197,11 @@ class MergeRequestDetails(
         myToolbars.forEach {
             it.setMergeRequestInfo(mergeRequestInfo)
         }
-        FindMergeRequestTask(applicationService, ideaProject, providerData, mergeRequestInfo, myFindMRListener)
-            .start()
-        GetPipelinesTask(applicationService, ideaProject, providerData, mergeRequestInfo, myGetPipelinesListener)
-            .start()
-        GetCommitsTask(applicationService, ideaProject, providerData, mergeRequestInfo, myGetCommitsListener)
-            .start()
+        FindMergeRequestTask(projectServiceProvider, providerData, mergeRequestInfo, myFindMRListener).start()
+        GetPipelinesTask(projectServiceProvider, providerData, mergeRequestInfo, myGetPipelinesListener).start()
+        GetCommitsTask(projectServiceProvider, providerData, mergeRequestInfo, myGetCommitsListener).start()
         if (providerData.hasApprovalFeature) {
-            FindApprovalTask(applicationService, ideaProject, providerData, mergeRequestInfo, myFindApprovalListener)
-                .start()
+            FindApprovalTask(projectServiceProvider, providerData, mergeRequestInfo, myFindApprovalListener).start()
         }
     }
 
@@ -216,7 +213,7 @@ class MergeRequestDetails(
 
     private fun toolbarCommonSideComponentFactory(): JComponent {
         val toolbar: MergeRequestDetailsToolbarUI = MergeRequestDetailsToolbar(
-            applicationService, ideaProject, providerData, this
+            projectServiceProvider, providerData, this
         )
         toolbar.dispatcher.addListener(myToolbarListener)
         myToolbars.add(toolbar)

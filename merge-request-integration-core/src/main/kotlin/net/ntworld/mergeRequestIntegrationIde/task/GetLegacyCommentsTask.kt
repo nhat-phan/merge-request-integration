@@ -11,10 +11,10 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommentsQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 
 class GetLegacyCommentsTask(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     ideaProject: Project,
     private val providerData: ProviderData,
     private val mergeRequest: MergeRequest,
@@ -32,7 +32,7 @@ class GetLegacyCommentsTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = applicationService.infrastructure.queryBus() process GetCommentsQuery.make(
+            val result = applicationServiceProvider.infrastructure.queryBus() process GetCommentsQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequest.id
             )

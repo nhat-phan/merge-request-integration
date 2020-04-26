@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 
 class GithubConnectionsConfigurable(myIdeaProject: Project) : GithubConnectionsConfigurableBase(
-    ServiceManager.getService(EnterpriseApplicationService::class.java),
+    ServiceManager.getService(EnterpriseApplicationServiceProvider::class.java),
     myIdeaProject
 ) {
     override fun getId(): String = "MRI:github-ee"

@@ -6,10 +6,10 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.Empty
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 class CommentsTabModelImpl(
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val providerData: ProviderData
 ) : AbstractModel<CommentsTabModel.DataListener>(), CommentsTabModel {
     override val dispatcher = EventDispatcher.create(CommentsTabModel.DataListener::class.java)
@@ -34,7 +34,7 @@ class CommentsTabModelImpl(
             }
         }
 
-    private val myMessageBusConnection = projectService.messageBus.connect()
+    private val myMessageBusConnection = projectServiceProvider.messageBus.connect()
     private val myMergeRequestDataNotifier = object : MergeRequestDataNotifier {
         override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         }

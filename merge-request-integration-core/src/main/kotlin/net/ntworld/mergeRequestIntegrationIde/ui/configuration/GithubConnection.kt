@@ -8,14 +8,14 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class GithubConnection(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     private val ideaProject: IdeaProject
 ) : ConnectionUI {
     var myWholePanel: JPanel? = null
@@ -38,7 +38,7 @@ class GithubConnection(
     private var myIsTested: Boolean = false
     private val myProjectFinder: ProjectFinderUI by lazy {
         GithubProjectFinder(
-            applicationService,
+            applicationServiceProvider,
             ideaProject,
             myTerm!!,
             myProjectList!!

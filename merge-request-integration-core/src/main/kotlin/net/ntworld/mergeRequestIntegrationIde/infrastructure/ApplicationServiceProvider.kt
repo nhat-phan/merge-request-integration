@@ -9,7 +9,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 
-interface ApplicationService {
+interface ApplicationServiceProvider {
 
     val infrastructure: Infrastructure
 
@@ -21,11 +21,9 @@ interface ApplicationService {
 
     val watcherManager: WatcherManager
 
-    fun getProjectService(project: Project): ProjectService
+    fun findProjectServiceProvider(project: Project): ProjectServiceProvider
 
     fun getChangesToolWindowId(): String
-
-    fun supported(): List<ProviderInfo>
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)
 

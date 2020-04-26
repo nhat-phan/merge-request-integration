@@ -1,17 +1,15 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider
 
 import com.intellij.util.messages.MessageBus
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
 
 class MergeRequestDataProvider(
-    private val applicationService: ApplicationService,
-    private val project: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val messageBus: MessageBus
 ) : MergeRequestDataNotifier {
     private val getCommentsTaskListener = object : GetCommentsTask.Listener {
@@ -25,8 +23,7 @@ class MergeRequestDataProvider(
 
     override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
         val task = GetCommentsTask(
-            applicationService,
-            project,
+            projectServiceProvider,
             providerData,
             mergeRequestInfo,
             getCommentsTaskListener

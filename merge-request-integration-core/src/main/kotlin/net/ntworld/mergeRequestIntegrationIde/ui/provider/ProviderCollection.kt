@@ -7,21 +7,19 @@ import com.intellij.openapi.wm.ToolWindow
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import javax.swing.JComponent
 import com.intellij.openapi.project.Project as IdeaProject
 
 class ProviderCollection(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
-    private val toolWindow: ToolWindow
+    private val projectServiceProvider: ProjectServiceProvider
 ): Component, Disposable {
-    private val myProjectService = applicationService.getProjectService(ideaProject)
     private val myListUI: ProviderCollectionListUI by lazy {
         val list = ProviderCollectionList()
-        list.setProviders(myProjectService.registeredProviders)
+        list.setProviders(projectServiceProvider.registeredProviders)
         list
     }
     private val myToolbarUI: ProviderCollectionToolbarUI by lazy {
@@ -31,7 +29,7 @@ class ProviderCollection(
         ProjectEventListener {
         override fun providersClear() {
             myListUI.clear()
-            myListUI.setProviders(myProjectService.registeredProviders)
+            myListUI.setProviders(projectServiceProvider.registeredProviders)
         }
 
         override fun providerRegistered(providerData: ProviderData) {
@@ -52,7 +50,7 @@ class ProviderCollection(
         }
 
         override fun refreshClicked() {
-            myProjectService.clear()
+            projectServiceProvider.clear()
         }
 
         override fun helpClicked() {
@@ -66,8 +64,8 @@ class ProviderCollection(
         myComponent.toolbar = myToolbarUI.createComponent()
 
         myToolbarUI.eventDispatcher.addListener(myToolbarEventListener)
-        myProjectService.dispatcher.addListener(myProjectEventListener)
-        Disposer.register(ideaProject, this)
+        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
+        Disposer.register(projectServiceProvider.project, this)
     }
 
     override fun createComponent(): JComponent = myComponent

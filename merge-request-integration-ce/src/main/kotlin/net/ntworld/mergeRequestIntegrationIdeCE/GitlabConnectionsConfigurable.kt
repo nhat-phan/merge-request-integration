@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 
 class GitlabConnectionsConfigurable(myIdeaProject: Project) : GitlabConnectionsConfigurableBase(
-    ServiceManager.getService(CommunityApplicationService::class.java),
+    ServiceManager.getService(CommunityApplicationServiceProvider::class.java),
     myIdeaProject
 ) {
     override fun getId(): String = "MRI:gitlab-ce"

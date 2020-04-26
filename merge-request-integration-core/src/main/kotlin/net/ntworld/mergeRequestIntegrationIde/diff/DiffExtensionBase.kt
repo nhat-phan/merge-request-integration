@@ -11,13 +11,13 @@ import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.actions.diff.ChangeDiffRequestProducer
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 open class DiffExtensionBase(
-    private val applicationService: ApplicationService
+    private val applicationServiceProvider: ApplicationServiceProvider
 ) : DiffExtension() {
 
     override fun onViewerCreated(viewer: FrameDiffTool.DiffViewer, context: DiffContext, request: DiffRequest) {
@@ -29,7 +29,7 @@ open class DiffExtensionBase(
             DiffUserDataKeys.CONTEXT_ACTIONS, listOf(
                 MyToggleAllCommentsAction(
                     presenter,
-                    applicationService.settings.displayCommentsInDiffView
+                    applicationServiceProvider.settings.displayCommentsInDiffView
                 ),
                 MyToggleResolvedCommentsAction(
                     presenter,
@@ -39,30 +39,29 @@ open class DiffExtensionBase(
         )
     }
 
-    private fun findReviewContext(projectService: ProjectService, request: DiffRequest): ReviewContext? {
+    private fun findReviewContext(projectServiceProvider: ProjectServiceProvider, request: DiffRequest): ReviewContext? {
         val reviewContext = request.getUserData(ReviewContext.KEY)
         if (null !== reviewContext) {
             return reviewContext
         }
 
-        return projectService.findReviewContextWhichDoingCodeReview()
+        return projectServiceProvider.findReviewContextWhichDoingCodeReview()
     }
 
     private fun createPresenter(viewer: FrameDiffTool.DiffViewer, request: DiffRequest): DiffPresenter? {
         return if (viewer is DiffViewerBase) {
             assertViewerIsValid(viewer) { project, change ->
-                val projectService = applicationService.getProjectService(project)
-                val reviewContext = findReviewContext(projectService, request)
+                val projectServiceProvider = applicationServiceProvider.findProjectServiceProvider(project)
+                val reviewContext = findReviewContext(projectServiceProvider, request)
                 if (null === reviewContext) {
                     return@assertViewerIsValid null
                 }
 
-                val model = DiffFactory.makeDiffModel(projectService, reviewContext, change)
-                val view = DiffFactory.makeView(applicationService, viewer, change)
+                val model = DiffFactory.makeDiffModel(projectServiceProvider, reviewContext, change)
+                val view = DiffFactory.makeView(projectServiceProvider, viewer, change)
                 if (null !== view && null !== model) {
                     DiffFactory.makeDiffPresenter(
-                        applicationService = applicationService,
-                        projectService = applicationService.getProjectService(project),
+                        projectServiceProvider = projectServiceProvider,
                         model = model,
                         view = view
                     )

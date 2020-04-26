@@ -1,13 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.Approval
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.task.FindApprovalTask
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.provider.ProviderDetailsMRList
@@ -17,8 +16,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 class MergeRequestItemPanel(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val displayType: ProviderDetailsMRList.ApprovalStatusDisplayType
@@ -80,8 +78,7 @@ class MergeRequestItemPanel(
 
     private fun fetchApprovalData() {
         val task = FindApprovalTask(
-            applicationService = applicationService,
-            ideaProject = ideaProject,
+            projectServiceProvider = projectServiceProvider,
             providerData = providerData,
             mergeRequestInfo = mergeRequestInfo,
             listener = myFindApprovalTaskListener

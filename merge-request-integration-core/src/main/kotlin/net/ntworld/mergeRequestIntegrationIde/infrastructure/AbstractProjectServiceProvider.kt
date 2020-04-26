@@ -6,9 +6,9 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBus
+import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.util.UUIDGenerator
 import net.ntworld.mergeRequest.*
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
@@ -18,23 +18,25 @@ import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
+import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.internal.CodeReviewManagerImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
-import net.ntworld.mergeRequestIntegrationIde.service.*
+import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 import org.jdom.Element
+import com.intellij.openapi.project.Project as IdeaProject
 
-abstract class AbstractProjectService(
+abstract class AbstractProjectServiceProvider(
     final override val project: IdeaProject
-) : ProjectService, ServiceBase() {
+) : ProjectServiceProvider, ServiceBase() {
     private var myIsInitialized = false
     private var myCodeReviewManager : CodeReviewManager? = null
     private var myComments: Collection<Comment>? = null
@@ -105,22 +107,27 @@ abstract class AbstractProjectService(
         )
     }
 
+    override val applicationSettings: ApplicationSettings
+        get() = applicationServiceProvider.settings
+
+    override val infrastructure: Infrastructure
+        get() = applicationServiceProvider.infrastructure
+
+    override val intellijIdeApi: IntellijIdeApi
+        get() = applicationServiceProvider.intellijIdeApi
+
     init {
         dispatcher.addListener(myProjectEventListener)
     }
 
     protected fun bindDataProviderForNotifiers() {
         val connection = messageBus.connect(project)
-        connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(
-            getApplicationService(),
-            project,
-            messageBus
-        ))
+        connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(this, messageBus))
     }
 
     override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
         val data = myFiltersData[id]
-        return if (null !== data && getApplicationService().settings.saveMRFilterState) {
+        return if (null !== data && applicationServiceProvider.settings.saveMRFilterState) {
             data
         } else {
             Pair(
@@ -137,7 +144,7 @@ abstract class AbstractProjectService(
     }
 
     override fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering) {
-        if (getApplicationService().settings.saveMRFilterState) {
+        if (applicationServiceProvider.settings.saveMRFilterState) {
             myFiltersData[id] = Pair(filters, ordering)
         }
     }
@@ -212,7 +219,7 @@ abstract class AbstractProjectService(
         }
 
         val task = RegisterProviderTask(
-            applicationService = getApplicationService(),
+            applicationServiceProvider = applicationServiceProvider,
             ideaProject = project,
             id = UUIDGenerator.generate(),
             name = name,

@@ -4,10 +4,9 @@ import com.intellij.ide.util.treeView.NodeRenderer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.treeStructure.Tree
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.awt.Component
 import javax.swing.JComponent
 import javax.swing.JTree
@@ -16,10 +15,9 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class MergeRequestCollectionTree(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
-) : AbstractMergeRequestCollection(applicationService, ideaProject, providerData), TreeCellRenderer {
+) : AbstractMergeRequestCollection(projectServiceProvider, providerData), TreeCellRenderer {
 
     private val myTree = Tree()
     private val myRoot = DefaultMutableTreeNode()
@@ -73,7 +71,7 @@ class MergeRequestCollectionTree(
             collection.forEach {
                 val item = MergeRequestCollectionTreeNode(
                     providerData,
-                    ideaProject,
+                    projectServiceProvider.project,
                     it
                 )
                 myRoot.add(DefaultMutableTreeNode(item))

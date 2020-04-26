@@ -14,7 +14,8 @@ import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestFilterPropertiesPanel
 import java.awt.Point
 import java.awt.event.KeyEvent
@@ -25,8 +26,7 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
 class MergeRequestCollectionFilter(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : MergeRequestCollectionFilterUI {
     override val eventDispatcher = EventDispatcher.create(MergeRequestCollectionFilterEventListener::class.java)
@@ -45,7 +45,7 @@ class MergeRequestCollectionFilter(
         true
     )
     private val myAdvanceFilterButton: AdvanceFilterButton = AdvanceFilterButton(
-        applicationService, ideaProject, providerData, myToolbar.component, myFilterPropertiesChanged
+        projectServiceProvider, providerData, myToolbar.component, myFilterPropertiesChanged
     )
 
     private val myPanel by lazy {
@@ -105,16 +105,14 @@ class MergeRequestCollectionFilter(
 
     init {
         mySearchField.addKeyboardListener(myKeyListener)
-        val pair = applicationService.getProjectService(ideaProject).findFiltersByProviderId(providerData.key)
+        val pair = projectServiceProvider.findFiltersByProviderId(providerData.key)
         myOrdering = pair.second
         mySearchField.text = pair.first.search
         myAdvanceFilterButton.setPreselectedValues(pair.first)
     }
 
     private fun saveFilterAndOrdering(filter: GetMergeRequestFilter?, ordering: MergeRequestOrdering?) {
-        applicationService.getProjectService(
-            ideaProject
-        ).saveFiltersOfProvider(
+        projectServiceProvider.saveFiltersOfProvider(
             providerData.key,
             if (null === filter) myAdvanceFilterButton.buildFilter(mySearchField.text) else filter,
             if (null === ordering) myOrdering else ordering
@@ -158,8 +156,7 @@ class MergeRequestCollectionFilter(
     }
 
     private class AdvanceFilterButton(
-        private val applicationService: ApplicationService,
-        private val ideaProject: IdeaProject,
+        private val projectServiceProvider: ProjectServiceProvider,
         private val providerData: ProviderData,
         private val preferableFocusComponent: JComponent,
         private val onChanged: (() -> Unit)
@@ -175,7 +172,7 @@ class MergeRequestCollectionFilter(
             }
         }
         private val myFilterPropertiesPanel = MergeRequestFilterPropertiesPanel(
-            applicationService, ideaProject, providerData, onChanged, myFilterPropertiesReady
+            projectServiceProvider, providerData, onChanged, myFilterPropertiesReady
         )
 
         override fun actionPerformed(e: AnActionEvent) {

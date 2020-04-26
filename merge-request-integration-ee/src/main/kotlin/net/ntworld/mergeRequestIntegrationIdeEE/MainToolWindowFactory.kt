@@ -4,5 +4,5 @@ import com.intellij.openapi.components.ServiceManager
 import net.ntworld.mergeRequestIntegrationIde.ui.MainToolWindowFactoryBase
 
 class MainToolWindowFactory : MainToolWindowFactoryBase(
-    ServiceManager.getService(EnterpriseApplicationService::class.java)
+    ServiceManager.getService(EnterpriseApplicationServiceProvider::class.java)
 )

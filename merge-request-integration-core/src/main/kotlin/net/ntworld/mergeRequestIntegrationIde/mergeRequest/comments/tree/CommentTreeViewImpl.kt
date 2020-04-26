@@ -11,14 +11,14 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class CommentTreeViewImpl(
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
@@ -49,7 +49,7 @@ class CommentTreeViewImpl(
 
     private val myToolbar = CommentTreeViewToolbar(myTree, dispatcher)
     private val nodeSyncManager: NodeSyncManager by lazy {
-        NodeSyncManagerImpl(NodeDescriptorServiceImpl(projectService, providerData))
+        NodeSyncManagerImpl(NodeDescriptorServiceImpl(projectServiceProvider, providerData))
     }
     private val mySyncedTree: SyncedTree by lazy {
         nodeSyncManager.makeSyncedTree(myTree, myModel, myRoot)

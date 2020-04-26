@@ -14,17 +14,15 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.MergeRequestCollectionEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProviderInformationPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
-import com.intellij.openapi.project.Project as IdeaProject
 
 class ProviderDetails(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val toolWindow: ToolWindow,
     private val dispatcher: EventDispatcher<ProviderCollectionListEventListener>,
     private val providerData: ProviderData
@@ -66,14 +64,17 @@ class ProviderDetails(
         toolbar.component
     }
     private val myTabs: TabsUI by lazy {
-        val tabs = Tabs(ideaProject, toolWindow.contentManager)
+        val tabs = Tabs(projectServiceProvider.project, toolWindow.contentManager)
         tabs.setCommonCenterActionGroupFactory(myCommonCenterActionGroupFactory)
         tabs.setCommonSideComponentFactory(myCommonSideComponentFactory)
         tabs
     }
     private val myDetailsTabInfo by lazy {
         val tabInfo = TabInfo(
-            ScrollPaneFactory.createScrollPane(ProviderInformationPanel(applicationService, providerData).createComponent())
+            ScrollPaneFactory.createScrollPane(
+                ProviderInformationPanel(projectServiceProvider.applicationServiceProvider, providerData)
+                    .createComponent()
+            )
         )
         tabInfo.text = "General Information"
 
@@ -82,7 +83,8 @@ class ProviderDetails(
 
     private val myOpeningMRList by lazy {
         val list = ProviderDetailsMRList(
-            applicationService, ideaProject, providerData,
+            projectServiceProvider,
+            providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
                 search = "",
@@ -105,7 +107,8 @@ class ProviderDetails(
 
     private val myMyMRList by lazy {
         val list = ProviderDetailsMRList(
-            applicationService, ideaProject, providerData,
+            projectServiceProvider,
+            providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
                 search = "",
@@ -128,7 +131,8 @@ class ProviderDetails(
 
     private val myMyAssignedMRList by lazy {
         val list = ProviderDetailsMRList(
-            applicationService, ideaProject, providerData,
+            projectServiceProvider,
+            providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
                 search = "",
@@ -151,7 +155,8 @@ class ProviderDetails(
 
     private val myWaitingForMyApprovalMRList by lazy {
         val list = ProviderDetailsMRList(
-            applicationService, ideaProject, providerData,
+            projectServiceProvider,
+            providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
                 search = "",

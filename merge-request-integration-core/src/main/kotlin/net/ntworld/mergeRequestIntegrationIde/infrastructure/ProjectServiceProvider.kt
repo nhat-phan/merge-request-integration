@@ -5,15 +5,19 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBus
+import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import com.intellij.openapi.project.Project as IdeaProject
 
-interface ProjectService {
+interface ProjectServiceProvider {
+    val applicationServiceProvider: ApplicationServiceProvider
+
     val project: IdeaProject
 
     val messageBus: MessageBus
@@ -28,7 +32,11 @@ interface ProjectService {
 
     val repositoryFile: RepositoryFileService
 
-    fun getApplicationService(): ApplicationService
+    val applicationSettings: ApplicationSettings
+
+    val infrastructure: Infrastructure
+
+    val intellijIdeApi: IntellijIdeApi
 
     fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering>
 

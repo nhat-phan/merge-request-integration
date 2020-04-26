@@ -10,7 +10,7 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProjectPanel
 import java.awt.Component
 import java.awt.event.FocusEvent
@@ -22,7 +22,7 @@ import javax.swing.event.DocumentListener
 import com.intellij.openapi.project.Project as IdeaProject
 
 class GitlabProjectFinder(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     private val ideaProject: IdeaProject,
     private val myTerm: JTextField,
     private val myProjectList: JList<Project>,
@@ -101,7 +101,7 @@ class GitlabProjectFinder(
 
     private fun triggerSearchTask(term: String) {
         myProjectChangedDispatcher.multicaster.projectChanged("")
-        MySearchTask(applicationService, term, this).start()
+        MySearchTask(applicationServiceProvider, term, this).start()
     }
 
     override fun addProjectChangedListener(listener: ProjectFinderUI.ProjectChangedListener) {
@@ -142,7 +142,7 @@ class GitlabProjectFinder(
     }
 
     private class MySearchTask(
-        private val applicationService: ApplicationService,
+        private val applicationServiceProvider: ApplicationServiceProvider,
         private val term: String,
         private val self: GitlabProjectFinder
     ) : Task.Backgroundable(self.ideaProject, "Searching gitlab projects...", false) {
@@ -159,7 +159,7 @@ class GitlabProjectFinder(
                 return
             }
 
-            val out = applicationService.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
+            val out = applicationServiceProvider.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
                 credentials = credentials,
                 term = term,
                 owner = self.mySearchOwn.isSelected,

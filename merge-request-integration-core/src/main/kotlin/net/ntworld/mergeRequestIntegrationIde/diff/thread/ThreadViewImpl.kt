@@ -19,7 +19,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.component.comment.*
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
@@ -33,7 +33,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class ThreadViewImpl(
-    private val applicationService: ApplicationService,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val editor: EditorEx,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
@@ -153,7 +153,7 @@ class ThreadViewImpl(
         editorEmbeddedComponentManager.addComponent(
             editor,
             myWrapper,
-            applicationService.intellijIdeApi.makeEditorEmbeddedComponentManagerProperties(offset)
+            projectServiceProvider.intellijIdeApi.makeEditorEmbeddedComponentManagerProperties(offset)
         )
 
         EditorUtil.disposeWithEditor(editor, this)

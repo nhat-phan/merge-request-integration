@@ -15,7 +15,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
@@ -25,7 +25,7 @@ import javax.swing.BoxLayout
 import javax.swing.JComponent
 
 class CommentsTabViewImpl(
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : AbstractView<CommentsTabView.ActionListener>(), CommentsTabView {
     override val dispatcher = EventDispatcher.create(CommentsTabView.ActionListener::class.java)
@@ -36,7 +36,7 @@ class CommentsTabViewImpl(
     )
     private val myTreePresenter: CommentTreePresenter = CommentTreeFactory.makePresenter(
         CommentTreeFactory.makeModel(providerData),
-        CommentTreeFactory.makeView(projectService, providerData)
+        CommentTreeFactory.makeView(projectServiceProvider, providerData)
     )
     private val myTreeListener = object : CommentTreePresenter.Listener {
         override fun onTreeNodeSelected(node: Node) {
@@ -87,7 +87,7 @@ class CommentsTabViewImpl(
     }
     private val myMainEditor by lazy {
         val editor = ComponentFactory.makeEditor(
-            projectService.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0, false
+            projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0, false
         )
         editor.isVisible = true
         editor.addListener(myMainEditorEventListener)
@@ -177,7 +177,7 @@ class CommentsTabViewImpl(
             }
 
             val group = ComponentFactory.makeGroup(
-                providerData, mergeRequestInfo, projectService.project, false, groupId, comments, 0
+                providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments, 0
             )
             myCommentPosition = comments.first().position
 

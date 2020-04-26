@@ -2,7 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 
 import com.intellij.ide.projectView.PresentationData
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 interface Node {
     val id: String
@@ -18,7 +18,7 @@ interface Node {
 
     fun updatePresentation(presentation: PresentationData)
 
-    fun updatePresentation(projectService: ProjectService, providerData: ProviderData, presentation: PresentationData) {
+    fun updatePresentation(projectServiceProvider: ProjectServiceProvider, providerData: ProviderData, presentation: PresentationData) {
         updatePresentation(presentation)
     }
 }

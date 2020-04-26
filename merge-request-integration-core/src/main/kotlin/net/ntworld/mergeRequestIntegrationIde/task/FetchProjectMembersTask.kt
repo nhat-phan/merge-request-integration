@@ -10,16 +10,16 @@ import net.ntworld.mergeRequest.UserStatus
 import net.ntworld.mergeRequest.query.GetProjectMembersQuery
 import net.ntworld.mergeRequestIntegration.internal.UserInfoImpl
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import com.intellij.openapi.project.Project as IdeaProject
 
 class FetchProjectMembersTask(
-    private val applicationService: ApplicationService,
-    ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val addEmptyMember: Boolean,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Fetching project members...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching project members...", false) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,
@@ -31,7 +31,7 @@ class FetchProjectMembersTask(
         try {
             listener.taskStarted()
             val query = GetProjectMembersQuery.make(providerData.id)
-            val result = applicationService.infrastructure.queryBus() process query
+            val result = projectServiceProvider.infrastructure.queryBus() process query
             val data = result.members
                 .filter { it.status == UserStatus.ACTIVE }
                 .sortedBy { it.name }

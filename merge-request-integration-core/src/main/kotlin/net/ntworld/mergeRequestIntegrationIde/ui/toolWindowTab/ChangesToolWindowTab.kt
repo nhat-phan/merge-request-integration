@@ -14,7 +14,7 @@ import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
@@ -27,12 +27,12 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
 class ChangesToolWindowTab(
-    private val projectService: ProjectService
+    private val projectServiceProvider: ProjectServiceProvider
 ) : Component {
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel()
     private val myComponent = SimpleToolWindowPanel(true, true)
-    private val myTree = MyTree(projectService.project)
+    private val myTree = MyTree(projectServiceProvider.project)
     private val myTreeWrapper = ScrollPaneFactory.createScrollPane(myTree, true)
     private val myToolbar by lazy {
         val panel = JPanel(MigLayout("ins 0, fill", "[left]0[left, fill]push[right]", "center"))
@@ -87,7 +87,7 @@ class ChangesToolWindowTab(
             return@TreeSelectionListener
         }
 
-        val reviewContext = projectService.findReviewContextWhichDoingCodeReview()
+        val reviewContext = projectServiceProvider.findReviewContextWhichDoingCodeReview()
         if (null !== reviewContext) {
             reviewContext.openChange(change, focus = true, displayMergeRequestId = false)
         }
@@ -101,13 +101,13 @@ class ChangesToolWindowTab(
         myComponent.toolbar = myToolbar
         myTree.addTreeSelectionListener(myTreeSelectionListener)
 
-        if (projectService.isDoingCodeReview()) {
-            setChanges(projectService.getCodeReviewChanges())
+        if (projectServiceProvider.isDoingCodeReview()) {
+            setChanges(projectServiceProvider.getCodeReviewChanges())
             showChanges()
         } else {
             hideChanges()
         }
-        projectService.dispatcher.addListener(myProjectEventListener)
+        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
     }
 
     override fun createComponent(): JComponent = myComponent

@@ -4,22 +4,20 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
-import com.intellij.openapi.project.Project
-import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.Commit
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommitsQuery
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class GetCommitsTask(
-    private val applicationService: ApplicationService,
-    ideaProject: Project,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Fetching commit data...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching commit data...", false) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,
@@ -32,7 +30,7 @@ class GetCommitsTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = applicationService.infrastructure.queryBus() process GetCommitsQuery.make(
+            val result = projectServiceProvider.infrastructure.queryBus() process GetCommitsQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestInfo.id
             )

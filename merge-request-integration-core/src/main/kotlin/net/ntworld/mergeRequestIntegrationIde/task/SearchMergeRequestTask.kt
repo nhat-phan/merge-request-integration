@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.task
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -12,16 +11,15 @@ import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequest.query.GetMergeRequestsQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.SEARCH_MERGE_REQUEST_ITEMS_PER_PAGE
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 class SearchMergeRequestTask(
-    private val applicationService: ApplicationService,
-    ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val filtering: GetMergeRequestFilter,
     private val ordering: MergeRequestOrdering,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Fetching merge requests...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge requests...", false) {
     var page: Int = 1
     fun start() = start(1)
 
@@ -44,7 +42,7 @@ class SearchMergeRequestTask(
                 page = currentPage,
                 itemsPerPage = SEARCH_MERGE_REQUEST_ITEMS_PER_PAGE
             )
-            val result = applicationService.infrastructure.queryBus() process query
+            val result = projectServiceProvider.infrastructure.queryBus() process query
             listener.dataReceived(result.mergeRequests, currentPage, result.totalPages, result.totalItems)
             listener.taskEnded()
         } catch (exception: Exception) {

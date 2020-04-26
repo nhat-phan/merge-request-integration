@@ -2,15 +2,15 @@ package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.openapi.options.SearchableConfigurable
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
 import javax.swing.JComponent
 
 abstract class ConfigurationBase(
-    private val applicationService: ApplicationService
+    private val applicationServiceProvider: ApplicationServiceProvider
 ) : SearchableConfigurable {
-    private var myInitializedSettings = applicationService.settings
-    private var myCurrentSettings = applicationService.settings
+    private var myInitializedSettings = applicationServiceProvider.settings
+    private var myCurrentSettings = applicationServiceProvider.settings
     private val mySettingsUI: SettingsUI = SettingsConfiguration()
     private val mySettingsListener = object: SettingsUI.Listener {
         override fun change(settings: ApplicationSettings) {
@@ -29,7 +29,7 @@ abstract class ConfigurationBase(
     }
 
     override fun apply() {
-        applicationService.updateSettings(myCurrentSettings)
+        applicationServiceProvider.updateSettings(myCurrentSettings)
         myInitializedSettings = myCurrentSettings
         ApiProviderManager.updateApiOptions(myCurrentSettings.toApiOptions())
     }

@@ -3,18 +3,18 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.SimpleTextAttributes
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 class FileNode(
     val path: String
 ) : AbstractNode() {
     override fun updatePresentation(
-        projectService: ProjectService,
+        projectServiceProvider: ProjectServiceProvider,
         providerData: ProviderData,
         presentation: PresentationData
     ) {
-        super.updatePresentation(projectService, providerData, presentation)
-        presentation.setIcon(projectService.repositoryFile.findIcon(providerData, path))
+        super.updatePresentation(projectServiceProvider, providerData, presentation)
+        presentation.setIcon(projectServiceProvider.repositoryFile.findIcon(providerData, path))
     }
 
     override val id: String = "file[$path]"

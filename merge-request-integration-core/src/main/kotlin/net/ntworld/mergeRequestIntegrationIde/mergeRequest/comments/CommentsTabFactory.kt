@@ -1,30 +1,29 @@
 package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments
 
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 object CommentsTabFactory {
     fun makeCommentsTabView(
-        projectService: ProjectService,
+        projectServiceProvider: ProjectServiceProvider,
         providerData: ProviderData
     ): CommentsTabView {
-        return CommentsTabViewImpl(projectService, providerData)
+        return CommentsTabViewImpl(projectServiceProvider, providerData)
     }
 
     fun makeCommentsTabModel(
-        projectService: ProjectService,
+        projectServiceProvider: ProjectServiceProvider,
         providerData: ProviderData
     ): CommentsTabModel {
-        return CommentsTabModelImpl(projectService, providerData)
+        return CommentsTabModelImpl(projectServiceProvider, providerData)
     }
 
     fun makeCommentsTabPresenter(
-        applicationService: ApplicationService,
-        projectService: ProjectService,
+        projectServiceProvider: ProjectServiceProvider,
         model: CommentsTabModel,
         view: CommentsTabView
     ): CommentsTabPresenter {
-        return CommentsTabPresenterImpl(applicationService, projectService, model, view)
+        return CommentsTabPresenterImpl(projectServiceProvider, model, view)
     }
 }

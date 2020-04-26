@@ -4,21 +4,19 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
-import com.intellij.openapi.project.Project
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.Pipeline
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetPipelinesQuery
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 class GetPipelinesTask(
-    private val applicationService: ApplicationService,
-    ideaProject: Project,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Fetching pipeline data...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching pipeline data...", false) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,
@@ -31,7 +29,7 @@ class GetPipelinesTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = applicationService.infrastructure.queryBus() process GetPipelinesQuery.make(
+            val result = projectServiceProvider.infrastructure.queryBus() process GetPipelinesQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestInfo.id
             )

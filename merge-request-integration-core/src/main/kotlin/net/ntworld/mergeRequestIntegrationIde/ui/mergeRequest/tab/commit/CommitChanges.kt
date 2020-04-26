@@ -14,7 +14,7 @@ import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import javax.swing.JComponent
@@ -23,9 +23,9 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
-class CommitChanges(private val projectService: ProjectService) : CommitChangesUI {
+class CommitChanges(private val projectServiceProvider: ProjectServiceProvider) : CommitChangesUI {
     private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
-    private val myTree = MyTree(projectService.project)
+    private val myTree = MyTree(projectServiceProvider.project)
     private var myProviderData: ProviderData? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
     private val myTreeSelectionListener = TreeSelectionListener {
@@ -47,7 +47,7 @@ class CommitChanges(private val projectService: ProjectService) : CommitChangesU
                         return@TreeSelectionListener
                     }
                 }
-                reviewContext.openChange(lastPath.userObject, focus = false, displayMergeRequestId = !projectService.isDoingCodeReview())
+                reviewContext.openChange(lastPath.userObject, focus = false, displayMergeRequestId = !projectServiceProvider.isDoingCodeReview())
             }
         }
     }
@@ -77,7 +77,7 @@ class CommitChanges(private val projectService: ProjectService) : CommitChangesU
         myMergeRequestInfo = mergeRequestInfo
         thread {
             myTree.isVisible = false
-            val changes = projectService.repositoryFile.findChanges(providerData, commits.map { it.id })
+            val changes = projectServiceProvider.repositoryFile.findChanges(providerData, commits.map { it.id })
             ReviewContextManager.updateChanges(providerData.id, mergeRequestInfo.id, changes)
             ApplicationManager.getApplication().invokeLater {
                 myTree.setChangesToDisplay(changes)

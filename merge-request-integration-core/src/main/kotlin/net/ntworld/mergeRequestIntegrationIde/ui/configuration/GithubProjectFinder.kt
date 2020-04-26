@@ -9,7 +9,7 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.github.request.GithubSearchRepositoriesRequest
 import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubRepositoryTransformer
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.ProjectPanel
 import java.awt.Component
 import java.awt.event.FocusEvent
@@ -21,7 +21,7 @@ import javax.swing.event.DocumentListener
 import com.intellij.openapi.project.Project as IdeaProject
 
 class GithubProjectFinder(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     private val ideaProject: IdeaProject,
     private val myTerm: JTextField,
     private val myProjectList: JList<Project>
@@ -92,7 +92,7 @@ class GithubProjectFinder(
 
     private fun triggerSearchTask(term: String) {
         myProjectChangedDispatcher.multicaster.projectChanged("")
-        MySearchTask(applicationService, term, this).start()
+        MySearchTask(applicationServiceProvider, term, this).start()
     }
 
     override fun addProjectChangedListener(listener: ProjectFinderUI.ProjectChangedListener) {
@@ -128,7 +128,7 @@ class GithubProjectFinder(
     }
 
     private class MySearchTask(
-        private val applicationService: ApplicationService,
+        private val applicationServiceProvider: ApplicationServiceProvider,
         private val term: String,
         private val self: GithubProjectFinder
     ) : Task.Backgroundable(self.ideaProject, "Searching github projects...", false) {
@@ -145,7 +145,7 @@ class GithubProjectFinder(
                 return
             }
 
-            val out = applicationService.infrastructure.serviceBus() process GithubSearchRepositoriesRequest(
+            val out = applicationServiceProvider.infrastructure.serviceBus() process GithubSearchRepositoriesRequest(
                 credentials = credentials,
                 term = term
             )

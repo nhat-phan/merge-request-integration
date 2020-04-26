@@ -5,7 +5,7 @@ import com.intellij.ui.JBColor
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.ENTERPRISE_EDITION_URL
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.awt.Color
 import javax.swing.JButton
@@ -14,7 +14,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 class ProviderInformationPanel(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     private val providerData: ProviderData
 ): Component {
     var myWholePanel: JPanel? = null
@@ -51,7 +51,7 @@ class ProviderInformationPanel(
             BrowserUtil.open(providerData.project.url)
         }
 
-        val isLegal = this.applicationService.isLegal(providerData)
+        val isLegal = this.applicationServiceProvider.isLegal(providerData)
         if (!isLegal) {
             myLegalStatus!!.text = "Illegal"
             myLegalStatus!!.foreground = Color(0xBA, 0x3F, 0x3C)

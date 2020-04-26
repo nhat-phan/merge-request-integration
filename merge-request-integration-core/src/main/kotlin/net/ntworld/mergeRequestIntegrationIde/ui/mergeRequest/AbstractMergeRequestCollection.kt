@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.MergeRequestState
@@ -11,14 +10,13 @@ import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.component.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.PaginationToolbar
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.task.SearchMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import javax.swing.JComponent
 
 abstract class AbstractMergeRequestCollection(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : MergeRequestCollectionUI {
     abstract fun makeContent(): JComponent
@@ -92,8 +90,7 @@ abstract class AbstractMergeRequestCollection(
     private fun fetchPage(page: Int) {
         if (providerData.status == ProviderStatus.ACTIVE) {
             val task = SearchMergeRequestTask(
-                applicationService = applicationService,
-                ideaProject = ideaProject,
+                projectServiceProvider = projectServiceProvider,
                 providerData = providerData,
                 filtering = myFilter,
                 ordering = myOrdering,

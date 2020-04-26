@@ -6,20 +6,18 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
-import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.FindMergeRequestQuery
 import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 
 class FindMergeRequestTask(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Fetching merge request...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge request...", false) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,
@@ -32,7 +30,7 @@ class FindMergeRequestTask(
     override fun run(indicator: ProgressIndicator) {
         try {
             listener.taskStarted()
-            val result = applicationService.infrastructure.queryBus() process FindMergeRequestQuery.make(
+            val result = projectServiceProvider.infrastructure.queryBus() process FindMergeRequestQuery.make(
                 providerId = providerData.id,
                 mergeRequestId = mergeRequestInfo.id
             )

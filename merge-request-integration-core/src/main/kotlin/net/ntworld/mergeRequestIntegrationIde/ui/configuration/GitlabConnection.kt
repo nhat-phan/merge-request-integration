@@ -9,14 +9,14 @@ import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class GitlabConnection(
-    private val applicationService: ApplicationService,
+    private val applicationServiceProvider: ApplicationServiceProvider,
     private val ideaProject: IdeaProject
 ) : ConnectionUI {
     var myWholePanel: JPanel? = null
@@ -42,7 +42,7 @@ class GitlabConnection(
     private var myIsTested: Boolean = false
     private val myProjectFinder: ProjectFinderUI by lazy {
         GitlabProjectFinder(
-            applicationService,
+            applicationServiceProvider,
             ideaProject,
             myTerm!!,
             myProjectList!!,

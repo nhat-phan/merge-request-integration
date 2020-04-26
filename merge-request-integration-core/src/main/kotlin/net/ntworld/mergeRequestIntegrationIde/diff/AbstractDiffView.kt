@@ -19,11 +19,13 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.*
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadPresenter
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 abstract class AbstractDiffView<V : DiffViewerBase>(
-    private val applicationService: ApplicationService,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val viewerBase: DiffViewerBase
 ) : AbstractView<DiffView.ActionListener>(), DiffView<V> {
     final override val dispatcher = EventDispatcher.create(DiffView.ActionListener::class.java)
@@ -134,7 +136,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         if (!map.containsKey(logicalLine)) {
             val model = ThreadFactory.makeModel(comments)
             val view = ThreadFactory.makeView(
-                applicationService, editor, providerData, mergeRequestInfo, logicalLine, side, position
+                projectServiceProvider, editor, providerData, mergeRequestInfo, logicalLine, side, position
             )
             val presenter = ThreadFactory.makePresenter(model, view)
 

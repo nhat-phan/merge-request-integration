@@ -1,30 +1,27 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import javax.swing.JComponent
 
 class MergeRequestCollection(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
 ) : MergeRequestCollectionUI {
     private val myComponent = SimpleToolWindowPanel(true, true)
     private val myFilter: MergeRequestCollectionFilterUI by lazy {
-        MergeRequestCollectionFilter(applicationService, ideaProject, providerData)
+        MergeRequestCollectionFilter(projectServiceProvider, providerData)
     }
     private val myTree: MergeRequestCollectionUI by lazy {
-        val tree = MergeRequestCollectionTree(applicationService, ideaProject, providerData)
-        if (applicationService.settings.saveMRFilterState) {
-            val projectService = applicationService.getProjectService(ideaProject)
-            val pair = projectService.findFiltersByProviderId(providerData.key)
+        val tree = MergeRequestCollectionTree(projectServiceProvider, providerData)
+        if (projectServiceProvider.applicationSettings.saveMRFilterState) {
+            val pair = projectServiceProvider.findFiltersByProviderId(providerData.key)
             tree.setFilter(pair.first)
             tree.setOrder(pair.second)
         }
@@ -65,7 +62,7 @@ class MergeRequestCollection(
             override fun mergeRequestSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
             }
         })
-        applicationService.getProjectService(ideaProject).dispatcher.addListener(myProjectEventListener)
+        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
     }
 
     override val eventDispatcher = myTree.eventDispatcher

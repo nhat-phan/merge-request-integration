@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.MergeRequestState
@@ -8,15 +7,14 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.UserInfo
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.task.FetchProjectMembersTask
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.awt.event.ActionListener
 import javax.swing.*
 
 class MergeRequestFilterPropertiesPanel(
-    private val applicationService: ApplicationService,
-    private val ideaProject: IdeaProject,
+    private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData,
     private val onChanged: (() -> Unit),
     private val onReady: (() -> Unit)
@@ -75,7 +73,7 @@ class MergeRequestFilterPropertiesPanel(
     }
 
     init {
-        val task = FetchProjectMembersTask(applicationService, ideaProject, providerData, true, myListener)
+        val task = FetchProjectMembersTask(projectServiceProvider, providerData, true, myListener)
         if (!isFetched) {
             task.start()
         }

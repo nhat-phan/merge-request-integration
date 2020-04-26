@@ -7,7 +7,10 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
-import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.CommentPosition
+import net.ntworld.mergeRequest.CommentPositionChangeType
+import net.ntworld.mergeRequest.CommentPositionSource
 import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
@@ -21,16 +24,14 @@ import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationService
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.util.*
 
 internal class DiffPresenterImpl(
-    private val applicationService: ApplicationService,
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val model: DiffModel,
     override val view: DiffView<*>
 ) : AbstractPresenter<EventListener>(),
@@ -65,8 +66,10 @@ internal class DiffPresenterImpl(
             view.initializeLine(model.reviewContext, item.key, Side.RIGHT, item.value)
         }
 
-        if (applicationService.settings.displayCommentsInDiffView) {
-            view.showAllComments()
+        if (projectServiceProvider.applicationSettings.displayCommentsInDiffView) {
+            ApplicationManager.getApplication().invokeLater {
+                view.showAllComments()
+            }
         }
 
         val scrollPosition = model.reviewContext.getChangeData(model.change, DiffNotifier.ScrollPosition)
@@ -122,13 +125,13 @@ internal class DiffPresenterImpl(
     }
 
     override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
-        applicationService.infrastructure.serviceBus() process ReplyCommentRequest.make(
+        projectServiceProvider.infrastructure.serviceBus() process ReplyCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             repliedComment = repliedComment,
             body = content
         ) ifError {
-            projectService.notify(
+            projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",
                 NotificationType.ERROR
             )
@@ -140,13 +143,13 @@ internal class DiffPresenterImpl(
 
     override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
         val commentPosition = convertGutterPositionToCommentPosition(position)
-        applicationService.infrastructure.serviceBus() process CreateCommentRequest.make(
+        projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             position = commentPosition,
             body = content
         ) ifError {
-            projectService.notify(
+            projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",
                 NotificationType.ERROR
             )
@@ -157,7 +160,7 @@ internal class DiffPresenterImpl(
     }
 
     override fun onDeleteCommentRequested(comment: Comment) {
-        applicationService.infrastructure.commandBus() process DeleteCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process DeleteCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
@@ -166,7 +169,7 @@ internal class DiffPresenterImpl(
     }
 
     override fun onResolveCommentRequested(comment: Comment) {
-        applicationService.infrastructure.commandBus() process ResolveCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process ResolveCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
@@ -175,7 +178,7 @@ internal class DiffPresenterImpl(
     }
 
     override fun onUnresolveCommentRequested(comment: Comment) {
-        applicationService.infrastructure.commandBus() process UnresolveCommentCommand.make(
+        projectServiceProvider.infrastructure.commandBus() process UnresolveCommentCommand.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             comment = comment
@@ -202,7 +205,7 @@ internal class DiffPresenterImpl(
     }
 
     private fun fetchAndUpdateComments() {
-        projectService.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(
+        projectServiceProvider.messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC).fetchCommentsRequested(
             model.providerData, model.mergeRequestInfo
         )
     }
@@ -233,7 +236,7 @@ internal class DiffPresenterImpl(
     }
 
     private fun convertGutterPositionToCommentPosition(input: GutterPosition): CommentPosition {
-        val repository: GitRepository? = RepositoryUtil.findRepository(projectService.project, model.providerData)
+        val repository: GitRepository? = RepositoryUtil.findRepository(projectServiceProvider.project, model.providerData)
 
         return CommentPositionImpl(
             oldLine = input.oldLine,

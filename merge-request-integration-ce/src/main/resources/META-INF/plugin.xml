@@ -9,8 +9,8 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityApplicationService"/>
-        <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityProjectService"/>
+        <applicationService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityApplicationServiceProvider"/>
+        <projectService serviceImplementation="net.ntworld.mergeRequestIntegrationIdeCE.CommunityProjectServiceProvider"/>
         <diff.DiffExtension implementation="net.ntworld.mergeRequestIntegrationIdeCE.DiffExtension"/>
 
         <projectConfigurable id="merge-request-integration-ce"

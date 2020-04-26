@@ -10,11 +10,11 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class DiffModelImpl(
-    private val projectService: ProjectService,
+    private val projectServiceProvider: ProjectServiceProvider,
     override val reviewContext: ReviewContext,
     override val change: Change,
     override var displayResolvedComments: Boolean
