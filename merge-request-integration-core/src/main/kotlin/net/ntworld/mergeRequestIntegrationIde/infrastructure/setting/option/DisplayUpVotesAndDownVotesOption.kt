@@ -2,14 +2,14 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.option
 
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsImpl
 
-class GroupCommentsByThreadOption : BooleanOption() {
-    override val name: String = "comments:group-comment-by-thread"
+class DisplayUpVotesAndDownVotesOption : BooleanOption() {
+    override val name: String = "merge-request:display-upvotes-downvotes"
 
     override fun getOptionValueFromSettings(settings: ApplicationSettingsImpl): Boolean {
-        return settings.groupCommentsByThread
+        return settings.displayUpVotesAndDownVotes
     }
 
     override fun copySettings(settings: ApplicationSettingsImpl, value: Boolean): ApplicationSettingsImpl {
-        return settings.copy(groupCommentsByThread = value)
+        return settings.copy(displayUpVotesAndDownVotes = value)
     }
 }

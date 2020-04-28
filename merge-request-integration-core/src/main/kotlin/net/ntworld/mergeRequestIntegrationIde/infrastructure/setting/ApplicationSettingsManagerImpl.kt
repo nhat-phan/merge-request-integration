@@ -7,19 +7,21 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
     private var mySettings: ApplicationSettings = ApplicationSettingsImpl.DEFAULT
     private val myOptionEnableRequestCache = EnableRequestCacheOption()
     private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
-    private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
     private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
     private val myOptionShowAddCommentIconsInDiffViewGutter = ShowAddCommentIconsInDiffViewGutterOption()
     private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
     private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
+    private val myOptionDisplayUpVotesAndDownVotes = DisplayUpVotesAndDownVotesOption()
+    private val myOptionDisplayMergeRequestState = DisplayMergeRequestStateOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
         myOptionEnableRequestCache,
         myOptionSaveMRFilterState,
-        myOptionGroupCommentsByThread,
         myOptionDisplayCommentsInDiffView,
         myOptionShowAddCommentIconsInDiffViewGutter,
         myOptionCheckoutTargetBranch,
-        myOptionMaxDiffChangesOpenedAutomatically
+        myOptionMaxDiffChangesOpenedAutomatically,
+        myOptionDisplayUpVotesAndDownVotes,
+        myOptionDisplayMergeRequestState
     )
 
     val settings: ApplicationSettings
@@ -30,9 +32,6 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
 
     override val saveMRFilterState: Boolean
         get() = mySettings.saveMRFilterState
-
-    override val groupCommentsByThread: Boolean
-        get() = mySettings.groupCommentsByThread
 
     override val displayCommentsInDiffView: Boolean
         get() = mySettings.displayCommentsInDiffView
@@ -45,6 +44,12 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
 
     override val maxDiffChangesOpenedAutomatically: Int
         get() = mySettings.maxDiffChangesOpenedAutomatically
+
+    override val displayUpVotesAndDownVotes: Boolean
+        get() = mySettings.displayUpVotesAndDownVotes
+
+    override val displayMergeRequestState: Boolean
+        get() = mySettings.displayMergeRequestState
 
     override fun readFrom(elements: List<Element>): ApplicationSettings {
         var settings = ApplicationSettingsImpl.DEFAULT
@@ -76,11 +81,12 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
     override fun writeTo(element: Element) {
         writeOption(element, myOptionEnableRequestCache, mySettings.enableRequestCache)
         writeOption(element, myOptionSaveMRFilterState, mySettings.saveMRFilterState)
-        writeOption(element, myOptionGroupCommentsByThread, mySettings.groupCommentsByThread)
         writeOption(element, myOptionDisplayCommentsInDiffView, mySettings.displayCommentsInDiffView)
         writeOption(element, myOptionShowAddCommentIconsInDiffViewGutter, mySettings.showAddCommentIconsInDiffViewGutter)
         writeOption(element, myOptionCheckoutTargetBranch, mySettings.checkoutTargetBranch)
         writeOption(element, myOptionMaxDiffChangesOpenedAutomatically, mySettings.maxDiffChangesOpenedAutomatically)
+        writeOption(element, myOptionDisplayUpVotesAndDownVotes, mySettings.displayUpVotesAndDownVotes)
+        writeOption(element, myOptionDisplayMergeRequestState, mySettings.displayMergeRequestState)
     }
 
     override fun update(settings: ApplicationSettings) {

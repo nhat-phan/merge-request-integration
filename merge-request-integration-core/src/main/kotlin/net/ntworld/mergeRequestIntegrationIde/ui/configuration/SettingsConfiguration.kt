@@ -18,10 +18,13 @@ class SettingsConfiguration : SettingsUI {
     var myCommentOptionsPanel: JPanel? = null
     var myDisplayCommentsInDiffView: JCheckBox? = null
     var myShowAddCommentIconsInDiffViewGutter: JCheckBox? = null
-    var myGroupCommentsByThread: JCheckBox? = null
 
     var myCodeReviewOptionsPanel: JPanel? = null
     var myCheckoutTargetBranch: JCheckBox? = null
+
+    var myMergeRequestOptionsPanel: JPanel? = null
+    var myDisplayUpVotesAndDownVotes: JCheckBox? = null
+    var myDisplayMergeRequestState: JCheckBox? = null
 
     var myMaxDiffChangesOpenedAutomatically: JTextField? = null
 
@@ -33,10 +36,8 @@ class SettingsConfiguration : SettingsUI {
         mySaveMRFilterState!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayCommentsInDiffView!!.addActionListener { dispatchSettingsUpdated() }
         myShowAddCommentIconsInDiffViewGutter!!.addActionListener { dispatchSettingsUpdated() }
-
-        // TODO: remove me when implement the feature
-        myGroupCommentsByThread!!.addActionListener { dispatchSettingsUpdated() }
-        myGroupCommentsByThread!!.isVisible = false
+        myDisplayUpVotesAndDownVotes!!.addActionListener { dispatchSettingsUpdated() }
+        myDisplayMergeRequestState!!.addActionListener { dispatchSettingsUpdated() }
 
         myCheckoutTargetBranch!!.addActionListener { dispatchSettingsUpdated() }
         myMaxDiffChangesOpenedAutomatically!!.document.addDocumentListener(object : DocumentListener {
@@ -54,13 +55,14 @@ class SettingsConfiguration : SettingsUI {
             ApplicationSettingsImpl(
                 enableRequestCache = myEnableRequestCache!!.isSelected,
                 saveMRFilterState = mySaveMRFilterState!!.isSelected,
-                groupCommentsByThread = myGroupCommentsByThread!!.isSelected,
                 displayCommentsInDiffView = myDisplayCommentsInDiffView!!.isSelected,
                 showAddCommentIconsInDiffViewGutter = myShowAddCommentIconsInDiffViewGutter!!.isSelected,
                 checkoutTargetBranch = myCheckoutTargetBranch!!.isSelected,
                 maxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption.parse(
                     myMaxDiffChangesOpenedAutomatically!!.text
-                )
+                ),
+                displayUpVotesAndDownVotes = myDisplayUpVotesAndDownVotes!!.isSelected,
+                displayMergeRequestState = myDisplayMergeRequestState!!.isSelected
             )
         dispatcher.multicaster.change(settings)
     }
@@ -68,11 +70,12 @@ class SettingsConfiguration : SettingsUI {
     override fun initialize(settings: ApplicationSettings) {
         myEnableRequestCache!!.isSelected = settings.enableRequestCache
         mySaveMRFilterState!!.isSelected = settings.saveMRFilterState
-        myGroupCommentsByThread!!.isSelected = settings.groupCommentsByThread
         myDisplayCommentsInDiffView!!.isSelected = settings.displayCommentsInDiffView
         myShowAddCommentIconsInDiffViewGutter!!.isSelected = settings.showAddCommentIconsInDiffViewGutter
         myCheckoutTargetBranch!!.isSelected = settings.checkoutTargetBranch
         myMaxDiffChangesOpenedAutomatically!!.text = settings.maxDiffChangesOpenedAutomatically.toString()
+        myDisplayUpVotesAndDownVotes!!.isSelected = settings.displayUpVotesAndDownVotes
+        myDisplayMergeRequestState!!.isSelected = settings.displayMergeRequestState
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

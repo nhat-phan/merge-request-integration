@@ -8,8 +8,6 @@ interface ApplicationSettings {
 
     val saveMRFilterState: Boolean
 
-    val groupCommentsByThread: Boolean
-
     val displayCommentsInDiffView: Boolean
 
     val showAddCommentIconsInDiffViewGutter: Boolean
@@ -17,6 +15,10 @@ interface ApplicationSettings {
     val checkoutTargetBranch: Boolean
 
     val maxDiffChangesOpenedAutomatically: Int
+
+    val displayUpVotesAndDownVotes: Boolean
+
+    val displayMergeRequestState: Boolean
 
     fun toApiOptions(): ApiOptions {
         return ApiOptionsImpl(
