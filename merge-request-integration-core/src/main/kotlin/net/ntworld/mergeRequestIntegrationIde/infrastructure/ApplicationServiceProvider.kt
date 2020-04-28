@@ -1,12 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.openapi.project.Project
-import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsManager
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 
 interface ApplicationServiceProvider {
@@ -15,9 +15,7 @@ interface ApplicationServiceProvider {
 
     val intellijIdeApi: IntellijIdeApi
 
-    val settings: ApplicationSettings
-
-    val messageBus: MessageBus
+    val settingsManager: ApplicationSettingsManager
 
     val watcherManager: WatcherManager
 
@@ -32,7 +30,5 @@ interface ApplicationServiceProvider {
     fun getProviderConfigurations(): List<ProviderSettings>
 
     fun isLegal(providerData: ProviderData): Boolean
-
-    fun updateSettings(settings: ApplicationSettings)
 
 }

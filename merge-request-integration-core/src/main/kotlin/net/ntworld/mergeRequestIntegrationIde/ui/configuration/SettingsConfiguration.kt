@@ -1,9 +1,9 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.util.EventDispatcher
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.option.MaxDiffChangesOpenedAutomaticallyOption
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.option.MaxDiffChangesOpenedAutomaticallyOption
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener

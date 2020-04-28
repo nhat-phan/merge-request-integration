@@ -2,7 +2,6 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.mergeRequest.ProjectVisibility
@@ -12,11 +11,12 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ApiProviderManager
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
-import net.ntworld.mergeRequestIntegrationIde.compatibility.*
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.option.*
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.compatibility.Version193Adapter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsManager
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManagerImpl
 import org.jdom.Element
@@ -32,23 +32,6 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
     private val legalGrantedDomains = listOf(
         "gitlab.personio-internal.de"
     )
-    private val myOptionEnableRequestCache = EnableRequestCacheOption()
-    private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
-    private val myOptionGroupCommentsByThread = GroupCommentsByThreadOption()
-    private val myOptionDisplayCommentsInDiffView = DisplayCommentsInDiffViewOption()
-    private val myOptionShowAddCommentIconsInDiffViewGutter = ShowAddCommentIconsInDiffViewGutterOption()
-    private val myOptionCheckoutTargetBranch = CheckoutTargetBranchOption()
-    private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
-    private val myAllSettingOptions = listOf<SettingOption<*>>(
-        myOptionEnableRequestCache,
-        myOptionSaveMRFilterState,
-        myOptionGroupCommentsByThread,
-        myOptionDisplayCommentsInDiffView,
-        myOptionShowAddCommentIconsInDiffViewGutter,
-        myOptionCheckoutTargetBranch,
-        myOptionMaxDiffChangesOpenedAutomatically
-    )
-    private var myApplicationSettings : ApplicationSettings = ApplicationSettingsImpl.DEFAULT
     private val myAppLifecycleListener = object : AppLifecycleListener {
         override fun appClosing() {
             watcherManager.dispose()
@@ -75,51 +58,20 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
 
     override val intellijIdeApi: IntellijIdeApi = Version193Adapter()
 
-    override val settings: ApplicationSettings
-        get() = myApplicationSettings
-
-    final override val messageBus: MessageBus = ApplicationManager.getApplication().messageBus
+    override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl()
 
     override fun getState(): Element? {
         val element = super.getState()
         if (null === element) {
             return element
         }
-        writeSettingOption(element, myOptionEnableRequestCache, myApplicationSettings.enableRequestCache)
-        writeSettingOption(element, myOptionSaveMRFilterState, myApplicationSettings.saveMRFilterState)
-        writeSettingOption(element, myOptionGroupCommentsByThread, myApplicationSettings.groupCommentsByThread)
-        writeSettingOption(element, myOptionDisplayCommentsInDiffView, myApplicationSettings.displayCommentsInDiffView)
-        writeSettingOption(element, myOptionShowAddCommentIconsInDiffViewGutter, myApplicationSettings.showAddCommentIconsInDiffViewGutter)
-        writeSettingOption(element, myOptionCheckoutTargetBranch, myApplicationSettings.checkoutTargetBranch)
-        writeSettingOption(element, myOptionMaxDiffChangesOpenedAutomatically, myApplicationSettings.maxDiffChangesOpenedAutomatically)
+        settingsManager.writeTo(element)
         return element
     }
 
     override fun loadState(state: Element) {
         super.loadState(state)
-        var settings = ApplicationSettingsImpl.DEFAULT
-        for (item in state.children) {
-            if (item.name != "Setting") {
-                continue
-            }
-
-            val nameAttribute = item.getAttribute("name")
-            if (null === nameAttribute) {
-                continue
-            }
-
-            val valueAttribute = item.getAttribute("value")
-            if (null === valueAttribute) {
-                continue
-            }
-
-            for (option in myAllSettingOptions) {
-                if (option.name == nameAttribute.value.trim()) {
-                    settings = option.readValue(valueAttribute.value, settings)
-                }
-            }
-        }
-        myApplicationSettings = settings
+        val settings = settingsManager.readFrom(state.children)
         ApiProviderManager.updateApiOptions(settings.toApiOptions())
     }
 
@@ -158,16 +110,5 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
             return true
         }
         return legalGrantedDomains.contains(url.host)
-    }
-
-    override fun updateSettings(settings: ApplicationSettings) {
-        myApplicationSettings = settings
-    }
-
-    private fun<T> writeSettingOption(root: Element, option: SettingOption<T>, value: T) {
-        val item = Element("Setting")
-        item.setAttribute("name", option.name)
-        item.setAttribute("value", option.writeValue(value))
-        root.addContent(item)
     }
 }

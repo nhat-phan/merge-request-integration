@@ -1,6 +1,6 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure.option
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.option
 
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsImpl
 
 class MaxDiffChangesOpenedAutomaticallyOption : SettingOption<Int> {
     override val name: String = "code-review:max-diff-change-opened-automatically"

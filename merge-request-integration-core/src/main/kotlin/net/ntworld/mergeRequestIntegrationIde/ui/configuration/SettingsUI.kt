@@ -1,7 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
 import com.intellij.util.EventDispatcher
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import java.util.*
 

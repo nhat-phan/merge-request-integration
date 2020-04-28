@@ -149,7 +149,7 @@ object DisplayChangesService {
 
         ApplicationManager.getApplication().invokeLater {
             val reviewContext = applicationServiceProvider.findProjectServiceProvider(ideaProject).findReviewContextWhichDoingCodeReview()
-            val max = applicationServiceProvider.settings.maxDiffChangesOpenedAutomatically
+            val max = applicationServiceProvider.settingsManager.maxDiffChangesOpenedAutomatically
             if (null !== reviewContext && max != 0 && changes.size < max) {
                 val limit = UISettings().editorTabLimit
                 changes.forEachIndexed { index, item ->

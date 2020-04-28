@@ -12,6 +12,7 @@ import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import com.intellij.openapi.project.Project as IdeaProject
 

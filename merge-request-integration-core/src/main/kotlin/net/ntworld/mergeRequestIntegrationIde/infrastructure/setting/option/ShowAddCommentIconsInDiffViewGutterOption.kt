@@ -1,6 +1,6 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure.option
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.option
 
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApplicationSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsImpl
 
 class ShowAddCommentIconsInDiffViewGutterOption : BooleanOption() {
     override val name: String = "comments:show-add-comment-icons-in-diff-view-gutter"

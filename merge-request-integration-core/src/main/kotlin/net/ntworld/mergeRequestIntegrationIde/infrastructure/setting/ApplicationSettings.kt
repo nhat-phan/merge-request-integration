@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.setting
 
 import net.ntworld.mergeRequest.api.ApiOptions
 import net.ntworld.mergeRequestIntegration.internal.ApiOptionsImpl

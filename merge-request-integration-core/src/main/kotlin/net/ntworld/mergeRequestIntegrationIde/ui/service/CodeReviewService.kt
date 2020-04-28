@@ -61,7 +61,7 @@ object CodeReviewService {
         mergeRequest: MergeRequest,
         commits: List<Commit>
     ) {
-        if (!applicationServiceProvider.settings.checkoutTargetBranch) {
+        if (!applicationServiceProvider.settingsManager.checkoutTargetBranch) {
             return checkoutSuccess(applicationServiceProvider, ideaProject, providerData, mergeRequest, commits)
         }
 

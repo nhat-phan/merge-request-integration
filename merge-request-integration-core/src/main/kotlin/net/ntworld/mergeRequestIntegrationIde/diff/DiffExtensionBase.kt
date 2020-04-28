@@ -29,7 +29,7 @@ open class DiffExtensionBase(
             DiffUserDataKeys.CONTEXT_ACTIONS, listOf(
                 MyToggleAllCommentsAction(
                     presenter,
-                    applicationServiceProvider.settings.displayCommentsInDiffView
+                    applicationServiceProvider.settingsManager.displayCommentsInDiffView
                 ),
                 MyToggleResolvedCommentsAction(
                     presenter,

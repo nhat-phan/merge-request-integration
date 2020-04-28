@@ -26,6 +26,7 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBas
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.internal.CodeReviewManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
@@ -108,7 +109,7 @@ abstract class AbstractProjectServiceProvider(
     }
 
     override val applicationSettings: ApplicationSettings
-        get() = applicationServiceProvider.settings
+        get() = applicationServiceProvider.settingsManager
 
     override val infrastructure: Infrastructure
         get() = applicationServiceProvider.infrastructure
@@ -127,7 +128,7 @@ abstract class AbstractProjectServiceProvider(
 
     override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
         val data = myFiltersData[id]
-        return if (null !== data && applicationServiceProvider.settings.saveMRFilterState) {
+        return if (null !== data && applicationServiceProvider.settingsManager.saveMRFilterState) {
             data
         } else {
             Pair(
@@ -144,7 +145,7 @@ abstract class AbstractProjectServiceProvider(
     }
 
     override fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering) {
-        if (applicationServiceProvider.settings.saveMRFilterState) {
+        if (applicationServiceProvider.settingsManager.saveMRFilterState) {
             myFiltersData[id] = Pair(filters, ordering)
         }
     }
