@@ -90,14 +90,6 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="9cedd" class="javax.swing.JLabel" binding="mySourceBranch">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="task/do-something-really-cool"/>
-                </properties>
-              </component>
               <hspacer id="7036a">
                 <constraints>
                   <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -111,12 +103,23 @@
                   <text value=""/>
                 </properties>
               </component>
-              <component id="cbf33" class="javax.swing.JLabel" binding="myTargetBranch">
+              <component id="fcfa4" class="javax.swing.JTextField" binding="myTargetBranch">
                 <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
+                  <editable value="false"/>
+                  <enabled value="true"/>
                   <text value="master"/>
+                </properties>
+              </component>
+              <component id="2ab88" class="javax.swing.JTextField" binding="mySourceBranch">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <enabled value="true"/>
                 </properties>
               </component>
             </children>

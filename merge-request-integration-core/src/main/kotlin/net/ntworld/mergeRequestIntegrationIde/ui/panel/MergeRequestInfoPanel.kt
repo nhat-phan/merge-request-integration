@@ -7,6 +7,7 @@ import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 
 class MergeRequestInfoPanel {
     var myWholePanel: JPanel? = null
@@ -24,9 +25,9 @@ class MergeRequestInfoPanel {
     var myAuthorUsername: JLabel? = null
     var myAssigneeFullName: JLabel? = null
     var myAssigneeUsername: JLabel? = null
-    var mySourceBranch: JLabel? = null
+    var mySourceBranch: JTextField? = null
     var myBranchIcon: JLabel? = null
-    var myTargetBranch: JLabel? = null
+    var myTargetBranch: JTextField? = null
     var myStatus: JLabel? = null
     var myMergedByFullName: JLabel? = null
     var myMergedByUsername: JLabel? = null
@@ -38,6 +39,11 @@ class MergeRequestInfoPanel {
     var myClosedAt: JLabel? = null
 
     init {
+        mySourceBranch!!.background = null
+        mySourceBranch!!.border = null
+        myTargetBranch!!.background = null
+        myTargetBranch!!.border = null
+
         myBranchIcon!!.icon = AllIcons.Vcs.Arrow_right
         myTitle!!.text = "-"
         displayTime(null, myCreatedAt!!)
@@ -118,20 +124,20 @@ class MergeRequestInfoPanel {
     private fun displayBranches(
         source: String?,
         target: String?,
-        sourceLabel: JLabel,
-        targetLabel: JLabel,
+        sourceTextField: JTextField,
+        targetTextField: JTextField,
         icon: JLabel
     ) {
         if (null === source || null === target) {
-            sourceLabel.text = "-"
-            targetLabel.isVisible = false
+            sourceTextField.text = "-"
+            targetTextField.isVisible = false
             icon.isVisible = false
             return
         }
 
-        sourceLabel.text = source
-        targetLabel.text = target
-        targetLabel.isVisible = true
+        sourceTextField.text = source
+        targetTextField.text = target
+        targetTextField.isVisible = true
         icon.isVisible = true
     }
 

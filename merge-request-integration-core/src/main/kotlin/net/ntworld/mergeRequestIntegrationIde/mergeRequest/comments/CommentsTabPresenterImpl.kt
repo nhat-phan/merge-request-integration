@@ -49,10 +49,10 @@ class CommentsTabPresenterImpl(
     override fun onCommentsUpdated(source: DataChangedSource) {
         if (source == DataChangedSource.NOTIFIER) {
             ApplicationManager.getApplication().invokeLater {
-                handleWhenCommentsGetUpdated(source)
+                handleWhenCommentsGetUpdated()
             }
         } else {
-            handleWhenCommentsGetUpdated(source)
+            handleWhenCommentsGetUpdated()
         }
     }
 
@@ -202,7 +202,7 @@ class CommentsTabPresenterImpl(
         )
     }
 
-    private fun handleWhenCommentsGetUpdated(source: DataChangedSource) {
+    private fun handleWhenCommentsGetUpdated() {
         view.displayCommentCount(model.comments.size)
         view.hideThread()
         view.renderTree(model.mergeRequestInfo, model.comments, model.displayResolvedComments)

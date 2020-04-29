@@ -23,6 +23,7 @@ import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import javax.swing.BoxLayout
 import javax.swing.JComponent
+import javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
 
 class CommentsTabViewImpl(
     private val projectServiceProvider: ProjectServiceProvider,
@@ -135,6 +136,7 @@ class CommentsTabViewImpl(
         myThreadPanel.background = JBColor.border()
         myThreadBoxLayout.background = JBColor.border()
         myThreadWrapper.background = JBColor.border()
+        myThreadWrapper.horizontalScrollBarPolicy = HORIZONTAL_SCROLLBAR_NEVER
 
         myThreadBoxLayout.addToCenter(myThreadPanel)
         myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)

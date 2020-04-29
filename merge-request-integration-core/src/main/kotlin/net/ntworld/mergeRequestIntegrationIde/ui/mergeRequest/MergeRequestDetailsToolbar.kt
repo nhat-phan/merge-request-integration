@@ -31,7 +31,6 @@ class MergeRequestDetailsToolbar(
     private val myActionGroup = DefaultActionGroup()
     private var myMergeRequest: MergeRequest? = null
     private var myMergeRequestInfo: MergeRequestInfo? = null
-    private var myComments: List<Comment>? = null
 
     private val myRefreshAction = MyRefreshAction(this)
 
@@ -127,16 +126,6 @@ class MergeRequestDetailsToolbar(
         val currentMR = myMergeRequestInfo
         if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
             myReviewCommits = commits
-        }
-    }
-
-    override fun setComments(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>) {
-        val currentMR = myMergeRequest
-        if (currentMR != null && currentMR.id == mergeRequestInfo.id) {
-            myComments = comments
-            if (projectServiceProvider.isDoingCodeReview()) {
-                projectServiceProvider.setCodeReviewComments(providerData, currentMR, comments)
-            }
         }
     }
 
@@ -361,10 +350,6 @@ class MergeRequestDetailsToolbar(
                 return
             }
             if (state) {
-                val comments = self.myComments
-                if (null !== comments) {
-                    self.projectServiceProvider.setCodeReviewComments(self.providerData, mr, comments)
-                }
                 CodeReviewService.start(
                     self.projectServiceProvider.applicationServiceProvider,
                     self.projectServiceProvider.project, self.providerData, mr, self.myReviewCommits

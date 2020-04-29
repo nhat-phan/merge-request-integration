@@ -48,8 +48,7 @@ object CodeReviewService {
             toolWindow.hide(null)
         }
         if (checkedOut) {
-            CheckoutService.stop(ideaProject, providerData, mergeRequest)
-            EditorStateService.stop(ideaProject, providerData, mergeRequest)
+            CheckoutService.stop(ideaProject, providerData)
             DisplayChangesService.stop(ideaProject, providerData, mergeRequest)
         }
     }
@@ -88,7 +87,7 @@ object CodeReviewService {
         commits: List<Commit>
     ) {
         checkedOut = true
-        EditorStateService.start(ideaProject, providerData, mergeRequest)
+        EditorStateService.start(ideaProject)
         DisplayChangesService.start(applicationServiceProvider, ideaProject, providerData, mergeRequest, commits)
     }
 }

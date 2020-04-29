@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.Approval
@@ -35,26 +36,28 @@ class MergeRequestItemPanel(
     private var myUserStatusColor: JBColor = JBColor.RED
     private val myFindApprovalTaskListener = object : FindApprovalTask.Listener {
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, approval: Approval) {
-            val triple = approval.findVisibilityIconAndTextForApproval()
-            myAllStatuses!!.isVisible = triple.first
-            myAllStatuses!!.icon = triple.second
-            myAllStatuses!!.text = triple.third
+            ApplicationManager.getApplication().invokeLater {
+                val triple = approval.findVisibilityIconAndTextForApproval()
+                myAllStatuses!!.isVisible = triple.first
+                myAllStatuses!!.icon = triple.second
+                myAllStatuses!!.text = triple.third
 
-            if (displayType == ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES_AND_MINE_APPROVAL) {
-                val approved = approval.approvedBy.firstOrNull {
-                    it.id == providerData.currentUser.id
+                if (displayType == ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES_AND_MINE_APPROVAL) {
+                    val approved = approval.approvedBy.firstOrNull {
+                        it.id == providerData.currentUser.id
+                    }
+                    if (null !== approved) {
+                        myUserStatus!!.text = "Approved"
+                        myUserStatusColor = JBColor.GREEN
+                    } else {
+                        myUserStatus!!.text = "Waiting"
+                        myUserStatusColor = JBColor.RED
+                    }
+                    myUserStatus!!.foreground = myUserStatusColor
+                    myUserStatus!!.isVisible = true
                 }
-                if (null !== approved) {
-                    myUserStatus!!.text = "Approved"
-                    myUserStatusColor = JBColor.GREEN
-                } else {
-                    myUserStatus!!.text = "Waiting"
-                    myUserStatusColor = JBColor.RED
-                }
-                myUserStatus!!.foreground = myUserStatusColor
-                myUserStatus!!.isVisible = true
+                myApprovalStatusWrapperPanel!!.isVisible = true
             }
-            myApprovalStatusWrapperPanel!!.isVisible = true
         }
     }
 

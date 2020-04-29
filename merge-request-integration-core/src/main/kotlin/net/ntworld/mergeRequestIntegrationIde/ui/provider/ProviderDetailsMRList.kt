@@ -26,7 +26,7 @@ class ProviderDetailsMRList(
     private var isLoaded = false
     private val myList = JBList<MergeRequestInfo>()
     private val myItemPanels = mutableMapOf<Int, MergeRequestItemPanel>()
-    private val myCellRenderer = ListCellRenderer<MergeRequestInfo> { list, value, index, isSelected, cellHasFocus ->
+    private val myCellRenderer = ListCellRenderer<MergeRequestInfo> { _, value, index, isSelected, cellHasFocus ->
         if (null === myItemPanels[index]) {
             myItemPanels[index] = MergeRequestItemPanel(
                 projectServiceProvider,

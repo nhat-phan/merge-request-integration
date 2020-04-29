@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.panel
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.ui.UIUtil
 import net.ntworld.mergeRequest.MergeRequestState
@@ -42,7 +43,9 @@ class MergeRequestFilterPropertiesPanel(
         }
 
         override fun dataReceived(collection: List<UserInfo>) {
-            myData.addAll(collection)
+            ApplicationManager.getApplication().invokeLater {
+                myData.addAll(collection)
+            }
         }
 
         override fun taskEnded() {
@@ -57,7 +60,7 @@ class MergeRequestFilterPropertiesPanel(
             onReady()
         }
     }
-    private val myListRenderer = ListCellRenderer<UserInfo> { list, value, index, isSelected, cellHasFocus ->
+    private val myListRenderer = ListCellRenderer<UserInfo> { _, value, index, isSelected, cellHasFocus ->
         if (null === value) {
             JPanel()
         } else {

@@ -41,6 +41,7 @@ class NodeSyncManagerImpl(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun loopStructure(treeNode: DefaultMutableTreeNode, visitor: (Node, DefaultMutableTreeNode) -> Unit) {
         visitor((treeNode.userObject as PresentableNodeDescriptor<Node>).element, treeNode)
         val children = treeNode.children();

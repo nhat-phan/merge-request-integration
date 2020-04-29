@@ -14,8 +14,6 @@ interface MergeRequestDetailsToolbarUI : Component {
 
     fun setCommitsForReviewing(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>)
 
-    fun setComments(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>)
-
     fun setApproval(mergeRequestInfo: MergeRequestInfo, approval: Approval)
 
     fun setMergeRequest(mergeRequest: MergeRequest)

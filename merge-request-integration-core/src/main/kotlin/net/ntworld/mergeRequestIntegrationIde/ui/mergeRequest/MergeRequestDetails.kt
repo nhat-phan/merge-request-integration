@@ -73,7 +73,9 @@ class MergeRequestDetails(
 
     private val myFindMRListener = object : FindMergeRequestTask.Listener {
         override fun dataReceived(mergeRequest: MergeRequest) {
-            setMergeRequest(mergeRequest)
+            ApplicationManager.getApplication().invokeLater {
+                setMergeRequest(mergeRequest)
+            }
         }
     }
     private val myGetPipelinesListener = object : GetPipelinesTask.Listener {
@@ -124,19 +126,6 @@ class MergeRequestDetails(
         }
     }
 
-    private val myGetCommentsListener = object: GetLegacyCommentsTask.Listener {
-        override fun onError(exception: Exception) {
-            println(exception)
-        }
-
-        override fun dataReceived(providerData: ProviderData, mergeRequest: MergeRequest, comments: List<Comment>) {
-            ApplicationManager.getApplication().invokeLater {
-                myToolbars.forEach {
-                    it.setComments(mergeRequest, comments)
-                }
-            }
-        }
-    }
     private val myFindApprovalListener = object : FindApprovalTask.Listener {
         override fun onError(exception: Exception) {
             println(exception)
@@ -171,9 +160,6 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequest(mergeRequest: MergeRequest) {
-        GetLegacyCommentsTask(
-            projectServiceProvider.applicationServiceProvider,
-            projectServiceProvider.project, providerData, mergeRequest, myGetCommentsListener).start()
         myInfoTab.setMergeRequest(mergeRequest)
         myToolbars.forEach {
             it.setMergeRequest(mergeRequest)

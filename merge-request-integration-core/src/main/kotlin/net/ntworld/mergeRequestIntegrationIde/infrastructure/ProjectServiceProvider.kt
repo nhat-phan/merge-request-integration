@@ -61,21 +61,11 @@ interface ProjectServiceProvider {
 
     fun isReviewing(providerData: ProviderData, mergeRequest: MergeRequest): Boolean
 
-    fun setCodeReviewComments(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        comments: Collection<Comment>
-    )
-
-    fun getCodeReviewComments(): Collection<Comment>
-
     fun setCodeReviewCommits(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         commits: Collection<Commit>
     )
-
-    fun getCodeReviewCommits(): Collection<Commit>
 
     fun setCodeReviewChanges(
         providerData: ProviderData,

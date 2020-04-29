@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.util.messages.MessageBus
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
@@ -16,8 +17,10 @@ class MergeRequestDataProvider(
         override fun dataReceived(
             providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>
         ) {
-            messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC)
-                .onCommentsUpdated(providerData, mergeRequestInfo, comments)
+            ApplicationManager.getApplication().invokeLater {
+                messageBus.syncPublisher(MergeRequestDataNotifier.TOPIC)
+                    .onCommentsUpdated(providerData, mergeRequestInfo, comments)
+            }
         }
     }
 

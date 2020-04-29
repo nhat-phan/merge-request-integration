@@ -14,5 +14,4 @@ interface CodeReviewManager : Disposable {
 
     var commits: Collection<Commit>
     var changes: Collection<Change>
-    var comments: Collection<Comment>
 }

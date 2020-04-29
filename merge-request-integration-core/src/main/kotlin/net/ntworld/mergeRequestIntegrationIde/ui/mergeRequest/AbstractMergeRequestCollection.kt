@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.MergeRequestState
@@ -62,8 +63,10 @@ abstract class AbstractMergeRequestCollection(
         }
 
         override fun dataReceived(list: List<MergeRequestInfo>, page: Int, totalPages: Int, totalItems: Int) {
-            dataReceived(list)
-            myPaginator.setData(page, totalPages, totalItems)
+            ApplicationManager.getApplication().invokeLater {
+                dataReceived(list)
+                myPaginator.setData(page, totalPages, totalItems)
+            }
         }
     }
     private val myPaginatorListener = object: PaginationToolbar.Listener {

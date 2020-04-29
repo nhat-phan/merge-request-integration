@@ -40,7 +40,6 @@ abstract class AbstractProjectServiceProvider(
 ) : ProjectServiceProvider, ServiceBase() {
     private var myIsInitialized = false
     private var myCodeReviewManager : CodeReviewManager? = null
-    private var myComments: Collection<Comment>? = null
     private var myCommits: Collection<Commit>? = null
     private var myChanges: Collection<Change>? = null
     private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
@@ -61,10 +60,6 @@ abstract class AbstractProjectServiceProvider(
             val service = CodeReviewManagerImpl(
                 project, providerData, mergeRequest
             )
-            val comments = myComments
-            if (null !== comments) {
-                service.comments = comments
-            }
 
             val commits = myCommits
             if (null !== commits) {
@@ -255,24 +250,6 @@ abstract class AbstractProjectServiceProvider(
             codeReviewService.mergeRequest.id == mergeRequest.id
     }
 
-    override fun setCodeReviewComments(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        comments: Collection<Comment>
-    ) {
-        myComments = comments
-        val codeReviewService = myCodeReviewManager
-        if (null !== codeReviewService) {
-            codeReviewService.comments = comments
-        }
-        dispatcher.multicaster.codeReviewCommentsSet(providerData, mergeRequest, comments)
-    }
-
-    override fun getCodeReviewComments(): Collection<Comment> {
-        val codeReviewService = myCodeReviewManager
-        return if (null === codeReviewService) listOf() else codeReviewService.comments
-    }
-
     override fun setCodeReviewCommits(
         providerData: ProviderData,
         mergeRequest: MergeRequest,
@@ -284,11 +261,6 @@ abstract class AbstractProjectServiceProvider(
             codeReviewService.commits = commits
         }
         dispatcher.multicaster.codeReviewCommitsSet(providerData, mergeRequest, commits)
-    }
-
-    override fun getCodeReviewCommits(): Collection<Commit> {
-        val codeReviewService = myCodeReviewManager
-        return if (null === codeReviewService) listOf() else codeReviewService.commits
     }
 
     override fun setCodeReviewChanges(

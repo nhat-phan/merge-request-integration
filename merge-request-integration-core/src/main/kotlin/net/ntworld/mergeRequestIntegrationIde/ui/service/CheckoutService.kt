@@ -12,7 +12,7 @@ import kotlin.Exception
 object CheckoutService {
     private var myCurrentBranch: String? = null
 
-    fun stop(ideaProject: IdeaProject, providerData: ProviderData, mergeRequest: MergeRequest) {
+    fun stop(ideaProject: IdeaProject, providerData: ProviderData) {
         val branch = myCurrentBranch
         val repository = RepositoryUtil.findRepository(ideaProject, providerData)
         if (null !== branch && null !== repository) {

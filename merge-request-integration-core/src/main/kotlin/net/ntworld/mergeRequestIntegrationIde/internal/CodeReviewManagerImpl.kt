@@ -20,8 +20,6 @@ internal class CodeReviewManagerImpl(
 
     override var changes: Collection<Change> = listOf()
 
-    override var comments: Collection<Comment> = listOf()
-
     override fun dispose() {
         messageBusConnection.disconnect()
     }

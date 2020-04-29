@@ -57,7 +57,6 @@ object DisplayChangesService {
                 displayChangesForOneCommit(
                     applicationServiceProvider,
                     ideaProject,
-                    fileEditorManagerEx,
                     providerData,
                     mergeRequest,
                     repository,
@@ -70,7 +69,6 @@ object DisplayChangesService {
                 displayChangesForCommits(
                     applicationServiceProvider,
                     ideaProject,
-                    fileEditorManagerEx,
                     providerData,
                     mergeRequest,
                     repository,
@@ -85,7 +83,6 @@ object DisplayChangesService {
     private fun displayChangesForOneCommit(
         applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
-        fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         repository: GitRepository,
@@ -97,7 +94,6 @@ object DisplayChangesService {
         displayChanges(
             applicationServiceProvider,
             ideaProject,
-            fileEditorManagerEx,
             providerData,
             mergeRequest,
             details.changes
@@ -107,7 +103,6 @@ object DisplayChangesService {
     private fun displayChangesForCommits(
         applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
-        fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         repository: GitRepository,
@@ -126,7 +121,7 @@ object DisplayChangesService {
 
         if (details.size == 1) {
             return displayChanges(
-                applicationServiceProvider, ideaProject, fileEditorManagerEx,
+                applicationServiceProvider, ideaProject,
                 providerData, mergeRequest, details.first().changes
             )
         }
@@ -134,13 +129,12 @@ object DisplayChangesService {
         val changes = VcsLogUtil.collectChanges(details) {
             it.changes
         }
-        displayChanges(applicationServiceProvider, ideaProject, fileEditorManagerEx, providerData, mergeRequest, changes)
+        displayChanges(applicationServiceProvider, ideaProject, providerData, mergeRequest, changes)
     }
 
     private fun displayChanges(
         applicationServiceProvider: ApplicationServiceProvider,
         ideaProject: IdeaProject,
-        fileEditorManagerEx: FileEditorManagerEx,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
         changes: Collection<Change>
