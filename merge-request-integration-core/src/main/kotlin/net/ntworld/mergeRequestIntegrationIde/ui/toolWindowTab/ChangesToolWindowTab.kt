@@ -57,19 +57,15 @@ class ChangesToolWindowTab(
     private val myProjectEventListener = object :
         ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+            val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
+            if (null !== reviewContext) {
+                setChanges(reviewContext.reviewingChanges)
+            }
             showChanges()
         }
 
         override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
             hideChanges()
-        }
-
-        override fun codeReviewChangesSet(
-            providerData: ProviderData,
-            mergeRequest: MergeRequest,
-            changes: Collection<Change>
-        ) {
-            setChanges(changes)
         }
     }
     private val myTreeSelectionListener = TreeSelectionListener {
@@ -87,7 +83,7 @@ class ChangesToolWindowTab(
             return@TreeSelectionListener
         }
 
-        val reviewContext = projectServiceProvider.findReviewContextWhichDoingCodeReview()
+        val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
             reviewContext.openChange(change, focus = true, displayMergeRequestId = false)
         }
@@ -101,8 +97,9 @@ class ChangesToolWindowTab(
         myComponent.toolbar = myToolbar
         myTree.addTreeSelectionListener(myTreeSelectionListener)
 
-        if (projectServiceProvider.isDoingCodeReview()) {
-            setChanges(projectServiceProvider.getCodeReviewChanges())
+        val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
+        if (null !== reviewContext) {
+            setChanges(reviewContext.reviewingChanges)
             showChanges()
         } else {
             hideChanges()

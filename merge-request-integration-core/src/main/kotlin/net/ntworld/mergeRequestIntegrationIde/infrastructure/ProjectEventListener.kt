@@ -14,10 +14,6 @@ interface ProjectEventListener : EventListener {
 
     fun codeReviewChangesSet(providerData: ProviderData, mergeRequest: MergeRequest, changes: Collection<Change>) {}
 
-    fun codeReviewCommitsSet(providerData: ProviderData, mergeRequest: MergeRequest, commit: Collection<Commit>) {}
-
-    fun codeReviewCommentsSet(providerData: ProviderData, mergeRequest: MergeRequest, comments: Collection<Comment>) {}
-
     fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {}
 
 }

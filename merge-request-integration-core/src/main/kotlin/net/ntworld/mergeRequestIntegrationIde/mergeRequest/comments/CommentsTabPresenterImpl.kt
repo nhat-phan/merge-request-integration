@@ -16,12 +16,10 @@ import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.isEmpty
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.util.*
 
 class CommentsTabPresenterImpl(
@@ -90,7 +88,7 @@ class CommentsTabPresenterImpl(
         }
 
         if (node is FileNode) {
-            val reviewContext = ReviewContextManager.findContext(model.providerData.id, it.id)
+            val reviewContext = projectServiceProvider.reviewContextManager.findContext(model.providerData.id, it.id)
             if (null !== reviewContext) {
                 val change = reviewContext.findChangeByPath(node.path)
                 if (null !== change) {
@@ -103,7 +101,7 @@ class CommentsTabPresenterImpl(
 
         if (node is FileLineNode) {
             displayGeneralComments(it, node)
-            val reviewContext = ReviewContextManager.findContext(model.providerData.id, it.id)
+            val reviewContext = projectServiceProvider.reviewContextManager.findContext(model.providerData.id, it.id)
             if (null !== reviewContext) {
                 val change = reviewContext.findChangeByPath(node.path)
                 if (null !== change) {

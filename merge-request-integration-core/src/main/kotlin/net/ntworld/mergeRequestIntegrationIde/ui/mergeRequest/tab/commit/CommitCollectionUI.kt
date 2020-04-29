@@ -19,6 +19,6 @@ interface CommitCollectionUI : Component {
     fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>)
 
     interface Listener : EventListener {
-        fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>)
+        fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: List<Commit>)
     }
 }

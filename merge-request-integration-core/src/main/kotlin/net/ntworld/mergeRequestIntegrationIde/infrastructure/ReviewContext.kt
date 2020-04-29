@@ -26,6 +26,10 @@ interface ReviewContext {
 
     val changes: List<Change>
 
+    val reviewingCommits: List<Commit>
+
+    val reviewingChanges: List<Change>
+
     fun findChangeByPath(path: String): Change?
 
     fun getCommentsByPath(path: String): List<Comment>

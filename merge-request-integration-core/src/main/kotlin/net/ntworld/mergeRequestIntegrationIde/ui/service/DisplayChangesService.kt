@@ -96,7 +96,7 @@ object DisplayChangesService {
             ideaProject,
             providerData,
             mergeRequest,
-            details.changes
+            details.changes.toList()
         )
     }
 
@@ -122,7 +122,7 @@ object DisplayChangesService {
         if (details.size == 1) {
             return displayChanges(
                 applicationServiceProvider, ideaProject,
-                providerData, mergeRequest, details.first().changes
+                providerData, mergeRequest, details.first().changes.toList()
             )
         }
 
@@ -137,13 +137,16 @@ object DisplayChangesService {
         ideaProject: IdeaProject,
         providerData: ProviderData,
         mergeRequest: MergeRequest,
-        changes: Collection<Change>
+        changes: List<Change>
     ) {
-        applicationServiceProvider.findProjectServiceProvider(ideaProject).setCodeReviewChanges(providerData, mergeRequest, changes)
+        // TODO: call updateReviewingChanges too many time, let's save some resource
+        applicationServiceProvider.findProjectServiceProvider(ideaProject)
+            .reviewContextManager.updateReviewingChanges(providerData.id, mergeRequest.id, changes)
 
         ApplicationManager.getApplication().invokeLater {
-            val reviewContext = applicationServiceProvider.findProjectServiceProvider(ideaProject).findReviewContextWhichDoingCodeReview()
-            val max = applicationServiceProvider.settingsManager.maxDiffChangesOpenedAutomatically
+            val projectServiceProvider = applicationServiceProvider.findProjectServiceProvider(ideaProject)
+            val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
+            val max = projectServiceProvider.applicationSettings.maxDiffChangesOpenedAutomatically
             if (null !== reviewContext && max != 0 && changes.size < max) {
                 val limit = UISettings().editorTabLimit
                 changes.forEachIndexed { index, item ->

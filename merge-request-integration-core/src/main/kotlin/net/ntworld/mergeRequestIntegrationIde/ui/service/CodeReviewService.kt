@@ -21,7 +21,7 @@ object CodeReviewService {
     ) {
         checkedOut = false
         val projectService = applicationServiceProvider.findProjectServiceProvider(ideaProject)
-        projectService.setCodeReviewCommits(providerData, mergeRequest, commits)
+        projectService.reviewContextManager.updateReviewingCommits(providerData.id, mergeRequest.id, commits)
         projectService.dispatcher.multicaster.startCodeReview(providerData, mergeRequest)
         val toolWindow = ToolWindowManager.getInstance(ideaProject).getToolWindow(
             applicationServiceProvider.getChangesToolWindowId()

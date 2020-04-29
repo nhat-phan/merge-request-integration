@@ -10,7 +10,6 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.FindMergeRequestQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 
 class FindMergeRequestTask(
     private val projectServiceProvider: ProjectServiceProvider,
@@ -35,7 +34,7 @@ class FindMergeRequestTask(
                 mergeRequestId = mergeRequestInfo.id
             )
             listener.dataReceived(result.mergeRequest)
-            ReviewContextManager.updateMergeRequest(providerData.id, result.mergeRequest)
+            projectServiceProvider.reviewContextManager.updateMergeRequest(providerData.id, result.mergeRequest)
             listener.taskEnded()
         } catch (exception: Exception) {
             listener.onError(exception)

@@ -44,6 +44,10 @@ class ReviewContextImpl(
             buildChangesMap(value)
         }
 
+    override var reviewingCommits: List<Commit> = listOf()
+
+    override var reviewingChanges: List<Change> = listOf()
+
     override fun findChangeByPath(path: String): Change? {
         val absolutePath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path)
         val changes = myChangesMap[absolutePath]

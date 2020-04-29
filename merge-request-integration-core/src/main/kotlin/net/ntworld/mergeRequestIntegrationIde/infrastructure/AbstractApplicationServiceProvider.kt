@@ -41,7 +41,6 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
     init {
         val connection = ApplicationManager.getApplication().messageBus.connect()
         connection.subscribe(AppLifecycleListener.TOPIC, myAppLifecycleListener)
-        watcherManager.addWatcher(ReviewContextManager)
 //        private val myBranchChangeListener = object: BranchChangeListener {
 //            override fun branchWillChange(branchName: String) {
 //                println("branchWillChange $branchName")

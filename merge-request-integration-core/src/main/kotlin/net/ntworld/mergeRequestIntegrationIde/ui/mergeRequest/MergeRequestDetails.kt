@@ -10,10 +10,12 @@ import com.intellij.ui.tabs.TabInfo
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabFactory
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.CommentsTabPresenter
-import net.ntworld.mergeRequestIntegrationIde.task.*
+import net.ntworld.mergeRequestIntegrationIde.task.FindApprovalTask
+import net.ntworld.mergeRequestIntegrationIde.task.FindMergeRequestTask
+import net.ntworld.mergeRequestIntegrationIde.task.GetCommitsTask
+import net.ntworld.mergeRequestIntegrationIde.task.GetPipelinesTask
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.*
 import net.ntworld.mergeRequestIntegrationIde.ui.service.FetchService
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
@@ -118,10 +120,13 @@ class MergeRequestDetails(
         override fun commitSelected(
             providerData: ProviderData,
             mergeRequestInfo: MergeRequestInfo,
-            commits: Collection<Commit>
+            commits: List<Commit>
         ) {
+            projectServiceProvider.reviewContextManager.updateReviewingCommits(
+                providerData.id, mergeRequestInfo.id, commits
+            )
             myToolbars.forEach {
-                it.setCommitsForReviewing(mergeRequestInfo, commits.toList())
+                it.setCommitsForReviewing(mergeRequestInfo, commits)
             }
         }
     }
@@ -167,7 +172,7 @@ class MergeRequestDetails(
     }
 
     override fun setMergeRequestInfo(mergeRequestInfo: MergeRequestInfo) {
-        ReviewContextManager.initContext(projectServiceProvider.project, providerData, mergeRequestInfo, true)
+        projectServiceProvider.reviewContextManager.initContext(providerData, mergeRequestInfo, true)
         FetchService.start(
             projectServiceProvider.applicationServiceProvider,
             projectServiceProvider.project, providerData, mergeRequestInfo

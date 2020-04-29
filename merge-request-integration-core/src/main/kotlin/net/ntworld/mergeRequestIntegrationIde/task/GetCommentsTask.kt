@@ -10,7 +10,6 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.query.GetCommentsQuery
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 
 class GetCommentsTask(
     private val projectServiceProvider: ProjectServiceProvider,
@@ -35,7 +34,9 @@ class GetCommentsTask(
                 mergeRequestId = mergeRequestInfo.id
             )
             listener.dataReceived(providerData, mergeRequestInfo, result.comments)
-            ReviewContextManager.updateComments(providerData.id, mergeRequestInfo.id, result.comments)
+            projectServiceProvider.reviewContextManager.updateComments(
+                providerData.id, mergeRequestInfo.id, result.comments
+            )
             listener.taskEnded()
         } catch (exception: Exception) {
             listener.onError(exception)

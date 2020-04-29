@@ -26,11 +26,11 @@ class MergeRequestCommitsTab(
     private val myCollection: CommitCollectionUI = CommitCollection()
     private val myChanges: CommitChangesUI = CommitChanges(projectServiceProvider)
     private val myCollectionListener = object : CommitCollectionUI.Listener {
-        override fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>) {
+        override fun commitsSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
             if (commits.isEmpty()) {
                 myChanges.clear()
             } else {
-                myChanges.setCommits(providerData, mergeRequestInfo, commits)
+                myChanges.updateSelectedCommits(providerData, mergeRequestInfo, commits)
             }
             dispatcher.multicaster.commitSelected(providerData, mergeRequestInfo, commits)
         }

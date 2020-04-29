@@ -13,6 +13,8 @@ interface CommitChangesUI : Component {
 
     fun enable()
 
-    fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>)
+    fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: List<Commit>)
+
+    fun updateSelectedCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, selectedCommits: List<Commit>)
 
 }

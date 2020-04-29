@@ -2,7 +2,6 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
@@ -13,7 +12,6 @@ import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
-import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import com.intellij.openapi.project.Project as IdeaProject
 
 interface ProjectServiceProvider {
@@ -27,8 +25,6 @@ interface ProjectServiceProvider {
 
     val notification: NotificationGroup
 
-    val codeReviewManager: CodeReviewManager?
-
     val registeredProviders: List<ProviderData>
 
     val repositoryFile: RepositoryFileService
@@ -38,6 +34,8 @@ interface ProjectServiceProvider {
     val infrastructure: Infrastructure
 
     val intellijIdeApi: IntellijIdeApi
+
+    val reviewContextManager: ReviewContextManager
 
     fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering>
 
@@ -56,24 +54,6 @@ interface ProjectServiceProvider {
     fun register(settings: ProviderSettings)
 
     fun isDoingCodeReview(): Boolean
-
-    fun findReviewContextWhichDoingCodeReview(): ReviewContext?
-
-    fun isReviewing(providerData: ProviderData, mergeRequest: MergeRequest): Boolean
-
-    fun setCodeReviewCommits(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        commits: Collection<Commit>
-    )
-
-    fun setCodeReviewChanges(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        changes: Collection<Change>
-    )
-
-    fun getCodeReviewChanges(): Collection<Change>
 
     fun notify(message: String)
 

@@ -15,6 +15,6 @@ interface MergeRequestCommitsTabUI : Component {
     fun setCommits(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: List<Commit>)
 
     interface Listener : EventListener {
-        fun commitSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: Collection<Commit>)
+        fun commitSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, commits: List<Commit>)
     }
 }

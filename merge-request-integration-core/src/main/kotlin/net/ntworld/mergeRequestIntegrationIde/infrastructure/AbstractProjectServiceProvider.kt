@@ -3,12 +3,14 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.vcs.changes.Change
 import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.util.UUIDGenerator
-import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestState
+import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
@@ -22,13 +24,12 @@ import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
-import net.ntworld.mergeRequestIntegrationIde.internal.CodeReviewManagerImpl
-import net.ntworld.mergeRequestIntegrationIde.service.CodeReviewManager
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
@@ -39,9 +40,6 @@ abstract class AbstractProjectServiceProvider(
     final override val project: IdeaProject
 ) : ProjectServiceProvider, ServiceBase() {
     private var myIsInitialized = false
-    private var myCodeReviewManager : CodeReviewManager? = null
-    private var myCommits: Collection<Commit>? = null
-    private var myChanges: Collection<Change>? = null
     private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
 
     final override val messageBus: MessageBus by lazy { project.messageBus }
@@ -52,39 +50,17 @@ abstract class AbstractProjectServiceProvider(
         "Merge Request Integration", NotificationDisplayType.BALLOON, true
     )
 
-    override val codeReviewManager: CodeReviewManager?
-        get() = myCodeReviewManager
-
     private val myProjectEventListener = object : ProjectEventListener {
         override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
-            val service = CodeReviewManagerImpl(
-                project, providerData, mergeRequest
-            )
-
-            val commits = myCommits
-            if (null !== commits) {
-                service.commits = commits
-            }
-
-            val changes = myChanges
-            if (null !== changes) {
-                service.changes = changes
-            }
-
-            myCodeReviewManager = service
+            reviewContextManager.setContextToDoingCodeReview(providerData.id, mergeRequest.id)
         }
 
         override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
-            val reviewContext = findReviewContextWhichDoingCodeReview()
+            val reviewContext = reviewContextManager.findDoingCodeReviewContext()
             if (null !== reviewContext) {
                 reviewContext.closeAllChanges()
             }
-
-            val codeReviewManager = myCodeReviewManager
-            if (null !== codeReviewManager) {
-                codeReviewManager.dispose()
-            }
-            myCodeReviewManager = null
+            reviewContextManager.clearContextDoingCodeReview()
         }
     }
 
@@ -112,11 +88,15 @@ abstract class AbstractProjectServiceProvider(
     override val intellijIdeApi: IntellijIdeApi
         get() = applicationServiceProvider.intellijIdeApi
 
+    final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(project)
+
     init {
         dispatcher.addListener(myProjectEventListener)
     }
 
-    protected fun bindDataProviderForNotifiers() {
+    protected fun initWithApplicationServiceProvider(applicationSP: ApplicationServiceProvider) {
+        applicationSP.watcherManager.addWatcher(reviewContextManager)
+
         val connection = messageBus.connect(project)
         connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(this, messageBus))
     }
@@ -233,53 +213,7 @@ abstract class AbstractProjectServiceProvider(
         myIsInitialized = true
     }
 
-    override fun isDoingCodeReview(): Boolean = null !== myCodeReviewManager
-
-    override fun findReviewContextWhichDoingCodeReview(): ReviewContext? {
-        return if (this.isDoingCodeReview()) {
-            return ReviewContextManager.findSelectedContext()
-        } else null
-    }
-
-    override fun isReviewing(providerData: ProviderData, mergeRequest: MergeRequest): Boolean {
-        val codeReviewService = myCodeReviewManager
-        if (null === codeReviewService) {
-            return false
-        }
-        return codeReviewService.providerData.id == providerData.id &&
-            codeReviewService.mergeRequest.id == mergeRequest.id
-    }
-
-    override fun setCodeReviewCommits(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        commits: Collection<Commit>
-    ) {
-        myCommits = commits
-        val codeReviewService = myCodeReviewManager
-        if (null !== codeReviewService) {
-            codeReviewService.commits = commits
-        }
-        dispatcher.multicaster.codeReviewCommitsSet(providerData, mergeRequest, commits)
-    }
-
-    override fun setCodeReviewChanges(
-        providerData: ProviderData,
-        mergeRequest: MergeRequest,
-        changes: Collection<Change>
-    ) {
-        myChanges = changes
-        val codeReviewService = myCodeReviewManager
-        if (null !== codeReviewService) {
-            codeReviewService.changes = changes
-        }
-        dispatcher.multicaster.codeReviewChangesSet(providerData, mergeRequest, changes)
-    }
-
-    override fun getCodeReviewChanges(): Collection<Change> {
-        val codeReviewService = myCodeReviewManager
-        return if (null === codeReviewService) listOf() else codeReviewService.changes
-    }
+    override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
 
     override fun notify(message: String) {
         notify(message, NotificationType.INFORMATION)

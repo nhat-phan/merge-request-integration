@@ -386,10 +386,11 @@ class MergeRequestDetailsToolbar(
 
             val isDoingCodeReview = self.projectServiceProvider.isDoingCodeReview()
             if (isDoingCodeReview) {
-                val isReviewing = self.projectServiceProvider.isReviewing(self.providerData, mr)
                 e.presentation.text = "Stop Reviewing"
                 e.presentation.description = "End reviewing and show other MRs"
-                e.presentation.isEnabled = isReviewing
+                e.presentation.isEnabled = self.projectServiceProvider.reviewContextManager.isDoingCodeReview(
+                    self.providerData.id, mr.id
+                )
             } else {
                 e.presentation.isEnabled = true
             }
