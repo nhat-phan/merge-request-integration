@@ -18,9 +18,10 @@ class EnterpriseApplicationServiceProvider: AbstractApplicationServiceProvider()
     }
 
     override fun findProjectServiceProvider(project: Project): ProjectServiceProvider {
-        val tmp = ServiceManager.getService(project, EnterpriseProjectServiceProvider::class.java)
+        val service = ServiceManager.getService(project, EnterpriseProjectServiceProvider::class.java)
+        registerProjectServiceProvider(service)
 
-        return tmp
+        return service
     }
 
     override fun getChangesToolWindowId(): String = "Merge Request's Changes"

@@ -4,7 +4,7 @@ import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequestIntegrationIde.AbstractModel
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.Empty
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 

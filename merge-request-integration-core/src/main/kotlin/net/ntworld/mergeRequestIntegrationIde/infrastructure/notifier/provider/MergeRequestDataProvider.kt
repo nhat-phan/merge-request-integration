@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.util.messages.MessageBus
@@ -6,7 +6,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
 
 class MergeRequestDataProvider(

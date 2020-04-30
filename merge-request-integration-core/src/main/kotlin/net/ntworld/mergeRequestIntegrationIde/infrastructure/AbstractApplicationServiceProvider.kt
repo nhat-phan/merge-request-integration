@@ -2,15 +2,11 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
-import net.ntworld.foundation.Infrastructure
-import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.ApiCredentials
-import net.ntworld.mergeRequestIntegration.ApiProviderManager
-import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.compatibility.Version193Adapter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
@@ -24,6 +20,7 @@ import java.net.URL
 
 abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, ServiceBase() {
     final override val watcherManager: WatcherManager = WatcherManagerImpl()
+    private val myProjectServiceProviders = mutableSetOf<ProjectServiceProvider>()
 
     private val publicLegalGrantedDomains = listOf(
         "gitlab.com",
@@ -41,23 +38,21 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
     init {
         val connection = ApplicationManager.getApplication().messageBus.connect()
         connection.subscribe(AppLifecycleListener.TOPIC, myAppLifecycleListener)
-//        private val myBranchChangeListener = object: BranchChangeListener {
-//            override fun branchWillChange(branchName: String) {
-//                println("branchWillChange $branchName")
-//            }
-//
-//            override fun branchHasChanged(branchName: String) {
-//                println("branchHasChanged $branchName")
-//            }
-//        }
-//        connection.subscribe(BranchChangeListener.VCS_BRANCH_CHANGED, myBranchChangeListener)
     }
 
-    override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure())
+    protected fun registerProjectServiceProvider(projectServiceProvider: ProjectServiceProvider)
+    {
+        myProjectServiceProviders.add(projectServiceProvider)
+        projectServiceProvider.providerStorage.updateApiOptions(settingsManager.toApiOptions())
+    }
 
     override val intellijIdeApi: IntellijIdeApi = Version193Adapter()
 
     override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl()
+
+    override fun getAllProjectServiceProviders(): List<ProjectServiceProvider> {
+        return myProjectServiceProviders.toList()
+    }
 
     override fun getState(): Element? {
         val element = super.getState()
@@ -70,12 +65,11 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
 
     override fun loadState(state: Element) {
         super.loadState(state)
-        val settings = settingsManager.readFrom(state.children)
-        ApiProviderManager.updateApiOptions(settings.toApiOptions())
+        settingsManager.readFrom(state.children)
     }
 
     override fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials) {
-        myProvidersData[id] = ProviderSettingsImpl(
+        providerSettingsData[id] = ProviderSettingsImpl(
             id = id,
             info = info,
             credentials = encryptCredentials(info, credentials),
@@ -84,12 +78,12 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
     }
 
     override fun removeAllProviderConfigurations() {
-        myProvidersData.clear()
+        providerSettingsData.clear()
         this.state
     }
 
     override fun getProviderConfigurations(): List<ProviderSettings> {
-        return myProvidersData.values.map {
+        return providerSettingsData.values.map {
             ProviderSettingsImpl(
                 id = it.id,
                 info = it.info,

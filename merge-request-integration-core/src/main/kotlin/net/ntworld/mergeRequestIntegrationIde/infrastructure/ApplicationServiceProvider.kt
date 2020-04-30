@@ -11,8 +11,6 @@ import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
 
 interface ApplicationServiceProvider {
 
-    val infrastructure: Infrastructure
-
     val intellijIdeApi: IntellijIdeApi
 
     val settingsManager: ApplicationSettingsManager
@@ -31,4 +29,5 @@ interface ApplicationServiceProvider {
 
     fun isLegal(providerData: ProviderData): Boolean
 
+    fun getAllProjectServiceProviders(): List<ProjectServiceProvider>
 }

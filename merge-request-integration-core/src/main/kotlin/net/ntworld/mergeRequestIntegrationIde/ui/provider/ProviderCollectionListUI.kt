@@ -11,6 +11,4 @@ interface ProviderCollectionListUI: Component {
     fun clear()
 
     fun addProvider(providerData: ProviderData)
-
-    fun setProviders(providerDataCollection: List<ProviderData>)
 }

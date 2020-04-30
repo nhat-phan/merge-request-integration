@@ -1,15 +1,18 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
-import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifierAdapter
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.MergeRequestCollectionEventListener
 import net.ntworld.mergeRequestIntegrationIde.ui.provider.*
@@ -19,32 +22,32 @@ import javax.swing.JPanel
 class HomeToolWindowTab(
     private val projectServiceProvider: ProjectServiceProvider,
     private val toolWindow: ToolWindow
-) : Component {
+) : Component, Disposable {
     private val mySplitter = OnePixelSplitter(HomeToolWindowTab::class.java.canonicalName, 0.35f)
     private val myCollectionPanel = ProviderCollection(projectServiceProvider)
     private val myDetailPanels = mutableMapOf<String, ProviderDetailsUI>()
     private val myContents = mutableMapOf<String, Content>()
     private val myMRToolWindowTabs = mutableMapOf<String, MergeRequestToolWindowTab>()
-    private val myProjectEventListener = object:
-        ProjectEventListener {
-        override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+    private val myProjectNotifier = object : ProjectNotifierAdapter() {
+        override fun startCodeReview(reviewContext: ReviewContext) {
             myDetailPanels.forEach { it.value.hide() }
             myContents.forEach {
-                if (it.key == providerData.id) {
+                if (it.key == reviewContext.providerData.id) {
                     it.value.isCloseable = false
                 }
             }
         }
 
-        override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+        override fun stopCodeReview(reviewContext: ReviewContext) {
             myDetailPanels.forEach { it.value.show() }
             myContents.forEach {
-                if (it.key == providerData.id) {
+                if (it.key == reviewContext.providerData.id) {
                     it.value.isCloseable = true
                 }
             }
         }
     }
+    private val myConnection = projectServiceProvider.messageBus.connect()
 
     private val myDetailsListEventListener = object : MergeRequestCollectionEventListener {
         override fun mergeRequestUnselected() {
@@ -100,9 +103,6 @@ class HomeToolWindowTab(
         }
     }
     private val myCollectionPanelToolbarEventListener = object: ProviderCollectionToolbarEventListener {
-        override fun addClicked() {
-        }
-
         override fun refreshClicked() {
             myContents.forEach {
                 toolWindow.contentManager.removeContent(it.value, true)
@@ -121,7 +121,8 @@ class HomeToolWindowTab(
         toolWindow.contentManager.addContentManagerListener(myContentManagerListener)
         myCollectionPanel.addListEventListener(myCollectionPanelListEventListener)
         myCollectionPanel.addToolbarEventListener(myCollectionPanelToolbarEventListener)
-        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
+        myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
+        Disposer.register(projectServiceProvider.project, this)
     }
 
     private fun findNameForTab(providerData: ProviderData): String {
@@ -166,5 +167,9 @@ class HomeToolWindowTab(
     }
 
     override fun createComponent(): JComponent = mySplitter
+
+    override fun dispose() {
+        myConnection.disconnect()
+    }
 
 }

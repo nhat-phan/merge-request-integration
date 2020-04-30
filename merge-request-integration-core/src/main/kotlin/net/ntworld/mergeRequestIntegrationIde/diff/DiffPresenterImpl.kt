@@ -26,7 +26,8 @@ import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
 import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.DiffNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import java.util.*
 
@@ -35,7 +36,8 @@ internal class DiffPresenterImpl(
     override val model: DiffModel,
     override val view: DiffView<*>
 ) : AbstractPresenter<EventListener>(),
-    DiffPresenter, DiffView.ActionListener, DiffModel.DataListener, DiffNotifier {
+    DiffPresenter, DiffView.ActionListener, DiffModel.DataListener,
+    DiffNotifier {
     override val dispatcher = EventDispatcher.create(EventListener::class.java)
 
     init {

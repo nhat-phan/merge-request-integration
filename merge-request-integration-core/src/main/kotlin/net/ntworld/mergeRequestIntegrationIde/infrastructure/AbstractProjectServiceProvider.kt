@@ -6,6 +6,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.util.EventDispatcher
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
+import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.foundation.util.UUIDGenerator
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestState
@@ -15,17 +16,20 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequest.query.generated.GetMergeRequestFilterImpl
-import net.ntworld.mergeRequestIntegration.ApiProviderManager
+import net.ntworld.mergeRequestIntegration.DefaultProviderStorage
+import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
+import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.provider.MergeRequestDataProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
@@ -39,38 +43,22 @@ import com.intellij.openapi.project.Project as IdeaProject
 abstract class AbstractProjectServiceProvider(
     final override val project: IdeaProject
 ) : ProjectServiceProvider, ServiceBase() {
-    private var myIsInitialized = false
     private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
-
-    final override val messageBus: MessageBus by lazy { project.messageBus }
-
-    final override val dispatcher = EventDispatcher.create(ProjectEventListener::class.java)
-
-    override val notification: NotificationGroup = NotificationGroup(
+    private val myNotification: NotificationGroup = NotificationGroup(
         "Merge Request Integration", NotificationDisplayType.BALLOON, true
     )
 
-    private val myProjectEventListener = object : ProjectEventListener {
-        override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
-            reviewContextManager.setContextToDoingCodeReview(providerData.id, mergeRequest.id)
-        }
+    final override val providerStorage: ProviderStorage = DefaultProviderStorage()
 
-        override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
-            val reviewContext = reviewContextManager.findDoingCodeReviewContext()
-            if (null !== reviewContext) {
-                reviewContext.closeAllChanges()
-            }
-            reviewContextManager.clearContextDoingCodeReview()
-        }
-    }
+    override val infrastructure: Infrastructure = MemorizedInfrastructure(IdeInfrastructure(providerStorage))
 
-    override val registeredProviders: List<ProviderData>
-        get() {
-            if (!myIsInitialized) {
-                initialize()
-            }
-            return ApiProviderManager.providerDataCollection
-        }
+    override val applicationSettings: ApplicationSettings
+        get() = applicationServiceProvider.settingsManager
+
+    override val intellijIdeApi: IntellijIdeApi
+        get() = applicationServiceProvider.intellijIdeApi
+
+    final override val messageBus: MessageBus by lazy { project.messageBus }
 
     override val repositoryFile: RepositoryFileService by lazy {
         CachedRepositoryFile(
@@ -79,20 +67,9 @@ abstract class AbstractProjectServiceProvider(
         )
     }
 
-    override val applicationSettings: ApplicationSettings
-        get() = applicationServiceProvider.settingsManager
-
-    override val infrastructure: Infrastructure
-        get() = applicationServiceProvider.infrastructure
-
-    override val intellijIdeApi: IntellijIdeApi
-        get() = applicationServiceProvider.intellijIdeApi
-
     final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(project)
 
-    init {
-        dispatcher.addListener(myProjectEventListener)
-    }
+    private val myPublisher = messageBus.syncPublisher(ProjectNotifier.TOPIC)
 
     protected fun initWithApplicationServiceProvider(applicationSP: ApplicationServiceProvider) {
         applicationSP.watcherManager.addWatcher(reviewContextManager)
@@ -144,15 +121,13 @@ abstract class AbstractProjectServiceProvider(
         }
     }
 
-    override fun supported(): List<ProviderInfo> = supportedProviders
-
     override fun addProviderConfiguration(
         id: String,
         info: ProviderInfo,
         credentials: ApiCredentials,
         repository: String
     ) {
-        myProvidersData[id] = ProviderSettingsImpl(
+        providerSettingsData[id] = ProviderSettingsImpl(
             id = id,
             info = info,
             credentials = encryptCredentials(info, credentials),
@@ -161,11 +136,11 @@ abstract class AbstractProjectServiceProvider(
     }
 
     override fun removeProviderConfiguration(id: String) {
-        myProvidersData.remove(id)
+        providerSettingsData.remove(id)
     }
 
     override fun getProviderConfigurations(): List<ProviderSettings> {
-        return myProvidersData.values.map {
+        return providerSettingsData.values.map {
             ProviderSettingsImpl(
                 id = it.id,
                 info = it.info,
@@ -175,17 +150,43 @@ abstract class AbstractProjectServiceProvider(
         }
     }
 
-    protected open fun initialize() {
-        getProviderConfigurations().forEach { register(it) }
+    override fun initialize() {
+        providerStorage.clear()
+        myPublisher.starting()
+
+        getProviderConfigurations().forEach { registerProviderSettings(it) }
+        myPublisher.initialized()
     }
 
-    override fun clear() {
-        ApiProviderManager.clear()
-        dispatcher.multicaster.providersClear()
-        myIsInitialized = false
+    override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
+
+    override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+        reviewContextManager.setContextToDoingCodeReview(providerData.id, mergeRequest.id)
+        val reviewContext = reviewContextManager.findDoingCodeReviewContext()
+        if (null !== reviewContext) {
+            myPublisher.startCodeReview(reviewContext)
+        }
     }
 
-    override fun register(settings: ProviderSettings) {
+    override fun stopCodeReview() {
+        val reviewContext = reviewContextManager.findDoingCodeReviewContext()
+        if (null !== reviewContext) {
+            myPublisher.stopCodeReview(reviewContext)
+            reviewContext.closeAllChanges()
+        }
+        reviewContextManager.clearContextDoingCodeReview()
+    }
+
+    override fun notify(message: String) {
+        notify(message, NotificationType.INFORMATION)
+    }
+
+    override fun notify(message: String, type: NotificationType) {
+        val notification = myNotification.createNotification(message, type)
+        notification.notify(project)
+    }
+
+    private fun registerProviderSettings(settings: ProviderSettings) {
         var name = ""
         if (settings.info.id == Gitlab.id) {
             name = GitlabConnectionsConfigurableBase.findNameFromId(settings.id)
@@ -195,32 +196,16 @@ abstract class AbstractProjectServiceProvider(
         }
 
         val task = RegisterProviderTask(
-            applicationServiceProvider = applicationServiceProvider,
-            ideaProject = project,
+            this,
             id = UUIDGenerator.generate(),
             name = name,
             settings = settings,
             listener = object : RegisterProviderTask.Listener {
-                override fun onError(exception: Exception) {
-                }
-
                 override fun providerRegistered(providerData: ProviderData) {
-                    dispatcher.multicaster.providerRegistered(providerData)
+                    messageBus.syncPublisher(ProjectNotifier.TOPIC).providerRegistered(providerData)
                 }
             }
         )
         task.start()
-        myIsInitialized = true
-    }
-
-    override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
-
-    override fun notify(message: String) {
-        notify(message, NotificationType.INFORMATION)
-    }
-
-    override fun notify(message: String, type: NotificationType) {
-        val notification = notification.createNotification(message, type)
-        notification.notify(project)
     }
 }

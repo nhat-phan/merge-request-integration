@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier
 
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vcs.changes.Change

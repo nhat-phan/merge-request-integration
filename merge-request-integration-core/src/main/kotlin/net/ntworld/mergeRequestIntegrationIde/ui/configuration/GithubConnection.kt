@@ -9,14 +9,14 @@ import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class GithubConnection(
-    private val applicationServiceProvider: ApplicationServiceProvider,
-    private val ideaProject: IdeaProject
+    private val projectServiceProvider: ProjectServiceProvider
 ) : ConnectionUI {
     var myWholePanel: JPanel? = null
     var mySettingsPanel: JPanel? = null
@@ -37,12 +37,7 @@ class GithubConnection(
     private var mySelectedProject: Project? = null
     private var myIsTested: Boolean = false
     private val myProjectFinder: ProjectFinderUI by lazy {
-        GithubProjectFinder(
-            applicationServiceProvider,
-            ideaProject,
-            myTerm!!,
-            myProjectList!!
-        )
+        GithubProjectFinder(projectServiceProvider, myTerm!!, myProjectList!!)
     }
     private val myNameFieldListener = object : DocumentListener {
         override fun changedUpdate(e: DocumentEvent?) {
@@ -76,7 +71,7 @@ class GithubConnection(
     init {
         myIgnoreSSLError!!.isVisible = false
 
-        val repositories = RepositoryUtil.getRepositoriesByProject(ideaProject)
+        val repositories = RepositoryUtil.getRepositoriesByProject(projectServiceProvider.project)
         repositories.forEach { myRepository!!.addItem(it) }
         if (repositories.isNotEmpty()) {
             myRepository!!.selectedItem = repositories.first()

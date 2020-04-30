@@ -1,20 +1,22 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ui.ChangesTreeImpl
 import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
 import com.intellij.ui.JBColor
 import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
-import net.ntworld.mergeRequest.MergeRequest
-import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifierAdapter
 import net.ntworld.mergeRequestIntegrationIde.ui.Component
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
@@ -28,7 +30,7 @@ import javax.swing.tree.DefaultTreeModel
 
 class ChangesToolWindowTab(
     private val projectServiceProvider: ProjectServiceProvider
-) : Component {
+) : Component, Disposable {
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel()
     private val myComponent = SimpleToolWindowPanel(true, true)
@@ -54,20 +56,17 @@ class ChangesToolWindowTab(
         )
         panel
     }
-    private val myProjectEventListener = object :
-        ProjectEventListener {
-        override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
-            val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
-            if (null !== reviewContext) {
-                setChanges(reviewContext.reviewingChanges)
-            }
+    private val myProjectNotifier = object : ProjectNotifierAdapter() {
+        override fun startCodeReview(reviewContext: ReviewContext) {
+            setChanges(reviewContext.reviewingChanges)
             showChanges()
         }
 
-        override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+        override fun stopCodeReview(reviewContext: ReviewContext) {
             hideChanges()
         }
     }
+    private val myConnection = projectServiceProvider.messageBus.connect()
     private val myTreeSelectionListener = TreeSelectionListener {
         if (null === it) {
             return@TreeSelectionListener
@@ -104,7 +103,9 @@ class ChangesToolWindowTab(
         } else {
             hideChanges()
         }
-        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
+
+        myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
+        Disposer.register(projectServiceProvider.project, this)
     }
 
     override fun createComponent(): JComponent = myComponent
@@ -132,5 +133,9 @@ class ChangesToolWindowTab(
         override fun buildTreeModel(changes: MutableList<out Change>): DefaultTreeModel {
             return TreeModelBuilder.buildFromChanges(myProject, grouping, changes, null)
         }
+    }
+
+    override fun dispose() {
+        myConnection.disconnect()
     }
 }

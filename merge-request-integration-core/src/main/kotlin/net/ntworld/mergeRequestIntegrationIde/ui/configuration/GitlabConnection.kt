@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.EventDispatcher
 import git4idea.repo.GitRepository
@@ -8,16 +7,15 @@ import net.ntworld.mergeRequest.Project
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabUtil
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class GitlabConnection(
-    private val applicationServiceProvider: ApplicationServiceProvider,
-    private val ideaProject: IdeaProject
+    private val projectServiceProvider: ProjectServiceProvider
 ) : ConnectionUI {
     var myWholePanel: JPanel? = null
     var mySettingsPanel: JPanel? = null
@@ -42,8 +40,7 @@ class GitlabConnection(
     private var myIsTested: Boolean = false
     private val myProjectFinder: ProjectFinderUI by lazy {
         GitlabProjectFinder(
-            applicationServiceProvider,
-            ideaProject,
+            projectServiceProvider,
             myTerm!!,
             myProjectList!!,
             mySearchStarred!!,
@@ -79,7 +76,7 @@ class GitlabConnection(
     override val dispatcher = EventDispatcher.create(ConnectionUI.Listener::class.java)
 
     init {
-        val repositories = RepositoryUtil.getRepositoriesByProject(ideaProject)
+        val repositories = RepositoryUtil.getRepositoriesByProject(projectServiceProvider.project)
         repositories.forEach { myRepository!!.addItem(it) }
         if (repositories.isNotEmpty()) {
             myRepository!!.selectedItem = repositories.first()
@@ -167,7 +164,7 @@ class GitlabConnection(
 
     private fun requestGuessProjectByCurrentRepository() {
         val repository = RepositoryUtil.findRepositoryByPath(
-            ideaProject,
+            projectServiceProvider.project,
             myRepository!!.selectedItem as String? ?: ""
         )
         if (null !== repository) {

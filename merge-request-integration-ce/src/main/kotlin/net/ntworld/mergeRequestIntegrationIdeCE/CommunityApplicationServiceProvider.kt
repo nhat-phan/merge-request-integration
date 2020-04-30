@@ -10,7 +10,10 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvi
 @State(name = "MergeRequestIntegrationApplicationLevel", storages = [(Storage("merge-request-integration.xml"))])
 class CommunityApplicationServiceProvider: AbstractApplicationServiceProvider() {
     override fun findProjectServiceProvider(project: Project): ProjectServiceProvider {
-        return ServiceManager.getService(project, CommunityProjectServiceProvider::class.java)
+        val service = ServiceManager.getService(project, CommunityProjectServiceProvider::class.java)
+        registerProjectServiceProvider(service)
+
+        return service
     }
 
     override fun getChangesToolWindowId(): String = "Merge Request's Changes CE"

@@ -1,6 +1,5 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.configuration
 
-import com.intellij.openapi.project.Project
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiConnection
 import net.ntworld.mergeRequest.api.ApiCredentials
@@ -9,13 +8,12 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabFindPro
 import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchProjectsRequest
 import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabProjectTransformer
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 
 open class GitlabConnectionsConfigurableBase(
-    private val applicationServiceProvider: ApplicationServiceProvider,
-    private val ideaProject: Project
-) : AbstractConnectionsConfigurable(applicationServiceProvider, ideaProject) {
+    private val projectServiceProvider: ProjectServiceProvider
+) : AbstractConnectionsConfigurable(projectServiceProvider) {
     override fun makeProviderInfo(): ProviderInfo = Gitlab
 
     override fun findNameFromId(id: String) = Companion.findNameFromId(id)
@@ -23,7 +21,7 @@ open class GitlabConnectionsConfigurableBase(
     override fun findIdFromName(name: String) = Companion.findIdFromName(name)
 
     override fun makeConnection(): ConnectionUI {
-        return GitlabConnection(applicationServiceProvider, ideaProject)
+        return GitlabConnection(projectServiceProvider)
     }
 
     override fun validateConnection(connection: ApiConnection): Boolean {
@@ -31,7 +29,7 @@ open class GitlabConnectionsConfigurableBase(
     }
 
     override fun findProject(credentials: ApiCredentials): net.ntworld.mergeRequest.Project? {
-        val out = applicationServiceProvider.infrastructure.serviceBus() process GitlabFindProjectRequest(
+        val out = projectServiceProvider.infrastructure.serviceBus() process GitlabFindProjectRequest(
             credentials = credentials,
             projectId = credentials.projectId.toInt()
         )
@@ -44,7 +42,7 @@ open class GitlabConnectionsConfigurableBase(
     }
 
     override fun findProjectByPath(credentials: ApiCredentials, path: String): net.ntworld.mergeRequest.Project? {
-        val out = applicationServiceProvider.infrastructure.serviceBus() process GitlabFindProjectRequest(
+        val out = projectServiceProvider.infrastructure.serviceBus() process GitlabFindProjectRequest(
             credentials = credentials,
             projectId = 0,
             projectPath = path
@@ -58,7 +56,7 @@ open class GitlabConnectionsConfigurableBase(
     }
 
     override fun assertConnectionIsValid(connection: ApiConnection) {
-        val out = applicationServiceProvider.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
+        val out = projectServiceProvider.infrastructure.serviceBus() process GitlabSearchProjectsRequest(
             credentials = ApiCredentialsImpl(
                 url = connection.url,
                 login = connection.login,

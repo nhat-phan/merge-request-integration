@@ -9,23 +9,22 @@ import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.internal.ProviderDataImpl
 import net.ntworld.mergeRequestIntegration.internal.UserImpl
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
-import net.ntworld.mergeRequestIntegration.provider.github.Github
-import net.ntworld.mergeRequestIntegration.provider.github.GithubApiProvider
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegration.provider.gitlab.GitlabApiProvider
+import java.util.*
 
-object ApiProviderManager {
-    private val data = mutableMapOf<String, ProviderData>()
-    private val api = mutableMapOf<String, ApiProvider>()
+class DefaultProviderStorage : ProviderStorage {
+    private val data = Collections.synchronizedMap(mutableMapOf<String, ProviderData>())
+    private val api = Collections.synchronizedMap(mutableMapOf<String, ApiProvider>())
 
-    val providerDataCollection
+    override val registeredProviders
         get() = data.values.toList()
 
-    fun updateApiOptions(options: ApiOptions) {
+    override fun updateApiOptions(options: ApiOptions) {
         api.forEach { it.value.setOptions(options) }
     }
 
-    fun register(
+    override fun register(
         infrastructure: Infrastructure,
         id: String,
         key: String,
@@ -71,7 +70,7 @@ object ApiProviderManager {
         return invalid
     }
 
-    fun clear() {
+    override fun clear() {
         data.clear()
         api.clear()
     }
@@ -99,14 +98,14 @@ object ApiProviderManager {
         return created
     }
 
-    fun findOrFail(id: String): Pair<ProviderData, ApiProvider> {
+    override fun findOrFail(id: String): Pair<ProviderData, ApiProvider> {
         return Pair(findDataOrFail(id), findProviderOrFail(id))
     }
 
     private fun findDataOrFail(id: String): ProviderData {
-        val data = data[id]
-        return if (null !== data) {
-            data
+        val item = data[id]
+        return if (null !== item) {
+            item
         } else {
             throw Exception("Provider not found")
         }
@@ -117,8 +116,7 @@ object ApiProviderManager {
         return if (null !== provider) {
             provider
         } else {
-            throw Exception("Provider not found")
+            throw Exception("ApiProvider not found")
         }
     }
-
 }

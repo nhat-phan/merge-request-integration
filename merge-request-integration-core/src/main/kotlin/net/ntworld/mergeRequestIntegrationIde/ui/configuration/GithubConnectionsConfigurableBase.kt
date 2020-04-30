@@ -10,13 +10,11 @@ import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubRep
 import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubProjectId
 import net.ntworld.mergeRequestIntegrationIde.exception.InvalidConnectionException
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
-import com.intellij.openapi.project.Project as IdeaProject
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 open class GithubConnectionsConfigurableBase(
-    private val applicationServiceProvider: ApplicationServiceProvider,
-    private val ideaProject: IdeaProject
-) : AbstractConnectionsConfigurable(applicationServiceProvider, ideaProject) {
+    private val projectServiceProvider: ProjectServiceProvider
+) : AbstractConnectionsConfigurable(projectServiceProvider) {
     override fun getId(): String = "MRI:github"
 
     override fun getDisplayName(): String = "Github"
@@ -28,7 +26,7 @@ open class GithubConnectionsConfigurableBase(
     override fun findIdFromName(name: String): String = Companion.findIdFromName(name)
 
     override fun makeConnection(): ConnectionUI {
-        return GithubConnection(applicationServiceProvider, ideaProject)
+        return GithubConnection(projectServiceProvider)
     }
 
     override fun validateConnection(connection: ApiConnection): Boolean {
@@ -36,7 +34,7 @@ open class GithubConnectionsConfigurableBase(
     }
 
     override fun findProject(credentials: ApiCredentials): Project? {
-        val out = applicationServiceProvider.infrastructure.serviceBus() process GithubFindRepositoryRequest(
+        val out = projectServiceProvider.infrastructure.serviceBus() process GithubFindRepositoryRequest(
             credentials = credentials,
             repositoryId = GithubProjectId.parseId(credentials.projectId).toString()
         )
@@ -53,7 +51,7 @@ open class GithubConnectionsConfigurableBase(
     }
 
     override fun assertConnectionIsValid(connection: ApiConnection) {
-        val out = applicationServiceProvider.infrastructure.serviceBus() process GithubFindCurrentUserRequest(
+        val out = projectServiceProvider.infrastructure.serviceBus() process GithubFindCurrentUserRequest(
             credentials = ApiCredentialsImpl(
                 url = connection.url,
                 login = connection.login,

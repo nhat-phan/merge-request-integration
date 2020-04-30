@@ -10,15 +10,15 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProviderSettings
 import org.jdom.Element
 
 open class ServiceBase : PersistentStateComponent<Element> {
-    protected val myProvidersData = mutableMapOf<String, ProviderSettings>()
-    protected val supportedProviders: List<ProviderInfo> = listOf(
+    protected val providerSettingsData = mutableMapOf<String, ProviderSettings>()
+    private val supportedProviders: List<ProviderInfo> = listOf(
         Gitlab
         // Gitlab, Github
     )
 
     override fun getState(): Element? {
         val element = Element("Provider")
-        myProvidersData.values.map {
+        providerSettingsData.values.map {
             val item = Element("Item")
             item.setAttribute("id", it.id)
             writeStateItem(item, it.id, it)
@@ -69,7 +69,7 @@ open class ServiceBase : PersistentStateComponent<Element> {
     }
 
     protected open fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
-        myProvidersData[id] = settings
+        providerSettingsData[id] = settings
     }
 
     private fun shouldIgnoreSSLCertificateErrors(item: Element): Boolean {

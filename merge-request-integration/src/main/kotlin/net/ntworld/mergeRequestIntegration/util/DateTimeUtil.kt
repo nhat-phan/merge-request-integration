@@ -24,18 +24,23 @@ object DateTimeUtil {
     private val localTimeZone = DateTimeZone.forID(ZoneId.systemDefault().id)
     private val prettyTime = PrettyTime()
 
+    @Synchronized
     fun fromDate(date: Date): DateTime = convertDateFormat.format(date)
 
+    @Synchronized
     fun toDate(datetime: DateTime): Date {
         return parser.parseDateTime(datetime).withZone(localTimeZone).toDate()
     }
 
+    @Synchronized
     fun formatDate(date: Date): String = toStringDateFormat.format(date) ?: ""
 
+    @Synchronized
     fun toPretty(date: Date): String {
         return prettyTime.format(date)
     }
 
+    @Synchronized
     fun toPretty(datetime: DateTime): String {
         return prettyTime.format(toDate(datetime))
     }

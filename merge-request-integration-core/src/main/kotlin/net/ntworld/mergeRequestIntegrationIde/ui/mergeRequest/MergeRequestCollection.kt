@@ -1,19 +1,22 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import net.ntworld.mergeRequest.MergeRequest
+import com.intellij.openapi.util.Disposer
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifierAdapter
 import javax.swing.JComponent
 
 class MergeRequestCollection(
     private val projectServiceProvider: ProjectServiceProvider,
     private val providerData: ProviderData
-) : MergeRequestCollectionUI {
+) : MergeRequestCollectionUI, Disposable {
     private val myComponent = SimpleToolWindowPanel(true, true)
     private val myFilter: MergeRequestCollectionFilterUI by lazy {
         MergeRequestCollectionFilter(projectServiceProvider, providerData)
@@ -40,16 +43,16 @@ class MergeRequestCollection(
             myTree.fetchData()
         }
     }
-    private val myProjectEventListener = object:
-        ProjectEventListener {
-        override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+    private val myProjectNotifier = object : ProjectNotifierAdapter() {
+        override fun startCodeReview(reviewContext: ReviewContext) {
             myComponent.isVisible = false
         }
 
-        override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+        override fun stopCodeReview(reviewContext: ReviewContext) {
             myComponent.isVisible = true
         }
     }
+    private val myConnection = projectServiceProvider.messageBus.connect()
 
     init {
         myComponent.toolbar = myFilter.createComponent()
@@ -62,7 +65,8 @@ class MergeRequestCollection(
             override fun mergeRequestSelected(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
             }
         })
-        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
+        myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
+        Disposer.register(projectServiceProvider.project, this)
     }
 
     override val eventDispatcher = myTree.eventDispatcher
@@ -80,4 +84,8 @@ class MergeRequestCollection(
     }
 
     override fun createComponent(): JComponent = myComponent
+
+    override fun dispose() {
+        myConnection.disconnect()
+    }
 }

@@ -36,13 +36,6 @@ class ProviderCollectionToolbar : ProviderCollectionToolbarUI, Component {
         panel.add(rightCornerToolbar.component)
         panel
     }
-    private class MyAddAction(private val self: ProviderCollectionToolbar) :
-        AnAction(null, null, AllIcons.General.Add) {
-        override fun actionPerformed(e: AnActionEvent) {
-            self.eventDispatcher.multicaster.addClicked()
-        }
-    }
-    private val myAddAction = MyAddAction(this)
 
     private class MyHelpAction(private val self: ProviderCollectionToolbar) :
         AnAction("Help", null, AllIcons.Actions.Help) {

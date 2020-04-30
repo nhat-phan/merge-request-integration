@@ -4,14 +4,16 @@ import net.ntworld.foundation.Handler
 import net.ntworld.foundation.cqrs.QueryHandler
 import net.ntworld.mergeRequest.query.GetMergeRequestsQuery
 import net.ntworld.mergeRequest.query.GetMergeRequestsQueryResult
-import net.ntworld.mergeRequestIntegration.ApiProviderManager
+import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegration.make
 
 @Handler
-class GetMergeRequestsQueryHandler : QueryHandler<GetMergeRequestsQuery, GetMergeRequestsQueryResult> {
+class GetMergeRequestsQueryHandler(
+    private val providerStorage: ProviderStorage
+) : QueryHandler<GetMergeRequestsQuery, GetMergeRequestsQueryResult> {
 
     override fun handle(query: GetMergeRequestsQuery): GetMergeRequestsQueryResult {
-        val (data, api) = ApiProviderManager.findOrFail(query.providerId)
+        val (data, api) = providerStorage.findOrFail(query.providerId)
         val result = api.mergeRequest.search(
             projectId = data.project.id,
             currentUserId = data.currentUser.id,

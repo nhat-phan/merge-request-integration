@@ -1,13 +1,16 @@
 package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.util.EventDispatcher
 import net.ntworld.mergeRequest.Commit
-import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectEventListener
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifierAdapter
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChangesUI
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitCollection
@@ -16,7 +19,7 @@ import javax.swing.JComponent
 
 class MergeRequestCommitsTab(
     private val projectServiceProvider: ProjectServiceProvider
-) : MergeRequestCommitsTabUI {
+) : MergeRequestCommitsTabUI, Disposable {
     override val dispatcher = EventDispatcher.create(MergeRequestCommitsTabUI.Listener::class.java)
 
     private val mySplitter = OnePixelSplitter(
@@ -35,25 +38,26 @@ class MergeRequestCommitsTab(
             dispatcher.multicaster.commitSelected(providerData, mergeRequestInfo, commits)
         }
     }
-    private val myProjectEventListener = object :
-        ProjectEventListener {
-        override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+    private val myProjectNotifier = object : ProjectNotifierAdapter() {
+        override fun startCodeReview(reviewContext: ReviewContext) {
             myCollection.disable()
             myChanges.disable()
         }
 
-        override fun stopCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
+        override fun stopCodeReview(reviewContext: ReviewContext) {
             myCollection.enable()
             myChanges.enable()
         }
     }
+    private val myConnection = projectServiceProvider.messageBus.connect()
 
     init {
         mySplitter.firstComponent = myCollection.createComponent()
         mySplitter.secondComponent = myChanges.createComponent()
 
         myCollection.dispatcher.addListener(myCollectionListener)
-        projectServiceProvider.dispatcher.addListener(myProjectEventListener)
+        myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
+        Disposer.register(projectServiceProvider.project, this)
     }
 
     override fun clear() {
@@ -67,4 +71,7 @@ class MergeRequestCommitsTab(
 
     override fun createComponent(): JComponent = mySplitter
 
+    override fun dispose() {
+        myConnection.disconnect()
+    }
 }

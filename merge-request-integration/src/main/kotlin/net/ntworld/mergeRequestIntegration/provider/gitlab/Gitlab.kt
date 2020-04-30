@@ -17,10 +17,12 @@ object Gitlab : ProviderInfo {
 
     override val icon4xPath: String = "/icons/gitlab@4x.svg"
 
+    @Synchronized
     override fun createCommentUrl(mergeRequestUrl: String, comment: Comment): String {
         return "$mergeRequestUrl#note_${comment.id}"
     }
 
+    @Synchronized
     override fun formatMergeRequestId(mergeRequestId: String): String {
         return "!$mergeRequestId"
     }

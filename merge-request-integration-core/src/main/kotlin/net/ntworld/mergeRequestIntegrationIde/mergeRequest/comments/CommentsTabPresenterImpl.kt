@@ -15,9 +15,9 @@ import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.DataChangedSource
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.DiffNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.api.MergeRequestDataNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.isEmpty
 import java.util.*

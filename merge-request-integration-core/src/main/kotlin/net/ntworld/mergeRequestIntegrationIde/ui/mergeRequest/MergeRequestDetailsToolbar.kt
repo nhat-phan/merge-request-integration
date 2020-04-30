@@ -350,14 +350,9 @@ class MergeRequestDetailsToolbar(
                 return
             }
             if (state) {
-                CodeReviewService.start(
-                    self.projectServiceProvider.applicationServiceProvider,
-                    self.projectServiceProvider.project, self.providerData, mr, self.myReviewCommits
-                )
+                CodeReviewService.start(self.projectServiceProvider, self.providerData, mr, self.myReviewCommits)
             } else {
-                CodeReviewService.stop(
-                    self.projectServiceProvider.applicationServiceProvider,
-                    self.projectServiceProvider.project, self.providerData, mr)
+                CodeReviewService.stop(self.projectServiceProvider, self.providerData, mr)
             }
         }
 

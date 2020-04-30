@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.infrastructure.api
+package net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier
 
 import com.intellij.util.messages.Topic
 import net.ntworld.mergeRequest.Comment

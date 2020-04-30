@@ -17,14 +17,14 @@ import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegrationIde.configuration.vos.GitRemotePathInfo
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ApiCredentialsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProviderSettings
 import net.ntworld.mergeRequestIntegrationIde.ui.util.Tabs
 import net.ntworld.mergeRequestIntegrationIde.ui.util.TabsUI
 import javax.swing.JComponent
 
 abstract class AbstractConnectionsConfigurable(
-    private val applicationServiceProvider: ApplicationServiceProvider,
-    private val ideaProject: IdeaProject
+    private val projectServiceProvider: ProjectServiceProvider
 ) : SearchableConfigurable, Disposable {
     private val logger = Logger.getInstance(AbstractConnectionsConfigurable::class.java)
     private val myData = mutableMapOf<String, MyProviderSettings>()
@@ -32,7 +32,7 @@ abstract class AbstractConnectionsConfigurable(
     private val myInitializedData = mutableMapOf<String, MyProviderSettings>()
     private var myIsInitialized = false
     private val myTabs: TabsUI by lazy {
-        val tabs = Tabs(ideaProject, ideaProject)
+        val tabs = Tabs(projectServiceProvider.project, projectServiceProvider.project)
 
         tabs.setCommonCenterActionGroupFactory {
             val actionGroup = DefaultActionGroup()
@@ -204,8 +204,9 @@ abstract class AbstractConnectionsConfigurable(
 
         val currentProviderInfo = makeProviderInfo()
         myInitializedData.clear()
+        val applicationServiceProvider = projectServiceProvider.applicationServiceProvider
         val appConnections = applicationServiceProvider.getProviderConfigurations()
-        applicationServiceProvider.findProjectServiceProvider(ideaProject).getProviderConfigurations().forEach {
+        projectServiceProvider.getProviderConfigurations().forEach {
             if (it.info.id == currentProviderInfo.id) {
                 myInitializedData[it.id] = MyProviderSettings(
                     id = it.id,
@@ -326,13 +327,13 @@ abstract class AbstractConnectionsConfigurable(
 
     override fun apply() {
         logger.info("Delete global connections")
+        val applicationServiceProvider = projectServiceProvider.applicationServiceProvider
         applicationServiceProvider.removeAllProviderConfigurations()
 
-        val projectService = applicationServiceProvider.findProjectServiceProvider(ideaProject)
         for (entry in myData) {
             if (entry.value.deleted) {
                 logger.info("Delete connection ${entry.key}")
-                projectService.removeProviderConfiguration(entry.value.id.trim())
+                projectServiceProvider.removeProviderConfiguration(entry.value.id.trim())
                 continue
             }
 
@@ -347,7 +348,7 @@ abstract class AbstractConnectionsConfigurable(
 
             if (validateProviderSettings(entry.value)) {
                 logger.info("Save connection ${entry.key}")
-                projectService.addProviderConfiguration(
+                projectServiceProvider.addProviderConfiguration(
                     id = entry.value.id.trim(),
                     info = entry.value.info,
                     credentials = entry.value.credentials,
@@ -358,7 +359,7 @@ abstract class AbstractConnectionsConfigurable(
 
         myData.clear()
         myIsInitialized = false
-        applicationServiceProvider.findProjectServiceProvider(ideaProject).clear()
+        projectServiceProvider.initialize()
         buildInitializedData(initUI = false, initDataForCheckModification = true)
     }
 

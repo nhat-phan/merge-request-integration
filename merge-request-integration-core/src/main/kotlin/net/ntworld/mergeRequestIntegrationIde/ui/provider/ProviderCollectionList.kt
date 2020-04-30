@@ -9,6 +9,8 @@ import java.awt.Component
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
+import javax.swing.event.ListSelectionEvent
+import javax.swing.event.ListSelectionListener
 
 class ProviderCollectionList : ProviderCollectionListUI {
     override val eventDispatcher = EventDispatcher.create(ProviderCollectionListEventListener::class.java)
@@ -32,6 +34,16 @@ class ProviderCollectionList : ProviderCollectionListUI {
             val panel = myProviderItemPanels[index]!!
             panel.changeStyle(isSelected, cellHasFocus)
             return panel.createComponent()
+        }
+    }
+    private val myListSelectionListener = object: ListSelectionListener {
+        override fun valueChanged(e: ListSelectionEvent?) {
+            val value = myList.selectedValue
+            if (null === value) {
+                eventDispatcher.multicaster.providerUnselected()
+            } else {
+                eventDispatcher.multicaster.providerSelected(value)
+            }
         }
     }
     private val myListMouseListener = object: MouseAdapter() {
@@ -64,6 +76,7 @@ class ProviderCollectionList : ProviderCollectionListUI {
         myList.clearSelection()
         myList.selectionMode = ListSelectionModel.SINGLE_SELECTION
         myList.cellRenderer = myCellRenderer
+        myList.addListSelectionListener(myListSelectionListener)
         myList.addMouseListener(myListMouseListener)
         updateList()
     }
@@ -85,11 +98,6 @@ class ProviderCollectionList : ProviderCollectionListUI {
 
     override fun addProvider(providerData: ProviderData) {
         myProviderDataMap[providerData.id] = providerData
-        updateList()
-    }
-
-    override fun setProviders(providerDataCollection: List<ProviderData>) {
-        providerDataCollection.forEach { myProviderDataMap[it.id] = it }
         updateList()
     }
 
