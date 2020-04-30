@@ -30,7 +30,9 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSe
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.internal.FiltersStorageServiceImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
@@ -43,7 +45,6 @@ import com.intellij.openapi.project.Project as IdeaProject
 abstract class AbstractProjectServiceProvider(
     final override val project: IdeaProject
 ) : ProjectServiceProvider, ServiceBase() {
-    private val myFiltersData: MutableMap<String, Pair<GetMergeRequestFilter, MergeRequestOrdering>> = mutableMapOf()
     private val myNotification: NotificationGroup = NotificationGroup(
         "Merge Request Integration", NotificationDisplayType.BALLOON, true
     )
@@ -67,6 +68,8 @@ abstract class AbstractProjectServiceProvider(
         )
     }
 
+    override val filtersStorage: FiltersStorageService = FiltersStorageServiceImpl(this)
+
     final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(project)
 
     private val myPublisher = messageBus.syncPublisher(ProjectNotifier.TOPIC)
@@ -78,47 +81,14 @@ abstract class AbstractProjectServiceProvider(
         connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(this, messageBus))
     }
 
-    override fun findFiltersByProviderId(id: String): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
-        val data = myFiltersData[id]
-        return if (null !== data && applicationServiceProvider.settingsManager.saveMRFilterState) {
-            data
-        } else {
-            Pair(
-                GetMergeRequestFilterImpl(
-                    state = MergeRequestState.OPENED,
-                    search = "",
-                    authorId = "",
-                    assigneeId = "",
-                    approverIds = listOf("")
-                ),
-                MergeRequestOrdering.RECENTLY_UPDATED
-            )
-        }
-    }
-
-    override fun saveFiltersOfProvider(id: String, filters: GetMergeRequestFilter, ordering: MergeRequestOrdering) {
-        if (applicationServiceProvider.settingsManager.saveMRFilterState) {
-            myFiltersData[id] = Pair(filters, ordering)
-        }
-    }
-
     override fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
         super.readStateItem(item, id, settings)
-        val attribute = item.getAttribute("savedFilters")
-        if (null !== attribute) {
-            val data = SavedFiltersUtil.parse(attribute.value)
-            if (null !== data) {
-                myFiltersData[id] = data
-            }
-        }
+        filtersStorage.readFrom(item, id)
     }
 
     override fun writeStateItem(item: Element, id: String, settings: ProviderSettings) {
         super.writeStateItem(item, id, settings)
-        val data = myFiltersData[id]
-        if (null !== data) {
-            item.setAttribute("savedFilters", SavedFiltersUtil.stringify(data.first, data.second))
-        }
+        filtersStorage.writeTo(item, id)
     }
 
     override fun addProviderConfiguration(

@@ -105,14 +105,14 @@ class MergeRequestCollectionFilter(
 
     init {
         mySearchField.addKeyboardListener(myKeyListener)
-        val pair = projectServiceProvider.findFiltersByProviderId(providerData.key)
+        val pair = projectServiceProvider.filtersStorage.find(providerData.key)
         myOrdering = pair.second
         mySearchField.text = pair.first.search
         myAdvanceFilterButton.setPreselectedValues(pair.first)
     }
 
     private fun saveFilterAndOrdering(filter: GetMergeRequestFilter?, ordering: MergeRequestOrdering?) {
-        projectServiceProvider.saveFiltersOfProvider(
+        projectServiceProvider.filtersStorage.save(
             providerData.key,
             if (null === filter) myAdvanceFilterButton.buildFilter(mySearchField.text) else filter,
             if (null === ordering) myOrdering else ordering

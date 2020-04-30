@@ -24,7 +24,7 @@ class MergeRequestCollection(
     private val myTree: MergeRequestCollectionUI by lazy {
         val tree = MergeRequestCollectionTree(projectServiceProvider, providerData)
         if (projectServiceProvider.applicationSettings.saveMRFilterState) {
-            val pair = projectServiceProvider.findFiltersByProviderId(providerData.key)
+            val pair = projectServiceProvider.filtersStorage.find(providerData.key)
             tree.setFilter(pair.first)
             tree.setOrder(pair.second)
         }

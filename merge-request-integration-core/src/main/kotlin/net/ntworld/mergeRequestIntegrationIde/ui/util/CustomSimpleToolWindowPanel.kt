@@ -114,11 +114,6 @@ class CustomSimpleToolWindowPanel(
         return this
     }
 
-    fun getContent(): JComponent? {
-        return myContent
-    }
-
-
     fun setContent(c: JComponent?) {
         if (myContent != null) {
             remove(myContent)
