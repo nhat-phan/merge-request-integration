@@ -2,17 +2,17 @@ package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.DEBUG
+import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.rework.BranchWatcher
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
 
 class BranchWatcherImpl(
-    val reworkManager: ReworkManager,
+    private val reworkManager: ReworkManager,
     override val providerData: ProviderData,
     override val repository: GitRepository
 ) : BranchWatcher {
     private var myTerminate = false
-    private var myPrevBranchName = repository.currentBranchName
+    private var myPrevBranchName: String? = null
 
     override val currentBranchName: String?
         get() = repository.currentBranchName
@@ -31,17 +31,17 @@ class BranchWatcherImpl(
         val branchName = currentBranchName
         if (null !== branchName && myPrevBranchName != branchName) {
             myPrevBranchName = branchName
-            if (DEBUG) println("BranchWatcher of ${providerData.id} found branch changed, request create watcher")
-            reworkManager.requestCreateReworkWatcher(providerData, branchName)
+            debug("BranchWatcher of ${providerData.id} found branch changed, request create watcher")
+            reworkManager.requestCreateReworkWatcher(providerData, repository, branchName)
         }
     }
 
     override fun terminate() {
-        if (DEBUG) println("BranchWatcher of ${providerData.id} is terminated")
+        debug("BranchWatcher of ${providerData.id} is terminated")
     }
 
     override fun shutdown() {
-        if (DEBUG) println("Terminate BranchWatcher of ${providerData.id}")
+        debug("Terminate BranchWatcher of ${providerData.id}")
         myTerminate = true
     }
 }

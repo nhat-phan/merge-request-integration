@@ -238,7 +238,7 @@ internal class DiffPresenterImpl(
     }
 
     private fun convertGutterPositionToCommentPosition(input: GutterPosition): CommentPosition {
-        val repository: GitRepository? = RepositoryUtil.findRepository(projectServiceProvider.project, model.providerData)
+        val repository: GitRepository? = RepositoryUtil.findRepository(projectServiceProvider, model.providerData)
 
         return CommentPositionImpl(
             oldLine = input.oldLine,

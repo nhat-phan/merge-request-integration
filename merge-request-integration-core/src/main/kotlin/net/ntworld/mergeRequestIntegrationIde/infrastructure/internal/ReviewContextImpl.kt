@@ -2,20 +2,21 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.UserDataHolderBase
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangesUtil
 import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile
 import com.intellij.util.messages.MessageBusConnection
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 
 class ReviewContextImpl(
-    override val project: IdeaProject,
+    val projectServiceProvider: ProjectServiceProvider,
     override val providerData: ProviderData,
     override val mergeRequestInfo: MergeRequestInfo,
     override val messageBusConnection: MessageBusConnection
@@ -26,9 +27,11 @@ class ReviewContextImpl(
     private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
     private val myChangesDataMap = mutableMapOf<Change, UserDataHolderBase>()
 
+    override val project: Project = projectServiceProvider.project
+
     override var diffReference: DiffReference? = null
 
-    override val repository: GitRepository? = RepositoryUtil.findRepository(project, providerData)
+    override val repository: GitRepository? = RepositoryUtil.findRepository(projectServiceProvider, providerData)
 
     override var commits: List<Commit> = listOf()
 

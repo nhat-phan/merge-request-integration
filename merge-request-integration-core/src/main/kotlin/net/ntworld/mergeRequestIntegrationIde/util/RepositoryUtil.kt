@@ -3,15 +3,16 @@ package net.ntworld.mergeRequestIntegrationIde.util
 import com.intellij.dvcs.repo.VcsRepositoryManager
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.ProviderData
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.io.File
 import com.intellij.openapi.project.Project as IdeaProject
 
 object RepositoryUtil {
     private val repositoryCached = mutableMapOf<String, GitRepository>()
 
-    fun findRepository(ideaProject: IdeaProject, providerData: ProviderData): GitRepository? {
+    fun findRepository(projectServiceProvider: ProjectServiceProvider, providerData: ProviderData): GitRepository? {
         if (null === repositoryCached[providerData.id]) {
-            val vcsRepositoryManager = VcsRepositoryManager.getInstance(ideaProject)
+            val vcsRepositoryManager = VcsRepositoryManager.getInstance(projectServiceProvider.project)
             for (repository in vcsRepositoryManager.repositories) {
                 if (repository.root.path == providerData.repository) {
                     repositoryCached[providerData.id] = repository as GitRepository

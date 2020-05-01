@@ -17,9 +17,9 @@ import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
-import net.ntworld.mergeRequestIntegrationIde.DEBUG
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
@@ -38,6 +38,7 @@ import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 import org.jdom.Element
+import kotlin.concurrent.thread
 import com.intellij.openapi.project.Project as IdeaProject
 
 abstract class AbstractProjectServiceProvider(
@@ -61,14 +62,14 @@ abstract class AbstractProjectServiceProvider(
 
     override val repositoryFile: RepositoryFileService by lazy {
         CachedRepositoryFile(
-            LocalRepositoryFileService(ideaProject = project),
+            LocalRepositoryFileService(this),
             MemoryCache()
         )
     }
 
     override val filtersStorage: FiltersStorageService = FiltersStorageServiceImpl(this)
 
-    final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(project)
+    final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(this)
 
     private val myPublisher = messageBus.syncPublisher(ProjectNotifier.TOPIC)
 
@@ -79,7 +80,7 @@ abstract class AbstractProjectServiceProvider(
         }
 
         override fun branchHasChanged(branchName: String) {
-            if (DEBUG) println("BranchChangeListener triggered, request create ReworkWatcher for $branchName")
+            debug("BranchChangeListener triggered, request create ReworkWatcher for $branchName")
             reworkManager.requestCreateReworkWatcher(providerStorage.registeredProviders, branchName)
         }
     }
@@ -133,7 +134,7 @@ abstract class AbstractProjectServiceProvider(
 
     override fun initialize() {
         providerStorage.clear()
-        reworkManager.clearAllBranchWatchers()
+        reworkManager.clear()
         myPublisher.starting()
 
         getProviderConfigurations().forEach { registerProviderSettings(it) }
@@ -155,6 +156,9 @@ abstract class AbstractProjectServiceProvider(
         if (null !== reviewContext) {
             myPublisher.stopCodeReview(reviewContext)
             reviewContext.closeAllChanges()
+        }
+        providerStorage.registeredProviders.forEach {
+            reworkManager.createBranchWatcher(it)
         }
         reviewContextManager.clearContextDoingCodeReview()
     }
@@ -184,8 +188,8 @@ abstract class AbstractProjectServiceProvider(
             settings = settings,
             listener = object : RegisterProviderTask.Listener {
                 override fun providerRegistered(providerData: ProviderData) {
-                    reworkManager.createBranchWatcher(providerData)
                     messageBus.syncPublisher(ProjectNotifier.TOPIC).providerRegistered(providerData)
+                    reworkManager.createBranchWatcher(providerData)
                 }
             }
         )

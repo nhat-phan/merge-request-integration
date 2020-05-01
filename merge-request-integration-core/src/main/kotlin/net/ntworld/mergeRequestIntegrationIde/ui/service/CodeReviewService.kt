@@ -45,7 +45,7 @@ object CodeReviewService {
             toolWindow.hide(null)
         }
         if (checkedOut) {
-            CheckoutService.stop(projectServiceProvider.project, providerData)
+            CheckoutService.stop(projectServiceProvider, providerData)
             DisplayChangesService.stop(projectServiceProvider.project, providerData, mergeRequest)
         }
     }
@@ -60,7 +60,7 @@ object CodeReviewService {
             return checkoutSuccess(projectServiceProvider, providerData, mergeRequest, commits)
         }
 
-        CheckoutService.start(projectServiceProvider.project, providerData, mergeRequest, object : CheckoutService.Listener {
+        CheckoutService.start(projectServiceProvider, providerData, mergeRequest, object : CheckoutService.Listener {
             override fun onError(exception: Exception) {
                 projectServiceProvider.notify(
                     "Cannot checkout branch ${mergeRequest.sourceBranch}\n\nPlease do git checkout manually before click Code Review",

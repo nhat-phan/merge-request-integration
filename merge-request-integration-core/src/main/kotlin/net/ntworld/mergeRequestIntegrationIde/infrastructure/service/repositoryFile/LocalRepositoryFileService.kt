@@ -11,23 +11,23 @@ import com.intellij.psi.PsiManager
 import com.intellij.vcs.log.impl.VcsLogContentUtil
 import com.intellij.vcs.log.util.VcsLogUtil
 import net.ntworld.mergeRequest.ProviderData
-import com.intellij.openapi.project.Project as IdeaProject
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.Icon
 
 class LocalRepositoryFileService(
-    private val ideaProject: IdeaProject
+    private val projectServiceProvider: ProjectServiceProvider
 ) : RepositoryFileService {
     private val myLogger = Logger.getInstance(this.javaClass)
 
     override fun findChanges(providerData: ProviderData, hashes: List<String>): List<Change> {
         try {
-            val repository = RepositoryUtil.findRepository(ideaProject, providerData)
+            val repository = RepositoryUtil.findRepository(projectServiceProvider, providerData)
             if (null === repository) {
                 return listOf()
             }
-            val log = VcsLogContentUtil.getOrCreateLog(ideaProject)
+            val log = VcsLogContentUtil.getOrCreateLog(projectServiceProvider.project)
             if (null === log) {
                 return listOf()
             }
@@ -45,7 +45,7 @@ class LocalRepositoryFileService(
     }
 
     override fun findIcon(providerData: ProviderData, path: String): Icon {
-        val repository = RepositoryUtil.findRepository(ideaProject, providerData)
+        val repository = RepositoryUtil.findRepository(projectServiceProvider, providerData)
         val psiFile = findPsiFile(RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, path))
         if (null === psiFile) {
             return AllIcons.FileTypes.Any_type
@@ -63,7 +63,7 @@ class LocalRepositoryFileService(
         if (null === file) {
             return null
         }
-        return PsiManager.getInstance(ideaProject).findFile(file)
+        return PsiManager.getInstance(projectServiceProvider.project).findFile(file)
     }
 
     fun findVirtualFileByPath(path: String): VirtualFile? {

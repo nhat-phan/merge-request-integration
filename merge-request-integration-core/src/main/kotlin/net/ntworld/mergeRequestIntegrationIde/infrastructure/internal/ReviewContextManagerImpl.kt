@@ -1,14 +1,14 @@
 package net.ntworld.mergeRequestIntegrationIde.infrastructure.internal
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContextManager
 
 class ReviewContextManagerImpl(
-    private val ideaProject: Project
+    private val projectServiceProvider: ProjectServiceProvider
 ) : ReviewContextManager {
     private val myLogger = Logger.getInstance(this.javaClass)
     private val myContexts = mutableMapOf<String, ReviewContextImpl>()
@@ -23,7 +23,7 @@ class ReviewContextManagerImpl(
         myLogger.info("Init context $key")
         if (!myContexts.contains(key)) {
             myContexts[key] = ReviewContextImpl(
-                ideaProject, providerData, mergeRequestInfo, ideaProject.messageBus.connect()
+                projectServiceProvider, providerData, mergeRequestInfo, projectServiceProvider.messageBus.connect()
             )
         }
         if (selected) {

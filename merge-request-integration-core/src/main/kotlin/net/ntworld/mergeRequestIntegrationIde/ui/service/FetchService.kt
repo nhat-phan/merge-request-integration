@@ -20,7 +20,10 @@ object FetchService {
         }
 
         try {
-            GitVcs.runInBackground(RepositoryFetchAllRemotesTask(ideaProject, providerData))
+            GitVcs.runInBackground(RepositoryFetchAllRemotesTask(
+                applicationServiceProvider.findProjectServiceProvider(ideaProject),
+                providerData
+            ))
         } catch (exception: Exception) {
             applicationServiceProvider.findProjectServiceProvider(ideaProject).notify(
                 "Cannot fetch from remotes. The changes in Commits tab may not be displayed correctly. \n Please run 'git fetch' manually if you want to see the change list."

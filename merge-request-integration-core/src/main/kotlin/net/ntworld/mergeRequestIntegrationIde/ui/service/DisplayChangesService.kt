@@ -41,7 +41,10 @@ object DisplayChangesService {
         }
         myTabPlacement = null
         val diff = mergeRequest.diffReference
-        val repository = RepositoryUtil.findRepository(ideaProject, providerData)
+        val repository = RepositoryUtil.findRepository(
+            applicationServiceProvider.findProjectServiceProvider(ideaProject),
+            providerData
+        )
         if (null === repository || null === diff) {
             return
         }
