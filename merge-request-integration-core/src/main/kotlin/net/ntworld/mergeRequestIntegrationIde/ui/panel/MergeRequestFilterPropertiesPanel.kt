@@ -112,7 +112,8 @@ class MergeRequestFilterPropertiesPanel(
             search = search.trim(),
             authorId = findMemberInComboBox(myAuthor!!),
             assigneeId = findMemberInComboBox(myAssignee!!),
-            approverIds = listOf(findMemberInComboBox(myApprover!!))
+            approverIds = listOf(findMemberInComboBox(myApprover!!)),
+            sourceBranch = ""
         )
     }
 

@@ -3,39 +3,37 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
-import com.intellij.util.EventDispatcher
+import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.util.messages.MessageBus
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.foundation.util.UUIDGenerator
 import net.ntworld.mergeRequest.MergeRequest
-import net.ntworld.mergeRequest.MergeRequestState
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
-import net.ntworld.mergeRequest.api.MergeRequestOrdering
-import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequest.query.generated.GetMergeRequestFilterImpl
 import net.ntworld.mergeRequestIntegration.DefaultProviderStorage
 import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
-import net.ntworld.mergeRequestIntegration.util.SavedFiltersUtil
+import net.ntworld.mergeRequestIntegrationIde.DEBUG
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.internal.FiltersStorageServiceImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
+import net.ntworld.mergeRequestIntegrationIde.rework.internal.ReworkManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
@@ -74,11 +72,24 @@ abstract class AbstractProjectServiceProvider(
 
     private val myPublisher = messageBus.syncPublisher(ProjectNotifier.TOPIC)
 
+    final override val reworkManager: ReworkManager = ReworkManagerImpl(this)
+
+    private val myBranchChangeListener = object: BranchChangeListener {
+        override fun branchWillChange(branchName: String) {
+        }
+
+        override fun branchHasChanged(branchName: String) {
+            if (DEBUG) println("BranchChangeListener triggered, request create ReworkWatcher for $branchName")
+            reworkManager.requestCreateReworkWatcher(providerStorage.registeredProviders, branchName)
+        }
+    }
+
     protected fun initWithApplicationServiceProvider(applicationSP: ApplicationServiceProvider) {
         applicationSP.watcherManager.addWatcher(reviewContextManager)
 
         val connection = messageBus.connect(project)
         connection.subscribe(MergeRequestDataNotifier.TOPIC, MergeRequestDataProvider(this, messageBus))
+        connection.subscribe(BranchChangeListener.VCS_BRANCH_CHANGED, myBranchChangeListener)
     }
 
     override fun readStateItem(item: Element, id: String, settings: ProviderSettings) {
@@ -122,6 +133,7 @@ abstract class AbstractProjectServiceProvider(
 
     override fun initialize() {
         providerStorage.clear()
+        reworkManager.clearAllBranchWatchers()
         myPublisher.starting()
 
         getProviderConfigurations().forEach { registerProviderSettings(it) }
@@ -172,6 +184,7 @@ abstract class AbstractProjectServiceProvider(
             settings = settings,
             listener = object : RegisterProviderTask.Listener {
                 override fun providerRegistered(providerData: ProviderData) {
+                    reworkManager.createBranchWatcher(providerData)
                     messageBus.syncPublisher(ProjectNotifier.TOPIC).providerRegistered(providerData)
                 }
             }

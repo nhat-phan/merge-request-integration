@@ -90,7 +90,8 @@ class ProviderDetails(
                 search = "",
                 authorId = "",
                 assigneeId = "",
-                approverIds = listOf()
+                approverIds = listOf(),
+                sourceBranch = ""
             ),
             MergeRequestOrdering.RECENTLY_UPDATED,
             displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.NONE
@@ -114,7 +115,8 @@ class ProviderDetails(
                 search = "",
                 authorId = providerData.currentUser.id,
                 assigneeId = "",
-                approverIds = listOf()
+                approverIds = listOf(),
+                sourceBranch = ""
             ),
             MergeRequestOrdering.RECENTLY_UPDATED,
             displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES
@@ -138,7 +140,8 @@ class ProviderDetails(
                 search = "",
                 authorId = "",
                 assigneeId = providerData.currentUser.id,
-                approverIds = listOf()
+                approverIds = listOf(),
+                sourceBranch = ""
             ),
             MergeRequestOrdering.RECENTLY_UPDATED,
             displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES
@@ -162,7 +165,8 @@ class ProviderDetails(
                 search = "",
                 authorId = "",
                 assigneeId = "",
-                approverIds = listOf(providerData.currentUser.id)
+                approverIds = listOf(providerData.currentUser.id),
+                sourceBranch = ""
             ),
             MergeRequestOrdering.RECENTLY_UPDATED,
             displayType = ProviderDetailsMRList.ApprovalStatusDisplayType.STATUSES_AND_MINE_APPROVAL

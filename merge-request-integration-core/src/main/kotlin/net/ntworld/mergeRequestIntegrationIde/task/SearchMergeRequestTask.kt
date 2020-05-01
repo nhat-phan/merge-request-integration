@@ -53,12 +53,14 @@ class SearchMergeRequestTask(
     private class Indicator(private val task: SearchMergeRequestTask) : BackgroundableProcessIndicator(task)
 
     interface Listener {
-        fun onError(exception: Exception)
+        fun onError(exception: Exception) {
+            throw exception
+        }
 
-        fun taskStarted()
+        fun taskStarted() {}
 
         fun dataReceived(list: List<MergeRequestInfo>, page: Int, totalPages: Int, totalItems: Int)
 
-        fun taskEnded()
+        fun taskEnded() {}
     }
 }

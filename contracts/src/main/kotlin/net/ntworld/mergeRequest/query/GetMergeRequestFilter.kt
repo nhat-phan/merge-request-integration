@@ -13,5 +13,7 @@ interface GetMergeRequestFilter {
 
     val approverIds: List<String>
 
+    val sourceBranch: String
+
     companion object
 }

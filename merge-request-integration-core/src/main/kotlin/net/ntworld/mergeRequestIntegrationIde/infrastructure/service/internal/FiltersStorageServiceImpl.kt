@@ -25,7 +25,8 @@ class FiltersStorageServiceImpl(
                     search = "",
                     authorId = "",
                     assigneeId = "",
-                    approverIds = listOf("")
+                    approverIds = listOf(""),
+                    sourceBranch = ""
                 ),
                 MergeRequestOrdering.RECENTLY_UPDATED
             )

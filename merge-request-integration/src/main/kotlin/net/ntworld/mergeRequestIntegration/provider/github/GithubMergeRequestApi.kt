@@ -11,7 +11,6 @@ import net.ntworld.mergeRequestIntegration.provider.github.request.GithubSearchP
 import net.ntworld.mergeRequestIntegration.provider.github.transformer.GithubSearchPullRequestItemTransformer
 import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubProjectId
 import net.ntworld.mergeRequestIntegration.provider.github.vo.GithubUserId
-import net.ntworld.mergeRequestIntegration.provider.gitlab.transformer.GitlabMRSimpleTransformer
 import kotlin.math.ceil
 
 class GithubMergeRequestApi(

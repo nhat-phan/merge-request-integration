@@ -43,7 +43,8 @@ abstract class AbstractMergeRequestCollection(
         search = "",
         authorId = "",
         assigneeId = "",
-        approverIds = listOf()
+        approverIds = listOf(),
+        sourceBranch = ""
     )
     private var myOrdering = MergeRequestOrdering.RECENTLY_UPDATED
     private val myListener = object : SearchMergeRequestTask.Listener {

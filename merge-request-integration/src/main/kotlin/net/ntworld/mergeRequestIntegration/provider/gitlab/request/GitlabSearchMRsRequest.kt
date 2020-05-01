@@ -14,6 +14,7 @@ data class GitlabSearchMRsRequest(
     val authorId: String,
     val assigneeId: String,
     val approverIds: List<String>,
+    val sourceBranch: String,
     val orderBy: Constants.MergeRequestOrderBy = Constants.MergeRequestOrderBy.UPDATED_AT,
     val sort: Constants.SortOrder,
     val page: Int = 0,

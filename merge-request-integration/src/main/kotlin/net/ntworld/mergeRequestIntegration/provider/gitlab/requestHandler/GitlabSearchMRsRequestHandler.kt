@@ -37,7 +37,9 @@ class GitlabSearchMRsRequestHandler : RequestHandler<GitlabSearchMRsRequest, Git
 
     internal fun buildMergeRequestFilter(request: GitlabSearchMRsRequest): MyMergeRequestFilter {
         val filter = MyMergeRequestFilter()
-        filter.simpleView = true
+        if (request.sourceBranch.isNotEmpty()) {
+            filter.sourceBranch = request.sourceBranch
+        }
         filter.state = request.state
         filter.projectId = request.credentials.projectId.toInt()
 

@@ -31,7 +31,8 @@ class SavedFiltersUtil {
                     search = search,
                     authorId = authorId,
                     assigneeId = assigneeId,
-                    approverIds = approverIds
+                    approverIds = approverIds,
+                    sourceBranch = ""
                 ),
                 when (ordering) {
                     "recently-updated" -> MergeRequestOrdering.RECENTLY_UPDATED

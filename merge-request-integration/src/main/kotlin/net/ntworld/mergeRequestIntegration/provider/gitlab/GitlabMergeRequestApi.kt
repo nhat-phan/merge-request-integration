@@ -104,6 +104,7 @@ class GitlabMergeRequestApi(
             authorId = filterBy.authorId,
             assigneeId = filterBy.assigneeId,
             approverIds = filterBy.approverIds,
+            sourceBranch = filterBy.sourceBranch,
             orderBy = order,
             sort = sort,
             page = page,
