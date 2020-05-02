@@ -1,10 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIdeEE
 
 import com.intellij.openapi.components.ServiceManager
-import net.ntworld.mergeRequestIntegrationIde.toolWindow.AbstractSingleMRToolWindowFactory
+import net.ntworld.mergeRequestIntegrationIde.toolWindow.SingleMRToolWindowFactoryBase
 
-class SingleMRToolWindowFactory : AbstractSingleMRToolWindowFactory(
+class SingleMRToolWindowFactory : SingleMRToolWindowFactoryBase(
     ServiceManager.getService(EnterpriseApplicationServiceProvider::class.java)
-) {
-    override fun getToolWindowName(): String = "Merge Request"
-}
+)

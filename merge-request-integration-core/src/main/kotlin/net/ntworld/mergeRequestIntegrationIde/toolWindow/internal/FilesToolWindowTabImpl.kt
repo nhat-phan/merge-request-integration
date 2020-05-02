@@ -1,12 +1,10 @@
-package net.ntworld.mergeRequestIntegrationIde.ui.toolWindowTab
+package net.ntworld.mergeRequestIntegrationIde.toolWindow.internal
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ui.ChangesTreeImpl
 import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
@@ -14,25 +12,23 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifierAdapter
-import net.ntworld.mergeRequestIntegrationIde.ui.Component
+import net.ntworld.mergeRequestIntegrationIde.toolWindow.FilesToolWindowTab
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import java.awt.GridBagLayout
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.SwingConstants
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
-class ChangesToolWindowTab(
+class FilesToolWindowTabImpl(
     private val projectServiceProvider: ProjectServiceProvider
-) : Component, Disposable {
+) : FilesToolWindowTab {
     private val myComponentEmpty = JPanel()
-    private val myLabelEmpty = JLabel()
+    private val myLabelEmpty = JLabel("", SwingConstants.CENTER)
     private val myComponent = SimpleToolWindowPanel(true, true)
     private val myTree = MyTree(projectServiceProvider.project)
     private val myTreeWrapper = ScrollPaneFactory.createScrollPane(myTree, true)
@@ -50,23 +46,12 @@ class ChangesToolWindowTab(
         panel.add(leftToolbar.component)
         panel.add(
             ToolbarUtil.createExpandAndCollapseToolbar(
-                "${ChangesToolWindowTab::class.java.canonicalName}/toolbar-right",
+                "${this::class.java.canonicalName}/toolbar-right",
                 myTree
             )
         )
         panel
     }
-    private val myProjectNotifier = object : ProjectNotifierAdapter() {
-        override fun startCodeReview(reviewContext: ReviewContext) {
-            setChanges(reviewContext.reviewingChanges)
-            showChanges()
-        }
-
-        override fun stopCodeReview(reviewContext: ReviewContext) {
-            hideChanges()
-        }
-    }
-    private val myConnection = projectServiceProvider.messageBus.connect()
     private val myTreeSelectionListener = TreeSelectionListener {
         if (null === it) {
             return@TreeSelectionListener
@@ -89,7 +74,7 @@ class ChangesToolWindowTab(
     }
 
     init {
-        myLabelEmpty.text = "Changes will be displayed when you do Code Review"
+        myLabelEmpty.text = "<html>Files' changes will be displayed when you do Code Review<br/>or<br/>open a branch which has an opened Merge Request</html>"
         myComponentEmpty.background = JBColor.background()
         myComponentEmpty.layout = GridBagLayout()
         myComponentEmpty.add(myLabelEmpty)
@@ -99,32 +84,25 @@ class ChangesToolWindowTab(
         val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
             setChanges(reviewContext.reviewingChanges)
-            showChanges()
         } else {
-            hideChanges()
+            hide()
         }
-
-        myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
-        Disposer.register(projectServiceProvider.project, this)
     }
 
-    override fun createComponent(): JComponent = myComponent
+    override val component: JComponent = myComponent
 
-    private fun hideChanges() {
-        myTree.setChangesToDisplay(listOf())
-        myToolbar.isVisible = false
-        myComponent.setContent(myComponentEmpty)
-    }
-
-    private fun showChanges() {
+    override fun setChanges(changes: List<Change>) {
+        ApplicationManager.getApplication().invokeLater {
+            myTree.setChangesToDisplay(changes)
+        }
         myToolbar.isVisible = true
         myComponent.setContent(myTreeWrapper)
     }
 
-    private fun setChanges(changes: Collection<Change>) {
-        ApplicationManager.getApplication().invokeLater {
-            myTree.setChangesToDisplay(changes)
-        }
+    override fun hide() {
+        myTree.setChangesToDisplay(listOf())
+        myToolbar.isVisible = false
+        myComponent.setContent(myComponentEmpty)
     }
 
     private class MyTree(ideaProject: Project) : ChangesTreeImpl<Change>(
@@ -133,9 +111,5 @@ class ChangesToolWindowTab(
         override fun buildTreeModel(changes: MutableList<out Change>): DefaultTreeModel {
             return TreeModelBuilder.buildFromChanges(myProject, grouping, changes, null)
         }
-    }
-
-    override fun dispose() {
-        myConnection.disconnect()
     }
 }

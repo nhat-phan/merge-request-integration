@@ -2,7 +2,6 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.notification.NotificationType
 import com.intellij.util.messages.MessageBus
-import com.intellij.util.messages.Topic
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
@@ -10,7 +9,7 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ChangesToolWindowNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
@@ -43,13 +42,17 @@ interface ProjectServiceProvider {
 
     val projectNotifierTopic: ProjectNotifier
 
-    val changeToolWindowNotifierTopic: ChangesToolWindowNotifier
+    val singleMRToolWindowNotifierTopic: SingleMRToolWindowNotifier
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials, repository: String)
 
     fun removeProviderConfiguration(id: String)
 
     fun getProviderConfigurations(): List<ProviderSettings>
+
+    fun openSingleMRToolWindow(invoker: (() -> Unit)?)
+
+    fun hideSingleMRToolWindow(invoker: (() -> Unit)?)
 
     fun initialize()
 

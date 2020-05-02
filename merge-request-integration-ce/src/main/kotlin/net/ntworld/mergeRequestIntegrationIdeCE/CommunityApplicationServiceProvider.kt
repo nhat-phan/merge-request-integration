@@ -15,4 +15,6 @@ class CommunityApplicationServiceProvider: AbstractApplicationServiceProvider() 
 
         return service
     }
+
+    override val singleMRToolWindowName: String = "Merge Request CE"
 }

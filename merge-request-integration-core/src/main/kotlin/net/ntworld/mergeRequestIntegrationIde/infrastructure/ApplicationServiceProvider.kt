@@ -17,6 +17,8 @@ interface ApplicationServiceProvider {
 
     val watcherManager: WatcherManager
 
+    val singleMRToolWindowName: String
+
     fun findProjectServiceProvider(project: Project): ProjectServiceProvider
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)

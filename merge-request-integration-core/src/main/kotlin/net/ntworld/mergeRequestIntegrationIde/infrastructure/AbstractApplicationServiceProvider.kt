@@ -2,6 +2,8 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo

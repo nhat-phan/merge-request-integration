@@ -4,8 +4,8 @@ import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.BranchChangeListener
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.messages.MessageBus
-import com.intellij.util.messages.Topic
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.foundation.util.UUIDGenerator
@@ -24,7 +24,7 @@ import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ChangesToolWindowNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
@@ -74,7 +74,7 @@ abstract class AbstractProjectServiceProvider(
 
     override val projectNotifierTopic: ProjectNotifier = messageBus.syncPublisher(ProjectNotifier.TOPIC)
 
-    override val changeToolWindowNotifierTopic = messageBus.syncPublisher(ChangesToolWindowNotifier.TOPIC)
+    override val singleMRToolWindowNotifierTopic = messageBus.syncPublisher(SingleMRToolWindowNotifier.TOPIC)
 
     final override val reworkManager: ReworkManager = ReworkManagerImpl(this)
 
@@ -144,6 +144,24 @@ abstract class AbstractProjectServiceProvider(
         projectNotifierTopic.initialized()
     }
 
+    override fun openSingleMRToolWindow(invoker: (() -> Unit)?) {
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(
+            applicationServiceProvider.singleMRToolWindowName
+        )
+        if (null !== toolWindow) {
+            toolWindow.show(invoker)
+        }
+    }
+
+    override fun hideSingleMRToolWindow(invoker: (() -> Unit)?) {
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(
+            applicationServiceProvider.singleMRToolWindowName
+        )
+        if (null !== toolWindow) {
+            toolWindow.hide(invoker)
+        }
+    }
+
     override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
 
     override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
@@ -151,7 +169,9 @@ abstract class AbstractProjectServiceProvider(
         val reviewContext = reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
             projectNotifierTopic.startCodeReview(reviewContext)
-            changeToolWindowNotifierTopic.requestOpenToolWindow()
+            openSingleMRToolWindow {
+                singleMRToolWindowNotifierTopic.requestShowChanges(reviewContext.changes)
+            }
         }
     }
 
@@ -160,7 +180,9 @@ abstract class AbstractProjectServiceProvider(
         if (null !== reviewContext) {
             projectNotifierTopic.stopCodeReview(reviewContext)
             reviewContext.closeAllChanges()
-            changeToolWindowNotifierTopic.requestHideToolWindow()
+            hideSingleMRToolWindow {
+                singleMRToolWindowNotifierTopic.requestHideChanges()
+            }
         }
         providerStorage.registeredProviders.forEach {
             reworkManager.createBranchWatcher(it)
