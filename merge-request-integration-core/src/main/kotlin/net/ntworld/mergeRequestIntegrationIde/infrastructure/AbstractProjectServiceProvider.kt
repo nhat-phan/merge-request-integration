@@ -5,6 +5,7 @@ import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.util.messages.MessageBus
+import com.intellij.util.messages.Topic
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.foundation.MemorizedInfrastructure
 import net.ntworld.foundation.util.UUIDGenerator
@@ -23,6 +24,7 @@ import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ChangesToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
@@ -38,7 +40,6 @@ import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GitlabConnectionsConfigurableBase
 import org.jdom.Element
-import kotlin.concurrent.thread
 import com.intellij.openapi.project.Project as IdeaProject
 
 abstract class AbstractProjectServiceProvider(
@@ -71,7 +72,9 @@ abstract class AbstractProjectServiceProvider(
 
     final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(this)
 
-    private val myPublisher = messageBus.syncPublisher(ProjectNotifier.TOPIC)
+    override val projectNotifierTopic: ProjectNotifier = messageBus.syncPublisher(ProjectNotifier.TOPIC)
+
+    override val changeToolWindowNotifierTopic = messageBus.syncPublisher(ChangesToolWindowNotifier.TOPIC)
 
     final override val reworkManager: ReworkManager = ReworkManagerImpl(this)
 
@@ -135,10 +138,10 @@ abstract class AbstractProjectServiceProvider(
     override fun initialize() {
         providerStorage.clear()
         reworkManager.clear()
-        myPublisher.starting()
+        projectNotifierTopic.starting()
 
         getProviderConfigurations().forEach { registerProviderSettings(it) }
-        myPublisher.initialized()
+        projectNotifierTopic.initialized()
     }
 
     override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
@@ -147,15 +150,17 @@ abstract class AbstractProjectServiceProvider(
         reviewContextManager.setContextToDoingCodeReview(providerData.id, mergeRequest.id)
         val reviewContext = reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
-            myPublisher.startCodeReview(reviewContext)
+            projectNotifierTopic.startCodeReview(reviewContext)
+            changeToolWindowNotifierTopic.requestOpenToolWindow()
         }
     }
 
     override fun stopCodeReview() {
         val reviewContext = reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
-            myPublisher.stopCodeReview(reviewContext)
+            projectNotifierTopic.stopCodeReview(reviewContext)
             reviewContext.closeAllChanges()
+            changeToolWindowNotifierTopic.requestHideToolWindow()
         }
         providerStorage.registeredProviders.forEach {
             reworkManager.createBranchWatcher(it)
@@ -188,7 +193,7 @@ abstract class AbstractProjectServiceProvider(
             settings = settings,
             listener = object : RegisterProviderTask.Listener {
                 override fun providerRegistered(providerData: ProviderData) {
-                    messageBus.syncPublisher(ProjectNotifier.TOPIC).providerRegistered(providerData)
+                    projectNotifierTopic.providerRegistered(providerData)
                     reworkManager.createBranchWatcher(providerData)
                 }
             }

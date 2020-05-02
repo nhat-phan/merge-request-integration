@@ -34,11 +34,11 @@
                     canCloseContents="true"
                     factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.MainToolWindowFactory"/>
 
-        <toolWindow id="Merge Request's Changes CE"
+        <toolWindow id="Merge Request CE"
                     secondary="true"
                     anchor="left"
                     icon="/icons/compress-alt.svg"
-                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.ChangesToolWindowFactory"/>
+                    factoryClass="net.ntworld.mergeRequestIntegrationIdeCE.SingleMRToolWindowFactory"/>
     </extensions>
 
     <actions>

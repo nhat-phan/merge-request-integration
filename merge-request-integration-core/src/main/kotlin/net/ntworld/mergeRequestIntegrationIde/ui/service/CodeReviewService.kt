@@ -23,12 +23,6 @@ object CodeReviewService {
         checkedOut = false
         projectServiceProvider.reviewContextManager.updateReviewingCommits(providerData.id, mergeRequest.id, commits)
         projectServiceProvider.startCodeReview(providerData, mergeRequest)
-        val toolWindow = ToolWindowManager.getInstance(projectServiceProvider.project).getToolWindow(
-            projectServiceProvider.applicationServiceProvider.getChangesToolWindowId()
-        )
-        if (null !== toolWindow) {
-            toolWindow.show(null)
-        }
         checkout(projectServiceProvider, providerData, mergeRequest, commits)
     }
 
@@ -38,12 +32,6 @@ object CodeReviewService {
         mergeRequest: MergeRequest
     ) {
         projectServiceProvider.stopCodeReview()
-        val toolWindow = ToolWindowManager.getInstance(projectServiceProvider.project).getToolWindow(
-            projectServiceProvider.applicationServiceProvider.getChangesToolWindowId()
-        )
-        if (null !== toolWindow) {
-            toolWindow.hide(null)
-        }
         if (checkedOut) {
             CheckoutService.stop(projectServiceProvider, providerData)
             DisplayChangesService.stop(projectServiceProvider.project, providerData, mergeRequest)

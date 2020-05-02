@@ -23,6 +23,4 @@ class EnterpriseApplicationServiceProvider: AbstractApplicationServiceProvider()
 
         return service
     }
-
-    override fun getChangesToolWindowId(): String = "Merge Request's Changes"
 }

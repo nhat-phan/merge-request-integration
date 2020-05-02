@@ -2,6 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 
 import com.intellij.notification.NotificationType
 import com.intellij.util.messages.MessageBus
+import com.intellij.util.messages.Topic
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
@@ -9,6 +10,8 @@ import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ChangesToolWindowNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
@@ -37,6 +40,10 @@ interface ProjectServiceProvider {
     val filtersStorage: FiltersStorageService
 
     val reviewContextManager: ReviewContextManager
+
+    val projectNotifierTopic: ProjectNotifier
+
+    val changeToolWindowNotifierTopic: ChangesToolWindowNotifier
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials, repository: String)
 

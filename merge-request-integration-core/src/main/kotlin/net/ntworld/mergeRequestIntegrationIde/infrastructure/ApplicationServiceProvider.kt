@@ -19,8 +19,6 @@ interface ApplicationServiceProvider {
 
     fun findProjectServiceProvider(project: Project): ProjectServiceProvider
 
-    fun getChangesToolWindowId(): String
-
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials)
 
     fun removeAllProviderConfigurations()

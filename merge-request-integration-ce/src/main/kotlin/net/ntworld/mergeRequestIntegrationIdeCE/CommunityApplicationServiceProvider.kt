@@ -15,6 +15,4 @@ class CommunityApplicationServiceProvider: AbstractApplicationServiceProvider() 
 
         return service
     }
-
-    override fun getChangesToolWindowId(): String = "Merge Request's Changes CE"
 }
