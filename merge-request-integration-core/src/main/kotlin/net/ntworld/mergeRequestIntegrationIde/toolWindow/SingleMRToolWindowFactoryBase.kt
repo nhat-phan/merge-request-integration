@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
+import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
@@ -33,8 +34,8 @@ abstract class SingleMRToolWindowFactoryBase(
     private class MySingleMRToolWindowNotifier(
         val filesToolWindowTab: FilesToolWindowTab
     ) : SingleMRToolWindowNotifier {
-        override fun requestShowChanges(changes: List<Change>) {
-            filesToolWindowTab.setChanges(changes)
+        override fun requestShowChanges(providerData: ProviderData, changes: List<Change>) {
+            filesToolWindowTab.setChanges(providerData, changes)
         }
 
         override fun requestHideChanges() {

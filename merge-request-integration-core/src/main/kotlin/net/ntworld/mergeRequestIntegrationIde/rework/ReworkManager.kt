@@ -1,5 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.rework
 
+import com.intellij.openapi.vcs.changes.Change
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.ProviderData
 
@@ -15,4 +16,5 @@ interface ReworkManager {
 
     fun requestCreateReworkWatcher(providerData: ProviderData, repository: GitRepository, branchName: String)
 
+    fun findReworkWatcherByChange(providerData: ProviderData, change: Change): ReworkWatcher?
 }

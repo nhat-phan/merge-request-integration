@@ -25,4 +25,6 @@ interface ReworkWatcher : Watcher {
     val comments: List<Comment>
 
     fun shutdown()
+
+    fun openChange(change: Change)
 }

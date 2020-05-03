@@ -11,6 +11,7 @@ import com.intellij.openapi.vcs.changes.ui.TreeModelBuilder
 import com.intellij.ui.JBColor
 import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
+import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.toolWindow.FilesToolWindowTab
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
@@ -27,6 +28,7 @@ import javax.swing.tree.DefaultTreeModel
 class FilesToolWindowTabImpl(
     private val projectServiceProvider: ProjectServiceProvider
 ) : FilesToolWindowTab {
+    private var myProviderData: ProviderData? = null
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel("", SwingConstants.CENTER)
     private val myComponent = SimpleToolWindowPanel(true, true)
@@ -70,6 +72,18 @@ class FilesToolWindowTabImpl(
         val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
             reviewContext.openChange(change, focus = true, displayMergeRequestId = false)
+            return@TreeSelectionListener
+        }
+
+        val providerData = myProviderData
+        if (null !== providerData) {
+            val reworkWatcher = projectServiceProvider.reworkManager.findReworkWatcherByChange(
+                providerData,
+                change
+            )
+            if (null !== reworkWatcher) {
+                reworkWatcher.openChange(change)
+            }
         }
     }
 
@@ -83,7 +97,7 @@ class FilesToolWindowTabImpl(
 
         val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
-            setChanges(reviewContext.reviewingChanges)
+            setChanges(reviewContext.providerData, reviewContext.reviewingChanges)
         } else {
             hide()
         }
@@ -91,7 +105,8 @@ class FilesToolWindowTabImpl(
 
     override val component: JComponent = myComponent
 
-    override fun setChanges(changes: List<Change>) {
+    override fun setChanges(providerData: ProviderData, changes: List<Change>) {
+        myProviderData = providerData
         ApplicationManager.getApplication().invokeLater {
             myTree.setChangesToDisplay(changes)
         }

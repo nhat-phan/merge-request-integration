@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.vcs.changes.Change
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.MergeRequestState
@@ -118,6 +119,19 @@ internal class ReworkManagerImpl(
         )
 
         task.start()
+    }
+
+    override fun findReworkWatcherByChange(providerData: ProviderData, change: Change): ReworkWatcher? {
+        for (entry in myReworkWatchers) {
+            if (entry.value.providerData.id != providerData.id) {
+                continue
+            }
+
+            if (entry.value.changes.contains(change)) {
+                return entry.value
+            }
+        }
+        return null
     }
 
     private fun keyOf(providerData: ProviderData, branchName: String): String {

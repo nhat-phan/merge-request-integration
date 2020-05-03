@@ -170,7 +170,7 @@ abstract class AbstractProjectServiceProvider(
         if (null !== reviewContext) {
             projectNotifierTopic.startCodeReview(reviewContext)
             openSingleMRToolWindow {
-                singleMRToolWindowNotifierTopic.requestShowChanges(reviewContext.changes)
+                singleMRToolWindowNotifierTopic.requestShowChanges(reviewContext.providerData, reviewContext.changes)
             }
         }
     }
