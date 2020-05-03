@@ -15,6 +15,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.toolWindow.FilesToolWindowTab
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
+import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import java.awt.GridBagLayout
 import javax.swing.JComponent
@@ -31,7 +32,7 @@ class FilesToolWindowTabImpl(
     private var myProviderData: ProviderData? = null
     private val myComponentEmpty = JPanel()
     private val myLabelEmpty = JLabel("", SwingConstants.CENTER)
-    private val myComponent = SimpleToolWindowPanel(true, true)
+    private val myComponent = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
     private val myTree = MyTree(projectServiceProvider.project)
     private val myTreeWrapper = ScrollPaneFactory.createScrollPane(myTree, true)
     private val myToolbar by lazy {

@@ -134,6 +134,16 @@ internal class ReworkManagerImpl(
         return null
     }
 
+    override fun findActiveReworkWatcher(providerData: ProviderData): ReworkWatcher? {
+        for (entry in myReworkWatchers) {
+            if (entry.value.providerData.id != providerData.id) {
+                continue
+            }
+            return entry.value
+        }
+        return null
+    }
+
     private fun keyOf(providerData: ProviderData, branchName: String): String {
         return "${providerData.id}:${branchName}"
     }

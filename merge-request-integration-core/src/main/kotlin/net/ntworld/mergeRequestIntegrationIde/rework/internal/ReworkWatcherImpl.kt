@@ -1,6 +1,8 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.fileEditor.FileEditor
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile
@@ -41,6 +43,12 @@ class ReworkWatcherImpl(
                     projectServiceProvider.singleMRToolWindowNotifierTopic.requestShowChanges(
                         providerData, changes
                     )
+                }
+                val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
+                for (editor in editors) {
+                    if (editor is TextEditor) {
+                        projectServiceProvider.editorManager.initialize(editor, this@ReworkWatcherImpl)
+                    }
                 }
             }
         }
@@ -92,6 +100,12 @@ class ReworkWatcherImpl(
         myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->
             fileEditorManagerEx.closeFile(diffFile)
         }
+        val editors = fileEditorManagerEx.allEditors
+        for (editor in editors) {
+            if (editor is TextEditor) {
+                projectServiceProvider.editorManager.shutdown(editor)
+            }
+        }
         myPreviewDiffVirtualFileMap.clear()
         myTerminate = true
     }
@@ -105,7 +119,14 @@ class ReworkWatcherImpl(
         val path = afterRevision.file.path
         val file = LocalFileSystem.getInstance().findFileByPath(path)
         if (null !== file) {
-            FileEditorManagerEx.getInstanceEx(projectServiceProvider.project).openFile(file, true)
+            val fileEditors = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project).openFile(file, true)
+            ApplicationManager.getApplication().invokeLater {
+                for (fileEditor in fileEditors) {
+                    if (fileEditor is TextEditor) {
+                        projectServiceProvider.editorManager.initialize(fileEditor, this)
+                    }
+                }
+            }
         }
     }
 

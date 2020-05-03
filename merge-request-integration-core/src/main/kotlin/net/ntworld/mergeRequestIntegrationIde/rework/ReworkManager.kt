@@ -17,4 +17,6 @@ interface ReworkManager {
     fun requestCreateReworkWatcher(providerData: ProviderData, repository: GitRepository, branchName: String)
 
     fun findReworkWatcherByChange(providerData: ProviderData, change: Change): ReworkWatcher?
+
+    fun findActiveReworkWatcher(providerData: ProviderData): ReworkWatcher?
 }

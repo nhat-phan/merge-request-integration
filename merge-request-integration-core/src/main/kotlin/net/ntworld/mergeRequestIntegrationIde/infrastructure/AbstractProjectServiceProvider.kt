@@ -3,6 +3,10 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.fileEditor.FileEditorManagerEvent
+import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.messages.MessageBus
@@ -24,9 +28,9 @@ import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
@@ -34,7 +38,9 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.internal.Fi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.rework.EditorManager
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
+import net.ntworld.mergeRequestIntegrationIde.rework.internal.EditorManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.rework.internal.ReworkManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
@@ -70,13 +76,15 @@ abstract class AbstractProjectServiceProvider(
 
     override val filtersStorage: FiltersStorageService = FiltersStorageServiceImpl(this)
 
-    final override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(this)
+    override val reviewContextManager: ReviewContextManager = ReviewContextManagerImpl(this)
 
     override val projectNotifierTopic: ProjectNotifier = messageBus.syncPublisher(ProjectNotifier.TOPIC)
 
     override val singleMRToolWindowNotifierTopic = messageBus.syncPublisher(SingleMRToolWindowNotifier.TOPIC)
 
-    final override val reworkManager: ReworkManager = ReworkManagerImpl(this)
+    override val reworkManager: ReworkManager = ReworkManagerImpl(this)
+
+    override val editorManager: EditorManager = EditorManagerImpl(this)
 
     private val myBranchChangeListener = object: BranchChangeListener {
         override fun branchWillChange(branchName: String) {
@@ -86,6 +94,26 @@ abstract class AbstractProjectServiceProvider(
             debug("BranchChangeListener triggered, request create ReworkWatcher for $branchName")
             reworkManager.requestCreateReworkWatcher(providerStorage.registeredProviders, branchName)
         }
+    }
+
+    private val myFileEditorManagerListener = object: FileEditorManagerListener {
+        override fun selectionChanged(event: FileEditorManagerEvent) {
+            val editor = event.newEditor
+            if (editor !is TextEditor) {
+                return
+            }
+            val providers = providerStorage.registeredProviders
+            for (provider in providers) {
+                val reworkWatcher = reworkManager.findActiveReworkWatcher(provider)
+                if (null !== reworkWatcher) {
+                    editorManager.initialize(editor, reworkWatcher)
+                }
+            }
+        }
+    }
+
+    init {
+        messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, myFileEditorManagerListener)
     }
 
     protected fun initWithApplicationServiceProvider(applicationSP: ApplicationServiceProvider) {

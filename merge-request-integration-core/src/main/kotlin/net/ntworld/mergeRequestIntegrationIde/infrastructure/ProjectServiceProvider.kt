@@ -14,6 +14,7 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNot
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
+import net.ntworld.mergeRequestIntegrationIde.rework.EditorManager
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
 import com.intellij.openapi.project.Project as IdeaProject
 
@@ -35,6 +36,8 @@ interface ProjectServiceProvider {
     val repositoryFile: RepositoryFileService
 
     val reworkManager: ReworkManager
+
+    val editorManager: EditorManager
 
     val filtersStorage: FiltersStorageService
 

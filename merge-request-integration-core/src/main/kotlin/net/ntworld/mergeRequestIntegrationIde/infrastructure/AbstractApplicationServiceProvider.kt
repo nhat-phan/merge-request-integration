@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.impl.ProjectLifecycleListener
 import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
@@ -36,10 +37,16 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
             watcherManager.dispose()
         }
     }
+    private val myProjectLifecycleListener = object: ProjectLifecycleListener {
+        override fun projectComponentsInitialized(project: Project) {
+            findProjectServiceProvider(project).initialize()
+        }
+    }
 
     init {
         val connection = ApplicationManager.getApplication().messageBus.connect()
         connection.subscribe(AppLifecycleListener.TOPIC, myAppLifecycleListener)
+        connection.subscribe(ProjectLifecycleListener.TOPIC, myProjectLifecycleListener)
     }
 
     protected fun registerProjectServiceProvider(projectServiceProvider: ProjectServiceProvider)
