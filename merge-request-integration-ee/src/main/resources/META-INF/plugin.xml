@@ -44,13 +44,13 @@
     </extensions>
 
     <actions>
-        <action class="net.ntworld.mergeRequestIntegrationIdeEE.ToggleCommentsEditorAction"
+        <action class="net.ntworld.mergeRequestIntegrationIdeEE.DiffViewToggleCommentsAction"
                 text="Toggle Comments"
                 description="Toggle comments to this line">
             <keyboard-shortcut first-keystroke="alt V" keymap="$default"/>
             <add-to-group group-id="Diff.EditorPopupMenu" relative-to-action="Annotate" anchor="after" />
         </action>
-        <action class="net.ntworld.mergeRequestIntegrationIdeEE.AddCommentEditorAction"
+        <action class="net.ntworld.mergeRequestIntegrationIdeEE.DiffViewAddCommentAction"
                 text="Add Comment"
                 description="Add comment to this line">
             <keyboard-shortcut first-keystroke="alt C" keymap="$default"/>

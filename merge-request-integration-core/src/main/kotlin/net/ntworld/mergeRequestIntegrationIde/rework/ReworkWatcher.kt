@@ -31,4 +31,6 @@ interface ReworkWatcher : Watcher {
     fun findChangeByPath(path: String): Change?
 
     fun findCommentsByPath(path: String): List<Comment>
+
+    fun fetchComments()
 }

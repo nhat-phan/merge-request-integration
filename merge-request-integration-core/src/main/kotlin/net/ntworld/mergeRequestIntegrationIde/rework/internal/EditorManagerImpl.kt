@@ -1,6 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import com.intellij.diff.util.Side
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.TextEditor
@@ -8,11 +9,17 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vfs.VirtualFile
 import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequest.command.DeleteCommentCommand
+import net.ntworld.mergeRequest.command.ResolveCommentCommand
+import net.ntworld.mergeRequest.command.UnresolveCommentCommand
+import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadPresenter
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadFactory
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadModel
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadPresenter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.rework.EditorManager
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
@@ -52,7 +59,7 @@ class EditorManagerImpl(
     }
 
     override fun updateComments(textEditor: TextEditor, reworkWatcher: ReworkWatcher) {
-        if (myInitializedEditors.containsKey(textEditor)) {
+        if (!myInitializedEditors.containsKey(textEditor)) {
             return initialize(textEditor, reworkWatcher)
         }
 
@@ -149,6 +156,7 @@ class EditorManagerImpl(
             )
             val presenter = ThreadFactory.makePresenter(model, view)
 
+            presenter.addListener(MyThreadPresenterEventListener(this, textEditor, reworkWatcher))
             Disposer.register(textEditor, presenter)
 
             map[logicalLine] = presenter
@@ -217,6 +225,12 @@ class EditorManagerImpl(
         }
     }
 
+    private fun resetEditorOnLine(textEditor: TextEditor, logicalLine: Int, repliedComment: Comment) {
+        val map = myThreads[textEditor] ?: return
+        val thread = map[logicalLine] ?: return
+        thread.model.resetEditor(repliedComment)
+    }
+
     private class MyGutterIconRendererActionListener(
         private val self: EditorManagerImpl,
         private val textEditor: TextEditor,
@@ -246,6 +260,62 @@ class EditorManagerImpl(
 
                 position.newLine == visibleLine
             }
+        }
+    }
+
+    private class MyThreadPresenterEventListener(
+        private val self: EditorManagerImpl,
+        private val textEditor: TextEditor,
+        private val reworkWatcher: ReworkWatcher
+    ) : ThreadPresenter.EventListener {
+        override fun onMainEditorClosed(threadPresenter: ThreadPresenter) {
+        }
+
+        override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
+            self.projectServiceProvider.infrastructure.serviceBus() process ReplyCommentRequest.make(
+                providerId = reworkWatcher.providerData.id,
+                mergeRequestId = reworkWatcher.mergeRequestInfo.id,
+                repliedComment = repliedComment,
+                body = content
+            ) ifError {
+                self.projectServiceProvider.notify(
+                    "There was an error from server. \n\n ${it.message}",
+                    NotificationType.ERROR
+                )
+                throw ProviderException(it)
+            }
+            reworkWatcher.fetchComments()
+            self.resetEditorOnLine(textEditor, logicalLine, repliedComment)
+        }
+
+        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
+        }
+
+        override fun onDeleteCommentRequested(comment: Comment) {
+            self.projectServiceProvider.infrastructure.commandBus() process DeleteCommentCommand.make(
+                providerId = reworkWatcher.providerData.id,
+                mergeRequestId = reworkWatcher.mergeRequestInfo.id,
+                comment = comment
+            )
+            reworkWatcher.fetchComments()
+        }
+
+        override fun onResolveCommentRequested(comment: Comment) {
+            self.projectServiceProvider.infrastructure.commandBus() process ResolveCommentCommand.make(
+                providerId = reworkWatcher.providerData.id,
+                mergeRequestId = reworkWatcher.mergeRequestInfo.id,
+                comment = comment
+            )
+            reworkWatcher.fetchComments()
+        }
+
+        override fun onUnresolveCommentRequested(comment: Comment) {
+            self.projectServiceProvider.infrastructure.commandBus() process UnresolveCommentCommand.make(
+                providerId = reworkWatcher.providerData.id,
+                mergeRequestId = reworkWatcher.mergeRequestInfo.id,
+                comment = comment
+            )
+            reworkWatcher.fetchComments()
         }
     }
 }

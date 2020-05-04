@@ -99,7 +99,7 @@ class ReworkWatcherImpl(
 
     override fun execute() {
         if (myRunCount % 3 == 0) {
-            updateComments()
+            fetchComments()
         }
 
         myRunCount += 1
@@ -153,6 +153,17 @@ class ReworkWatcherImpl(
 
     override fun findCommentsByPath(path: String): List<Comment> {
         return myCommentsMap[path] ?: listOf()
+    }
+
+    override fun fetchComments() {
+        debug("Fetching comments of ${providerData.id}:$branchName")
+        val task = GetCommentsTask(
+            projectServiceProvider = projectServiceProvider,
+            providerData = providerData,
+            mergeRequestInfo = mergeRequestInfo,
+            listener = myGetCommentsTaskListener
+        )
+        task.start()
     }
 
     private fun buildCommentsMap() {
@@ -221,17 +232,6 @@ class ReworkWatcherImpl(
             providerData = providerData,
             mergeRequestInfo = mergeRequestInfo,
             listener = myFindMergeRequestTaskListener
-        )
-        task.start()
-    }
-
-    private fun updateComments() {
-        debug("Fetching comments of ${providerData.id}:$branchName")
-        val task = GetCommentsTask(
-            projectServiceProvider = projectServiceProvider,
-            providerData = providerData,
-            mergeRequestInfo = mergeRequestInfo,
-            listener = myGetCommentsTaskListener
         )
         task.start()
     }

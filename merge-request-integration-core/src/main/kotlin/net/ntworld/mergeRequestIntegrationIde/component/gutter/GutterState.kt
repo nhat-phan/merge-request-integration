@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.gutter
+package net.ntworld.mergeRequestIntegrationIde.component.gutter
 
 enum class GutterState {
     NO_COMMENT,

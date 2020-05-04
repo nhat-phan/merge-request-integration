@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.gutter
+package net.ntworld.mergeRequestIntegrationIde.component.gutter
 
 import com.intellij.diff.util.Side
 import com.intellij.openapi.actionSystem.AnAction
@@ -45,7 +45,7 @@ class GutterIconRendererImpl(
             }
             GutterState.WRITING -> {
                 icon = Icons.Gutter.WritingComment
-                desc = "Continue writing your comment"
+                desc = "Toggle comment thread & continue writing your comment"
             }
         }
     }
@@ -60,6 +60,7 @@ class GutterIconRendererImpl(
 
     override fun getClickAction(): AnAction = clickAction
     override fun getIcon() = icon
+    override fun getTooltipText(): String? = desc
     override fun isNavigateAction() = icon != Icons.Gutter.Empty
     override fun hashCode(): Int = System.identityHashCode(this)
     override fun equals(other: Any?): Boolean = other == this

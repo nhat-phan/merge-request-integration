@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.thread
 
 import com.intellij.diff.util.Side
 import com.intellij.openapi.Disposable
@@ -18,7 +18,7 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.component.comment.*
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import java.awt.Cursor
 import java.awt.Dimension

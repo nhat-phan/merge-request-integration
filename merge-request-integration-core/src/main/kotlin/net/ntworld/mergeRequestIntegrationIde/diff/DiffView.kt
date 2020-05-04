@@ -6,9 +6,9 @@ import com.intellij.openapi.Disposable
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
 import net.ntworld.mergeRequestIntegrationIde.View
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterActionType
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 

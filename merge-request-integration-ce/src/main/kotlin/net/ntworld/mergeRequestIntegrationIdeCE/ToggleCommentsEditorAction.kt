@@ -1,5 +1,0 @@
-package net.ntworld.mergeRequestIntegrationIdeCE
-
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.ToggleCommentsEditorActionBase
-
-class ToggleCommentsEditorAction : ToggleCommentsEditorActionBase()

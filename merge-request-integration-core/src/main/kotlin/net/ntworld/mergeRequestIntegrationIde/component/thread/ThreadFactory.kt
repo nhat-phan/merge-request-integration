@@ -1,11 +1,11 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.thread
 
 import com.intellij.diff.util.Side
 import com.intellij.openapi.editor.ex.EditorEx
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 object ThreadFactory {

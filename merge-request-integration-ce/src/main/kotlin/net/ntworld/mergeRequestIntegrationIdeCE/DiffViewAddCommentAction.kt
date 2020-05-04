@@ -1,0 +1,5 @@
+package net.ntworld.mergeRequestIntegrationIdeCE
+
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffViewAddCommentActionBase
+
+class DiffViewAddCommentAction : DiffViewAddCommentActionBase()

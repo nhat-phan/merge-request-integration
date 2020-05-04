@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.thread
 
 import com.intellij.diff.util.Side
 import com.intellij.util.EventDispatcher
@@ -6,7 +6,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEventPropagator
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
 
 class ThreadPresenterImpl(

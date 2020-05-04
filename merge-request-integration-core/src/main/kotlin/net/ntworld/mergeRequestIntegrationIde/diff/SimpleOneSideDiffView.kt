@@ -8,9 +8,9 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.vcs.changes.Change
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.CommentPosition
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRendererFactory
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterIconRenderer
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterIconRendererFactory
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 

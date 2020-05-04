@@ -1,12 +1,13 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.gutter
+package net.ntworld.mergeRequestIntegrationIde.diff
 
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorAction
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterIconRendererFactory
 
-open class ToggleCommentsEditorActionBase : EditorAction(MyHandler()) {
+open class DiffViewAddCommentActionBase : EditorAction(MyHandler()) {
 
     private class MyHandler : EditorActionHandler() {
         override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
@@ -17,7 +18,7 @@ open class ToggleCommentsEditorActionBase : EditorAction(MyHandler()) {
             super.doExecute(editor, caret, dataContext)
             val gutterRenderer = GutterIconRendererFactory.findGutterIconRenderer(editor)
             if (null !== gutterRenderer) {
-                gutterRenderer.triggerToggleAction()
+                gutterRenderer.triggerAddAction()
             }
         }
     }

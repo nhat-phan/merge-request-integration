@@ -1,4 +1,4 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.thread
+package net.ntworld.mergeRequestIntegrationIde.component.thread
 
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.Model

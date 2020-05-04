@@ -1,9 +1,8 @@
-package net.ntworld.mergeRequestIntegrationIde.diff.gutter
+package net.ntworld.mergeRequestIntegrationIde.component.gutter
 
 import com.intellij.diff.util.Side
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.RangeHighlighter
-import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
 
 object GutterIconRendererFactory {
 

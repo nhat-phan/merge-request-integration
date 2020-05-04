@@ -15,10 +15,10 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEventPropagator
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
-import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadPresenter
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadFactory
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadModel
+import net.ntworld.mergeRequestIntegrationIde.component.thread.ThreadPresenter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
 abstract class AbstractDiffView<V : DiffViewerBase>(
