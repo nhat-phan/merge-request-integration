@@ -12,7 +12,7 @@ class GutterIconRendererImpl(
     override val visibleLineRight: Int?,
     override val logicalLine: Int,
     override val side: Side,
-    private val action: ((GutterIconRenderer, GutterActionType) -> Unit)
+    private val actionListener: GutterIconRendererActionListener
 ) : GutterIconRenderer, GutterIconRendererClass() {
     private var icon = if (showAddIcon) Icons.Gutter.AddComment else Icons.Gutter.Empty
     private var desc = ""
@@ -20,9 +20,9 @@ class GutterIconRendererImpl(
     private class MyClickAction(private val self: GutterIconRendererImpl) : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
             if (self.icon == Icons.Gutter.AddComment || self.icon == Icons.Gutter.Empty) {
-                self.action.invoke(self, GutterActionType.ADD)
+                self.actionListener.performGutterIconRendererAction(self, GutterActionType.ADD)
             } else {
-                self.action.invoke(self, GutterActionType.TOGGLE)
+                self.actionListener.performGutterIconRendererAction(self, GutterActionType.TOGGLE)
             }
         }
     }
@@ -51,11 +51,11 @@ class GutterIconRendererImpl(
     }
 
     override fun triggerAddAction() {
-        action.invoke(this, GutterActionType.ADD)
+        actionListener.performGutterIconRendererAction(this, GutterActionType.ADD)
     }
 
     override fun triggerToggleAction() {
-        action.invoke(this, GutterActionType.TOGGLE)
+        actionListener.performGutterIconRendererAction(this, GutterActionType.TOGGLE)
     }
 
     override fun getClickAction(): AnAction = clickAction

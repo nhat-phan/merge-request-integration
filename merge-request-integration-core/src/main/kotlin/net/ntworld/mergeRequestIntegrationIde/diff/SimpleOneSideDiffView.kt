@@ -58,7 +58,7 @@ class SimpleOneSideDiffView(
                 visibleLineLeft = if (side == Side.LEFT) logicalLine + 1 else null,
                 visibleLineRight = if (side == Side.RIGHT) logicalLine + 1 else null,
                 side = side,
-                action = ::dispatchOnGutterActionPerformed
+                actionListener = myGutterIconRendererActionListener
             ))
         }
     }

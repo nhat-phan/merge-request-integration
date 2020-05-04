@@ -67,7 +67,7 @@ class TwoSideTextDiffView(
                     visibleLineLeft = logicalLine + 1,
                     visibleLineRight = null,
                     side = Side.LEFT,
-                    action = ::dispatchOnGutterActionPerformed
+                    actionListener = myGutterIconRendererActionListener
                 )
             )
         }
@@ -80,7 +80,7 @@ class TwoSideTextDiffView(
                     visibleLineLeft = null,
                     visibleLineRight = logicalLine + 1,
                     side = Side.RIGHT,
-                    action = ::dispatchOnGutterActionPerformed
+                    actionListener = myGutterIconRendererActionListener
                 )
             )
         }

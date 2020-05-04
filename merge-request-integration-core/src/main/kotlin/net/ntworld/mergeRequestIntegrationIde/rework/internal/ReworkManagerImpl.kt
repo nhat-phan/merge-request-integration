@@ -9,6 +9,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
+import net.ntworld.mergeRequestIntegration.exception.ProviderNotFoundException
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
@@ -94,6 +95,12 @@ internal class ReworkManagerImpl(
             ),
             MergeRequestOrdering.RECENTLY_UPDATED,
             object : SearchMergeRequestTask.Listener {
+                override fun onError(exception: Exception) {
+                    if (exception !is ProviderNotFoundException) {
+                        throw exception
+                    }
+                }
+
                 override fun dataReceived(list: List<MergeRequestInfo>, page: Int, totalPages: Int, totalItems: Int) {
                     if (myReworkWatchers.contains(key)) {
                         return

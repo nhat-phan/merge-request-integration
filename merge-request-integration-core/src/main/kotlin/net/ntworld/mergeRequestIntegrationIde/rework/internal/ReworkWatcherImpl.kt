@@ -18,6 +18,9 @@ import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
 import net.ntworld.mergeRequestIntegrationIde.task.FindMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommitsTask
+import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
+import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
+import java.util.*
 
 class ReworkWatcherImpl(
     override val projectServiceProvider: ProjectServiceProvider,
@@ -27,6 +30,9 @@ class ReworkWatcherImpl(
     override val mergeRequestInfo: MergeRequestInfo
 ) : ReworkWatcher {
     private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
+    private val myCommentsMap = Collections.synchronizedMap(mutableMapOf<String, List<Comment>>())
+    private val myChangesMap = Collections.synchronizedMap(mutableMapOf<String, Change>())
+    @Volatile
     private var myTerminate = false
     private var myRunCount = 0
     private var myMergeRequest: MergeRequest? = null
@@ -38,6 +44,7 @@ class ReworkWatcherImpl(
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
             this@ReworkWatcherImpl.commits = commits
             changes = projectServiceProvider.repositoryFile.findChanges(providerData, commits.map { it.id })
+            buildChangesMap()
             ApplicationManager.getApplication().invokeLater {
                 projectServiceProvider.openSingleMRToolWindow {
                     projectServiceProvider.singleMRToolWindowNotifierTopic.requestShowChanges(
@@ -60,6 +67,15 @@ class ReworkWatcherImpl(
             comments: List<Comment>
         ) {
             this@ReworkWatcherImpl.comments = comments
+            buildCommentsMap()
+            ApplicationManager.getApplication().invokeLater {
+                val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
+                for (editor in editors) {
+                    if (editor is TextEditor) {
+                        projectServiceProvider.editorManager.updateComments(editor, this@ReworkWatcherImpl)
+                    }
+                }
+            }
         }
     }
     private val myFindMergeRequestTaskListener = object : FindMergeRequestTask.Listener {
@@ -100,6 +116,7 @@ class ReworkWatcherImpl(
         myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->
             fileEditorManagerEx.closeFile(diffFile)
         }
+
         val editors = fileEditorManagerEx.allEditors
         for (editor in editors) {
             if (editor is TextEditor) {
@@ -127,6 +144,33 @@ class ReworkWatcherImpl(
                     }
                 }
             }
+        }
+    }
+
+    override fun findChangeByPath(path: String): Change? {
+        return if (myTerminate) null else myChangesMap[path]
+    }
+
+    override fun findCommentsByPath(path: String): List<Comment> {
+        return myCommentsMap[path] ?: listOf()
+    }
+
+    private fun buildCommentsMap() {
+        myCommentsMap.clear()
+        val grouped = CommentUtil.groupCommentsByNewPath(comments)
+        grouped.forEach { (relativePath, list) ->
+            val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, relativePath)
+            myCommentsMap[fullPath] = list
+        }
+    }
+
+    private fun buildChangesMap() {
+        for (change in changes) {
+            val afterRevision = change.afterRevision
+            if (null === afterRevision) {
+                continue
+            }
+            myChangesMap[afterRevision.file.path] = change
         }
     }
 

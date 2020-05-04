@@ -27,4 +27,8 @@ interface ReworkWatcher : Watcher {
     fun shutdown()
 
     fun openChange(change: Change)
+
+    fun findChangeByPath(path: String): Change?
+
+    fun findCommentsByPath(path: String): List<Comment>
 }

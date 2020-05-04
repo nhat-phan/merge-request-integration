@@ -1,13 +1,18 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import com.intellij.diff.util.Side
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vfs.VirtualFile
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRendererFactory
+import net.ntworld.mergeRequest.Comment
+import net.ntworld.mergeRequestIntegrationIde.diff.DiffView
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
+import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadPresenter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.rework.EditorManager
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
@@ -20,65 +25,48 @@ class EditorManagerImpl(
     // TODO: set to false & remove me after debug
     private val shouldDisplayAddIcon = true
     private val myInitializedEditors = Collections.synchronizedMap(mutableMapOf<TextEditor, ReworkWatcher>())
+    private val myGutterIconRenderers = Collections.synchronizedMap(
+        mutableMapOf<TextEditor, MutableMap<Int, GutterIconRenderer>>()
+    )
+    private val myThreads = Collections.synchronizedMap(
+        mutableMapOf<TextEditor, MutableMap<Int, ThreadPresenter>>()
+    )
 
-    override fun initialize(textEditor: TextEditor, watcher: ReworkWatcher) {
+    override fun initialize(textEditor: TextEditor, reworkWatcher: ReworkWatcher) {
         if (myInitializedEditors.containsKey(textEditor)) {
             return
         }
-        val virtualFile = textEditor.file
-        if (null === virtualFile) {
-            return
-        }
-        println(virtualFile.path)
-        val change = findChangeForVirtualFile(watcher, virtualFile)
-        if (null === change) {
-            return
-        }
+        val virtualFile = textEditor.file ?: return
+        val change = reworkWatcher.findChangeByPath(virtualFile.path) ?: return
 
-        val editor = textEditor.editor
-        val lineCount = editor.document.lineCount
-        // register an GutterIconRenderer to all line
-        for (logicalLine in 0 until lineCount) {
-            GutterIconRendererFactory.makeGutterIconRenderer(
-                editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
-                shouldDisplayAddIcon,
-                logicalLine,
-                visibleLineLeft = null,
-                visibleLineRight = logicalLine + 1,
-                side = Side.RIGHT,
-                action = ::dispatchOnGutterActionPerformed
-            )
+        registerGutterIcons(textEditor, reworkWatcher, virtualFile, change)
+
+        val commentsByLines = CommentUtil.groupCommentsByPositionNewLine(
+            reworkWatcher.findCommentsByPath(virtualFile.path)
+        )
+        commentsByLines.forEach { (visibleLine, comments) ->
+            initializeLine(textEditor, reworkWatcher, visibleLine, change, comments)
         }
 
-        // val comments = CommentUtil.groupCommentsByNewPath(watcher.comments)
-        // println(comments)
-
-        // myInitializedEditors[textEditor] = watcher
-        // val comments = watcher.comments
-
-        // val editor = textEditor.editor
-        // editor.markupModel.addLineHighlighter(1, HighlighterLayer.LAST, null)
-        myInitializedEditors[textEditor] = watcher
+        myInitializedEditors[textEditor] = reworkWatcher
     }
 
-    private fun dispatchOnGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
-        println(renderer)
-        println(type)
-    }
+    override fun updateComments(textEditor: TextEditor, reworkWatcher: ReworkWatcher) {
+        if (myInitializedEditors.containsKey(textEditor)) {
+            return initialize(textEditor, reworkWatcher)
+        }
 
-    private fun findChangeForVirtualFile(watcher: ReworkWatcher, virtualFile: VirtualFile): Change? {
-        val changes = watcher.changes
-        for (change in changes) {
-            val afterRevision = change.afterRevision
-            if (null === afterRevision) {
-                continue
-            }
-            val path = afterRevision.file.path
-            if (virtualFile.path == path) {
-                return change
+        val virtualFile = textEditor.file ?: return
+        val change = reworkWatcher.findChangeByPath(virtualFile.path) ?: return
+        val commentsByLines = CommentUtil.groupCommentsByPositionNewLine(
+            reworkWatcher.findCommentsByPath(virtualFile.path)
+        )
+        commentsByLines.forEach { (visibleLine, comments) ->
+            initializeLine(textEditor, reworkWatcher, visibleLine, change, comments)
+            assertThreadAvailable(textEditor, visibleLine - 1) {
+                it.model.comments = comments
             }
         }
-        return null
     }
 
     override fun shutdown(textEditor: TextEditor) {
@@ -95,5 +83,169 @@ class EditorManagerImpl(
             }
         }
         myInitializedEditors.remove(textEditor)
+        myGutterIconRenderers.remove(textEditor)
+        myThreads.remove(textEditor)
+    }
+
+    private fun initializeLine(
+        textEditor: TextEditor,
+        reworkWatcher: ReworkWatcher,
+        visibleLine: Int,
+        change: Change,
+        comments: List<Comment>
+    ) {
+        val logicalLine = visibleLine - 1
+        initializeThreadOnLineIfNotAvailable(textEditor, reworkWatcher, logicalLine, change, comments)
+        val renderer = findGutterIconRenderer(textEditor, logicalLine)
+        if (null !== renderer) {
+            updateGutterIcon(renderer, comments)
+        }
+    }
+
+    private fun findGutterIconRenderer(textEditor: TextEditor, logicalLine: Int): GutterIconRenderer? {
+        val map = myGutterIconRenderers[textEditor] ?: return null
+
+        return map[logicalLine]
+    }
+
+    // TODO: Duplicate AbstractDiffView.updateGutterIcon maybe move to Util class
+    private fun updateGutterIcon(renderer: GutterIconRenderer, comments: List<Comment>) {
+        val state = if (comments.isEmpty()) {
+            GutterState.NO_COMMENT
+        } else {
+            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+        }
+
+        renderer.setState(state)
+    }
+
+    private fun initializeThreadOnLineIfNotAvailable(
+        textEditor: TextEditor,
+        reworkWatcher: ReworkWatcher,
+        logicalLine: Int,
+        change: Change,
+        comments: List<Comment>
+    ) {
+        val editor = textEditor.editor as? EditorEx ?: return
+
+        if (!myThreads.containsKey(textEditor)) {
+            myThreads[textEditor] = mutableMapOf()
+        }
+        val map = myThreads[textEditor] ?: return
+        if (!map.containsKey(logicalLine)) {
+            val model = ThreadFactory.makeModel(comments)
+            val view = ThreadFactory.makeView(
+                projectServiceProvider, editor, reworkWatcher.providerData,
+                reworkWatcher.mergeRequestInfo, logicalLine, Side.RIGHT,
+                GutterPosition(
+                    editorType = DiffView.EditorType.SINGLE_SIDE,
+                    changeType = DiffView.ChangeType.UNKNOWN,
+                    newLine = logicalLine + 1,
+                    newPath = change.afterRevision!!.file.toString(),
+                    oldLine = null,
+                    oldPath = null,
+                    headHash = change.afterRevision!!.revisionNumber.asString()
+                )
+            )
+            val presenter = ThreadFactory.makePresenter(model, view)
+
+            Disposer.register(textEditor, presenter)
+
+            map[logicalLine] = presenter
+        }
+    }
+
+    private fun registerGutterIcons(
+        textEditor: TextEditor,
+        reworkWatcher: ReworkWatcher,
+        virtualFile: VirtualFile,
+        change: Change
+    ) {
+        if (!myGutterIconRenderers.containsKey(textEditor)) {
+            myGutterIconRenderers[textEditor] = mutableMapOf()
+        }
+        val gutterIconsMap: MutableMap<Int, GutterIconRenderer> = myGutterIconRenderers[textEditor] ?: return
+
+        val editor = textEditor.editor
+        val lineCount = editor.document.lineCount
+        for (logicalLine in 0 until lineCount) {
+            gutterIconsMap[logicalLine] = GutterIconRendererFactory.makeGutterIconRenderer(
+                editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
+                shouldDisplayAddIcon,
+                logicalLine,
+                visibleLineLeft = null,
+                visibleLineRight = logicalLine + 1,
+                side = Side.RIGHT,
+                actionListener = MyGutterIconRendererActionListener(
+                    this, textEditor, reworkWatcher, virtualFile, change
+                )
+            )
+        }
+    }
+
+    private fun displayComment(textEditor: TextEditor, logicalLine: Int) {
+        this.assertThreadAvailable(textEditor, logicalLine) {
+            this.displayComments(textEditor, it.model, logicalLine, DiffView.DisplayCommentMode.TOGGLE)
+        }
+    }
+
+    private fun assertThreadAvailable(textEditor: TextEditor, logicalLine: Int, invoker: ((ThreadPresenter) -> Unit)) {
+        val map = myThreads[textEditor] ?: return
+        val thread = map[logicalLine] ?: return
+
+        invoker.invoke(thread)
+    }
+
+    private fun displayComments(
+        textEditor: TextEditor,
+        model: ThreadModel,
+        logicalLine: Int,
+        mode: DiffView.DisplayCommentMode
+    ) {
+        when (mode) {
+            DiffView.DisplayCommentMode.TOGGLE -> model.visible = !model.visible
+            DiffView.DisplayCommentMode.SHOW -> model.visible = true
+            DiffView.DisplayCommentMode.HIDE -> model.visible = false
+        }
+        setWritingStateOfGutterIconRenderer(textEditor, model, logicalLine)
+    }
+
+    private fun setWritingStateOfGutterIconRenderer(textEditor: TextEditor, model: ThreadModel, logicalLine: Int) {
+        val renderer = findGutterIconRenderer(textEditor, logicalLine)
+        if (null !== renderer && model.showEditor) {
+            renderer.setState(GutterState.WRITING)
+        }
+    }
+
+    private class MyGutterIconRendererActionListener(
+        private val self: EditorManagerImpl,
+        private val textEditor: TextEditor,
+        private val reworkWatcher: ReworkWatcher,
+        private val virtualFile: VirtualFile,
+        private val change: Change
+    ) : GutterIconRendererActionListener {
+        override fun performGutterIconRendererAction(gutterIconRenderer: GutterIconRenderer, type: GutterActionType) {
+            when (type) {
+                GutterActionType.ADD -> {
+                }
+                GutterActionType.TOGGLE -> {
+                    self.initializeThreadOnLineIfNotAvailable(
+                        textEditor, reworkWatcher, gutterIconRenderer.logicalLine, change,
+                        collectCommentsOfLine(gutterIconRenderer.logicalLine)
+                    )
+                    self.displayComment(textEditor, gutterIconRenderer.logicalLine)
+                }
+            }
+        }
+
+        private fun collectCommentsOfLine(logicalLine: Int): List<Comment> {
+            val visibleLine = logicalLine + 1
+            val comments = reworkWatcher.findCommentsByPath(virtualFile.path)
+            return comments.filter {
+                val position = it.position ?: return@filter false
+
+                position.newLine == visibleLine
+            }
+        }
     }
 }

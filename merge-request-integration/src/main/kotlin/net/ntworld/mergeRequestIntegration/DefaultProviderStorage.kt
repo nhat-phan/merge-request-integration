@@ -5,6 +5,7 @@ import net.ntworld.mergeRequest.*
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequest.api.ApiOptions
 import net.ntworld.mergeRequest.api.ApiProvider
+import net.ntworld.mergeRequestIntegration.exception.ProviderNotFoundException
 import net.ntworld.mergeRequestIntegration.internal.ProjectImpl
 import net.ntworld.mergeRequestIntegration.internal.ProviderDataImpl
 import net.ntworld.mergeRequestIntegration.internal.UserImpl
@@ -107,7 +108,7 @@ class DefaultProviderStorage : ProviderStorage {
         return if (null !== item) {
             item
         } else {
-            throw Exception("Provider not found")
+            throw ProviderNotFoundException()
         }
     }
 
@@ -116,7 +117,7 @@ class DefaultProviderStorage : ProviderStorage {
         return if (null !== provider) {
             provider
         } else {
-            throw Exception("ApiProvider not found")
+            throw ProviderNotFoundException()
         }
     }
 }

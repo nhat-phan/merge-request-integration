@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
@@ -106,7 +107,9 @@ abstract class AbstractProjectServiceProvider(
             for (provider in providers) {
                 val reworkWatcher = reworkManager.findActiveReworkWatcher(provider)
                 if (null !== reworkWatcher) {
-                    editorManager.initialize(editor, reworkWatcher)
+                    ApplicationManager.getApplication().invokeLater {
+                        editorManager.initialize(editor, reworkWatcher)
+                    }
                 }
             }
         }

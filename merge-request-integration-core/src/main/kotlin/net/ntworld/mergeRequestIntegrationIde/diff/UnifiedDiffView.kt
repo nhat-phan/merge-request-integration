@@ -78,7 +78,7 @@ class UnifiedDiffView(
                     visibleLineRight = right + 1,
                     // Doesn't matter, unified view only have 1 side
                     side = Side.LEFT,
-                    action = ::dispatchOnGutterActionPerformed
+                    actionListener = myGutterIconRendererActionListener
                 )
             )
         }

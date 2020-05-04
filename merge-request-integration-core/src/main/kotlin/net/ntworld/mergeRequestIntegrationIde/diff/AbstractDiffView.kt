@@ -15,10 +15,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEvent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentEventPropagator
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterActionType
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterIconRenderer
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterPosition
-import net.ntworld.mergeRequestIntegrationIde.diff.gutter.GutterState
+import net.ntworld.mergeRequestIntegrationIde.diff.gutter.*
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadFactory
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadModel
 import net.ntworld.mergeRequestIntegrationIde.diff.thread.ThreadPresenter
@@ -70,6 +67,12 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             if (content.trim().isNotEmpty()) {
                 dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side)
             }
+        }
+    }
+
+    protected val myGutterIconRendererActionListener = object : GutterIconRendererActionListener {
+        override fun performGutterIconRendererAction(gutterIconRenderer: GutterIconRenderer, type: GutterActionType) {
+            dispatcher.multicaster.onGutterActionPerformed(gutterIconRenderer, type, DiffView.DisplayCommentMode.TOGGLE)
         }
     }
 
@@ -147,10 +150,6 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         }
     }
 
-    protected fun dispatchOnGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType) {
-        dispatcher.multicaster.onGutterActionPerformed(renderer, type, DiffView.DisplayCommentMode.TOGGLE)
-    }
-
     protected fun registerGutterIconRenderer(renderer: GutterIconRenderer) {
         val map = if (renderer.side == Side.LEFT) myGutterIconRenderersOfLeft else myGutterIconRenderersOfRight
 
@@ -206,6 +205,7 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         updateGutterIcon(renderer, comments)
     }
 
+    // TODO: Duplicate EditorManagerImpl.updateGutterIcon maybe move to Util class
     protected fun updateGutterIcon(renderer: GutterIconRenderer, comments: List<Comment>) {
         val state = if (comments.isEmpty()) {
             GutterState.NO_COMMENT

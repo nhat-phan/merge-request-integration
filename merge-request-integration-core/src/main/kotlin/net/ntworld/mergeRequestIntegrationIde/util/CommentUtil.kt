@@ -35,6 +35,26 @@ object CommentUtil {
         return groups
     }
 
+    fun groupCommentsByPositionNewLine(comments: List<Comment>): Map<Int, List<Comment>> {
+        val groups = mutableMapOf<Int, MutableList<Comment>>()
+        for (comment in comments) {
+            val position = comment.position
+            if (null === position) {
+                continue
+            }
+            val line = position.newLine
+            if (null === line) {
+                continue
+            }
+
+            if (!groups.containsKey(line)) {
+                groups[line] = mutableListOf()
+            }
+            groups[line]!!.add(comment)
+        }
+        return groups.toSortedMap()
+    }
+
     fun groupCommentsByPositionPath(comments: List<Comment>): Map<String, List<Comment>> {
         val groups = mutableMapOf<String, MutableList<Comment>>()
         for (comment in comments) {

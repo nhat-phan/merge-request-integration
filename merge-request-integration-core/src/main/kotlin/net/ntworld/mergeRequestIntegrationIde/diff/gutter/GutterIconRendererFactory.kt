@@ -14,10 +14,10 @@ object GutterIconRendererFactory {
         visibleLineLeft: Int?,
         visibleLineRight: Int?,
         side: Side,
-        action: ((GutterIconRenderer, GutterActionType) -> Unit)
+        actionListener: GutterIconRendererActionListener
     ): GutterIconRenderer {
         val gutterIconRenderer = GutterIconRendererImpl(
-            showAddIcon, visibleLineLeft, visibleLineRight, logicalLine, side, action
+            showAddIcon, visibleLineLeft, visibleLineRight, logicalLine, side, actionListener
         )
         highlighter.gutterIconRenderer = gutterIconRenderer
         return gutterIconRenderer
