@@ -19,6 +19,8 @@ interface ProviderData {
 
     val repository: String
 
+    val errorMessage: String?
+
     val status: ProviderStatus
 
     val hasApprovalFeature: Boolean

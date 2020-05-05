@@ -69,6 +69,10 @@ class ReworkWatcherImpl(
             this@ReworkWatcherImpl.comments = comments
             buildCommentsMap()
             ApplicationManager.getApplication().invokeLater {
+                projectServiceProvider.singleMRToolWindowNotifierTopic.requestShowComments(
+                    providerData, mergeRequestInfo, comments
+                )
+
                 val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
                 for (editor in editors) {
                     if (editor is TextEditor) {
@@ -85,6 +89,7 @@ class ReworkWatcherImpl(
     }
 
     init {
+        projectServiceProvider.singleMRToolWindowNotifierTopic.registerReworkWatcher(this)
         fetchCommits()
         fetchMergeRequest()
     }
@@ -107,11 +112,13 @@ class ReworkWatcherImpl(
 
     override fun terminate() {
         debug("ReworkWatcher of ${providerData.id}:$branchName is terminated")
+        projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
         projectServiceProvider.reworkManager.markReworkWatcherTerminated(this)
     }
 
     override fun shutdown() {
         debug("Terminate ReworkWatcher of ${providerData.id}:$branchName")
+        projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
         ApplicationManager.getApplication().invokeLater {
             val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project)
             myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->

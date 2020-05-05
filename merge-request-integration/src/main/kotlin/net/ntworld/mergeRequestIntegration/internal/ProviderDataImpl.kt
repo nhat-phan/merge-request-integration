@@ -14,6 +14,7 @@ data class ProviderDataImpl(
     override val project: Project,
     override val currentUser: User,
     override val repository: String,
+    override val errorMessage: String?,
     override val status: ProviderStatus
 ) : ProviderData {
     override val hasApprovalFeature: Boolean

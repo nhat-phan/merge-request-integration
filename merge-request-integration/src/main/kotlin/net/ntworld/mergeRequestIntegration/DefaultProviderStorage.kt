@@ -35,6 +35,7 @@ class DefaultProviderStorage : ProviderStorage {
         repository: String
     ): ProviderData {
         val api = createApiProvider(infrastructure = infrastructure, id = id, info = info, credentials = credentials)
+        var message: String? = ""
         try {
             val user = api.user.me()
             val project = api.project.find(credentials.projectId)
@@ -48,13 +49,14 @@ class DefaultProviderStorage : ProviderStorage {
                     project = project,
                     currentUser = user,
                     repository = repository,
+                    errorMessage = null,
                     status = ProviderStatus.ACTIVE
                 )
                 data[id] = providerData
                 return providerData
             }
         } catch (exception: Exception) {
-            println(exception)
+            message = exception.message
         }
         val invalid = ProviderDataImpl(
             id = id,
@@ -65,6 +67,7 @@ class DefaultProviderStorage : ProviderStorage {
             project = ProjectImpl("", info, "", "", "", "", ProjectVisibility.PUBLIC, "", ""),
             currentUser = UserImpl("", "[Error]", "<error>", "", "", UserStatus.INACTIVE, "", ""),
             repository = repository,
+            errorMessage = message,
             status = ProviderStatus.ERROR
         )
         data[id] = invalid

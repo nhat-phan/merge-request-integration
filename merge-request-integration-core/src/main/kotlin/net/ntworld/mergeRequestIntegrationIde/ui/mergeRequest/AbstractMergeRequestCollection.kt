@@ -9,7 +9,6 @@ import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
 import net.ntworld.mergeRequestIntegration.make
-import net.ntworld.mergeRequestIntegrationIde.component.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.PaginationToolbar
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.task.SearchMergeRequestTask
@@ -33,7 +32,9 @@ abstract class AbstractMergeRequestCollection(
 
     override val eventDispatcher = EventDispatcher.create(MergeRequestCollectionEventListener::class.java)
     private val mySplitter = CustomSimpleToolWindowPanel(vertical = true, borderless = true)
-    private val myPaginator: PaginationToolbar = ComponentFactory.makePaginationToolbar(displayRefreshButton = true)
+    private val myPaginator: PaginationToolbar = projectServiceProvider.componentFactory.makePaginationToolbar(
+        displayRefreshButton = true
+    )
     private val myContentDelegate = lazy {
         makeContent()
     }

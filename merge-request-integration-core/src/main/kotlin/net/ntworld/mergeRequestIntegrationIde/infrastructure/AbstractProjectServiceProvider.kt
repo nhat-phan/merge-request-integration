@@ -23,6 +23,8 @@ import net.ntworld.mergeRequestIntegration.ProviderStorage
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
+import net.ntworld.mergeRequestIntegrationIde.ComponentFactory
+import net.ntworld.mergeRequestIntegrationIde.DefaultComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.IdeInfrastructure
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.debug
@@ -86,6 +88,8 @@ abstract class AbstractProjectServiceProvider(
     override val reworkManager: ReworkManager = ReworkManagerImpl(this)
 
     override val editorManager: EditorManager = EditorManagerImpl(this)
+
+    override val componentFactory: ComponentFactory = DefaultComponentFactory(this)
 
     private val myBranchChangeListener = object: BranchChangeListener {
         override fun branchWillChange(branchName: String) {
@@ -201,7 +205,9 @@ abstract class AbstractProjectServiceProvider(
         if (null !== reviewContext) {
             projectNotifierTopic.startCodeReview(reviewContext)
             openSingleMRToolWindow {
-                singleMRToolWindowNotifierTopic.requestShowChanges(reviewContext.providerData, reviewContext.changes)
+                singleMRToolWindowNotifierTopic.requestShowChangesWhenDoingCodeReview(
+                    reviewContext.providerData, reviewContext.changes
+                )
             }
         }
     }

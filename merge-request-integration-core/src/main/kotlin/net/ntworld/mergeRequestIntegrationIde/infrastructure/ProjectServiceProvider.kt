@@ -8,6 +8,7 @@ import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
 import net.ntworld.mergeRequestIntegration.ProviderStorage
+import net.ntworld.mergeRequestIntegrationIde.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
@@ -46,6 +47,8 @@ interface ProjectServiceProvider {
     val projectNotifierTopic: ProjectNotifier
 
     val singleMRToolWindowNotifierTopic: SingleMRToolWindowNotifier
+
+    val componentFactory: ComponentFactory
 
     fun addProviderConfiguration(id: String, info: ProviderInfo, credentials: ApiCredentials, repository: String)
 

@@ -27,7 +27,9 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
 class FilesToolWindowTabImpl(
-    private val projectServiceProvider: ProjectServiceProvider
+    private val projectServiceProvider: ProjectServiceProvider,
+    override val providerData: ProviderData,
+    override val isCodeReviewChanges: Boolean
 ) : FilesToolWindowTab {
     private var myProviderData: ProviderData? = null
     private val myComponentEmpty = JPanel()
