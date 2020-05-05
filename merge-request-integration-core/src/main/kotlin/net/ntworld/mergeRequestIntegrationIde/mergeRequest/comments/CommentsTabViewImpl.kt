@@ -98,6 +98,9 @@ class CommentsTabViewImpl(
     private val myGroupComponentEventListener = object : GroupComponent.EventListener {
         override fun onResized() {}
 
+        override fun onOpenDialogClicked() {
+        }
+
         override fun onEditorCreated(groupId: String, editor: EditorComponent) {
         }
 
@@ -179,7 +182,7 @@ class CommentsTabViewImpl(
             }
 
             val group = ComponentFactory.makeGroup(
-                providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments, 0
+                providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments, 0, false
             )
             myCommentPosition = comments.first().position
 

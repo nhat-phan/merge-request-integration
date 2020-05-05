@@ -112,18 +112,20 @@ class ReworkWatcherImpl(
 
     override fun shutdown() {
         debug("Terminate ReworkWatcher of ${providerData.id}:$branchName")
-        val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project)
-        myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->
-            fileEditorManagerEx.closeFile(diffFile)
-        }
+        ApplicationManager.getApplication().invokeLater {
+            val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project)
+            myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->
+                fileEditorManagerEx.closeFile(diffFile)
+            }
+            myPreviewDiffVirtualFileMap.clear()
 
-        val editors = fileEditorManagerEx.allEditors
-        for (editor in editors) {
-            if (editor is TextEditor) {
-                projectServiceProvider.editorManager.shutdown(editor)
+            val editors = fileEditorManagerEx.allEditors
+            for (editor in editors) {
+                if (editor is TextEditor) {
+                    projectServiceProvider.editorManager.shutdown(editor)
+                }
             }
         }
-        myPreviewDiffVirtualFileMap.clear()
         myTerminate = true
     }
 

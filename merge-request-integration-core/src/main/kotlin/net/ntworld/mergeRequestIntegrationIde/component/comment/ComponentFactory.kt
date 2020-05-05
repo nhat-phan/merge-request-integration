@@ -15,7 +15,8 @@ object ComponentFactory {
         borderTop: Boolean,
         groupId: String,
         comments: List<Comment>,
-        borderLeftRight: Int = 1
+        borderLeftRight: Int = 1,
+        showMoveToDialog: Boolean = true
     ) : GroupComponent {
         return GroupComponentImpl(
             borderTop,
@@ -24,7 +25,8 @@ object ComponentFactory {
             ideaProject,
             groupId,
             comments,
-            borderLeftRight
+            borderLeftRight,
+            showMoveToDialog
         )
     }
 
@@ -34,7 +36,8 @@ object ComponentFactory {
         mergeRequestInfo: MergeRequestInfo,
         comment: Comment,
         indent: Int,
-        borderLeftRight: Int = 1
+        borderLeftRight: Int = 1,
+        showMoveToDialog: Boolean = true
     ): CommentComponent {
         return CommentComponentImpl(
             groupComponent,
@@ -42,7 +45,8 @@ object ComponentFactory {
             mergeRequestInfo,
             comment,
             indent,
-            borderLeftRight
+            borderLeftRight,
+            showMoveToDialog
         )
     }
 

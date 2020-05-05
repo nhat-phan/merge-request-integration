@@ -11,6 +11,8 @@ interface GroupComponent : Component, Disposable {
 
     var collapse: Boolean
 
+    fun requestOpenDialog()
+
     fun requestDeleteComment(comment: Comment)
 
     fun requestToggleResolvedStateOfComment(comment: Comment)
@@ -23,8 +25,14 @@ interface GroupComponent : Component, Disposable {
 
     fun addListener(listener: EventListener)
 
+    fun hideMoveToDialogButtons()
+
+    fun showMoveToDialogButtons()
+
     interface EventListener : java.util.EventListener, CommentEvent {
         fun onResized()
+
+        fun onOpenDialogClicked()
 
         fun onEditorCreated(groupId: String, editor: EditorComponent)
 

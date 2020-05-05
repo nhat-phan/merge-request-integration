@@ -1,8 +1,12 @@
 package net.ntworld.mergeRequestIntegrationIde.component.comment
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.util.TipUIUtil
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.JBColor
@@ -12,8 +16,8 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
-import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
 import java.awt.Color
 import java.awt.Cursor
 import java.awt.event.MouseEvent
@@ -28,8 +32,10 @@ class CommentComponentImpl(
     private val mergeRequestInfo: MergeRequestInfo,
     private val comment: Comment,
     private val indent: Int,
-    private val borderLeftRight: Int = 1
+    private val borderLeftRight: Int = 1,
+    private val showMoveToDialog: Boolean = true
 ) : CommentComponent {
+    private var displayMoveToDialog: Boolean = showMoveToDialog
     private val myPanel = SimpleToolWindowPanel(true, false)
     private val myNameLabel = Label(comment.author.name)
     private val myUsernameLabel = Label("@${comment.author.username}")
@@ -41,55 +47,11 @@ class CommentComponentImpl(
         "/templates/mr.comment.html"
     ).readText()
 
-    private class MyTimeAction(private val self: CommentComponentImpl) : AnAction(null, null, null) {
-        override fun actionPerformed(e: AnActionEvent) {
-            self.myUsePrettyTime = !self.myUsePrettyTime
-        }
-
-        override fun update(e: AnActionEvent) {
-            e.presentation.text = if (self.myUsePrettyTime) {
-                DateTimeUtil.toPretty(DateTimeUtil.toDate(self.comment.updatedAt))
-            } else {
-                DateTimeUtil.formatDate(DateTimeUtil.toDate(self.comment.updatedAt))
-            }
-        }
-
-        override fun useSmallerFontForTextInToolbar(): Boolean = false
-        override fun displayTextInToolbar() = true
-    }
     private val myTimeAction = MyTimeAction(this)
-
-    private class MyOpenInBrowserAction(private val self: CommentComponentImpl): AnAction(
-        "View in browser", "Open and view the comment in browser", Icons.ExternalLink
-    ) {
-        override fun actionPerformed(e: AnActionEvent) {
-            BrowserUtil.open(self.providerData.info.createCommentUrl(self.mergeRequestInfo.url, self.comment))
-        }
-    }
     private val myOpenInBrowserAction = MyOpenInBrowserAction(this)
-
-    private class MyReplyAction(private val self: CommentComponentImpl): AnAction(
-        "Reply", "Reply this comment", Icons.ReplyComment
-    ) {
-        override fun actionPerformed(e: AnActionEvent) {
-            self.groupComponent.showReplyEditor()
-        }
-    }
     private val myReplyAction = MyReplyAction(this)
-
-    private class MyDeleteAction(private val self: CommentComponentImpl) : AnAction(
-        "Delete comment", "Delete comment", Icons.Trash
-    ) {
-        override fun actionPerformed(e: AnActionEvent) {
-            val result = Messages.showYesNoDialog(
-                "Do you want to delete the comment?", "Are you sure", Messages.getQuestionIcon()
-            )
-            if (result == Messages.YES) {
-                self.groupComponent.requestDeleteComment(self.comment)
-            }
-        }
-    }
     private val myDeleteAction = MyDeleteAction(this)
+    private val myMoveToDialogAction = MyMoveToDialogAction(this)
 
     private class MyResolveAction(private val self: CommentComponentImpl) : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
@@ -126,6 +88,8 @@ class CommentComponentImpl(
         }
     }
 
+    override val component: JComponent = myPanel
+
     init {
         if (indent == 0 && groupComponent.comments.size > 1) {
             myNameLabel.icon = if (groupComponent.collapse) Icons.CaretRight else Icons.CaretDown
@@ -143,7 +107,13 @@ class CommentComponentImpl(
         )
     }
 
-    override val component: JComponent = myPanel
+    override fun hideMoveToDialogButtons() {
+        displayMoveToDialog = false
+    }
+
+    override fun showMoveToDialogButtons() {
+        displayMoveToDialog = true
+    }
 
     private fun createToolbar(): JComponent {
         val panel = JPanel(MigLayout("ins 0, fill", "5[left]5[left]5[left]0[left, fill]push[right]", "center"))
@@ -157,10 +127,16 @@ class CommentComponentImpl(
         )
 
         val rightActionGroup = DefaultActionGroup()
+        if (showMoveToDialog) {
+            rightActionGroup.add(myMoveToDialogAction)
+            rightActionGroup.addSeparator()
+        }
+
         if (providerData.currentUser.id == comment.author.id) {
             rightActionGroup.add(myDeleteAction)
             rightActionGroup.addSeparator()
         }
+
         rightActionGroup.add(myOpenInBrowserAction)
         rightActionGroup.addSeparator()
         if (comment.resolvable) {
@@ -186,5 +162,64 @@ class CommentComponentImpl(
             .replace("{{content}}", HtmlHelper.convertFromMarkdown(comment.body))
 
         return HtmlHelper.resolveRelativePath(providerData, output)
+    }
+
+    private class MyMoveToDialogAction(private val self: CommentComponentImpl): AnAction(
+        "Open in a Dialog", "", AllIcons.Actions.MoveToWindow
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            self.groupComponent.requestOpenDialog()
+        }
+
+        override fun update(e: AnActionEvent) {
+            super.update(e)
+            e.presentation.isVisible = self.displayMoveToDialog
+        }
+    }
+
+    private class MyTimeAction(private val self: CommentComponentImpl) : AnAction(null, null, null) {
+        override fun actionPerformed(e: AnActionEvent) {
+            self.myUsePrettyTime = !self.myUsePrettyTime
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.text = if (self.myUsePrettyTime) {
+                DateTimeUtil.toPretty(DateTimeUtil.toDate(self.comment.updatedAt))
+            } else {
+                DateTimeUtil.formatDate(DateTimeUtil.toDate(self.comment.updatedAt))
+            }
+        }
+
+        override fun useSmallerFontForTextInToolbar(): Boolean = false
+        override fun displayTextInToolbar() = true
+    }
+
+    private class MyOpenInBrowserAction(private val self: CommentComponentImpl): AnAction(
+        "View in browser", "Open and view the comment in browser", Icons.ExternalLink
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            BrowserUtil.open(self.providerData.info.createCommentUrl(self.mergeRequestInfo.url, self.comment))
+        }
+    }
+
+    private class MyReplyAction(private val self: CommentComponentImpl): AnAction(
+        "Reply", "Reply this comment", Icons.ReplyComment
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            self.groupComponent.showReplyEditor()
+        }
+    }
+
+    private class MyDeleteAction(private val self: CommentComponentImpl) : AnAction(
+        "Delete comment", "Delete comment", Icons.Trash
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val result = Messages.showYesNoDialog(
+                "Do you want to delete the comment?", "Are you sure", Messages.getQuestionIcon()
+            )
+            if (result == Messages.YES) {
+                self.groupComponent.requestDeleteComment(self.comment)
+            }
+        }
     }
 }

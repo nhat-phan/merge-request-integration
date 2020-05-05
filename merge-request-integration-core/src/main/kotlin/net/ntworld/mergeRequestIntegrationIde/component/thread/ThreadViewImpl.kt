@@ -7,6 +7,8 @@ import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
+import com.intellij.openapi.ui.DialogBuilder
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBScrollPane
@@ -23,10 +25,12 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvi
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
+import java.awt.GridBagLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import javax.swing.BoxLayout
 import javax.swing.JComponent
+import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import kotlin.math.ceil
 import kotlin.math.max
@@ -45,7 +49,8 @@ class ThreadViewImpl(
 
     private val myThreadPanel = Panel()
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
-    private val myWrapper = ComponentWrapper(myBoxLayoutPanel)
+    private val myComponent = MyComponent(myBoxLayoutPanel)
+    private val myWrapper = JPanel()
     private val myEditorWidthWatcher = EditorTextWidthWatcher()
     private val myCreatedEditors = mutableMapOf<String, EditorComponent>()
     private val myGroups = mutableMapOf<String, GroupComponent>()
@@ -107,6 +112,23 @@ class ThreadViewImpl(
             myEditorWidthWatcher.updateWidthForAllInlays()
         }
 
+        override fun onOpenDialogClicked() {
+            val builder = DialogBuilder()
+            builder.setCenterPanel(myComponent)
+
+            myEditorWidthWatcher.updateWidthForAllInlays()
+            myGroups.forEach { it.value.hideMoveToDialogButtons() }
+
+            builder.removeAllActions()
+            builder.addOkAction()
+            builder.resizable(true)
+            builder.show()
+
+            // This line run after the dialog is closed
+            myGroups.forEach { it.value.showMoveToDialogButtons() }
+            myWrapper.add(myComponent)
+        }
+
         override fun onEditorCreated(groupId: String, editor: EditorComponent) {
             editor.addListener(myEditorComponentEventListener)
             Disposer.register(this@ThreadViewImpl, editor)
@@ -133,8 +155,11 @@ class ThreadViewImpl(
         myBoxLayoutPanel.addToCenter(myThreadPanel)
         myThreadPanel.layout = BoxLayout(myThreadPanel, BoxLayout.Y_AXIS)
 
-        myWrapper.isVisible = false
-        myWrapper.cursor = Cursor.getDefaultCursor()
+        myComponent.isVisible = false
+        myComponent.cursor = Cursor.getDefaultCursor()
+
+        myWrapper.layout = GridBagLayout()
+        myWrapper.add(myComponent)
     }
 
     override fun dispose() {
@@ -213,16 +238,16 @@ class ThreadViewImpl(
     }
 
     override fun show() {
-        myWrapper.isVisible = true
+        myComponent.isVisible = true
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
     override fun hide() {
-        myWrapper.isVisible = false
+        myComponent.isVisible = false
         myEditorWidthWatcher.updateWidthForAllInlays()
     }
 
-    private inner class ComponentWrapper(private val component: JComponent) : JBScrollPane(component) {
+    private inner class MyComponent(private val component: JComponent) : JBScrollPane(component) {
         init {
             isOpaque = false
             viewport.isOpaque = false

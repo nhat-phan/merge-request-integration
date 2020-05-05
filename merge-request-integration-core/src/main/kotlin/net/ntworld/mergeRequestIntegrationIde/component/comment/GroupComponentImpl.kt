@@ -20,7 +20,8 @@ class GroupComponentImpl(
     private val project: IdeaProject,
     override val id: String,
     comments: List<Comment>,
-    private val borderLeftRight: Int = 1
+    private val borderLeftRight: Int = 1,
+    private val showMoveToDialog: Boolean = true
 ) : GroupComponent {
     private val dispatcher = EventDispatcher.create(GroupComponent.EventListener::class.java)
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
@@ -101,6 +102,10 @@ class GroupComponentImpl(
             dispatcher.multicaster.onResized()
         }
 
+    override fun requestOpenDialog() {
+        dispatcher.multicaster.onOpenDialogClicked()
+    }
+
     override fun requestDeleteComment(comment: Comment) {
         dispatcher.multicaster.onDeleteCommentRequested(comment)
     }
@@ -153,6 +158,14 @@ class GroupComponentImpl(
 
     override fun addListener(listener: GroupComponent.EventListener) = dispatcher.addListener(listener)
 
+    override fun hideMoveToDialogButtons() {
+        myCommentComponents.forEach { it.hideMoveToDialogButtons() }
+    }
+
+    override fun showMoveToDialogButtons() {
+        myCommentComponents.forEach { it.showMoveToDialogButtons() }
+    }
+
     override fun dispose() {
         dispatcher.listeners.clear()
     }
@@ -183,15 +196,15 @@ class GroupComponentImpl(
         myCommentComponents.clear()
 
         items.forEachIndexed { index, comment ->
-            val commentComponent =
-                ComponentFactory.makeComment(
-                    this,
-                    providerData,
-                    mergeRequestInfo,
-                    comment,
-                    if (index == 0) 0 else 1,
-                    borderLeftRight
-                )
+            val commentComponent = ComponentFactory.makeComment(
+                this,
+                providerData,
+                mergeRequestInfo,
+                comment,
+                if (index == 0) 0 else 1,
+                borderLeftRight,
+                showMoveToDialog
+            )
 
             myPanel.add(commentComponent.component)
             myCommentComponents.add(commentComponent)
