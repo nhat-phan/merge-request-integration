@@ -104,6 +104,10 @@ class CommentTreeViewImpl(
         }
     }
 
+    override fun setToolbarMode(mode: CommentTreeView.ToolbarMode) {
+        myToolbar.setMode(mode)
+    }
+
     private fun isGeneralCommentsTreeNode(node: TreeNode) : Boolean {
         val treeNode = node as? DefaultMutableTreeNode ?: return false
         val descriptor = treeNode.userObject as? PresentableNodeDescriptor<*> ?: return false

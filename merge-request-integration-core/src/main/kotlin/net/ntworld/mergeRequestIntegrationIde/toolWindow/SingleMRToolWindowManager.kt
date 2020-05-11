@@ -29,6 +29,16 @@ class SingleMRToolWindowManager(
 
     init {
         projectServiceProvider.messageBus.connect().subscribe(SingleMRToolWindowNotifier.TOPIC, this)
+        val activeReworkWatchers = projectServiceProvider.reworkManager.getActiveReworkWatchers()
+        activeReworkWatchers.forEach {
+            registerReworkWatcher(it)
+            if (it.isChangesBuilt()) {
+                showReworkChanges(it.providerData, it.changes)
+            }
+            if (it.isFetchedComments()) {
+                showReworkComments(it.providerData, it.mergeRequestInfo, it.comments, it.displayResolvedComments)
+            }
+        }
     }
 
     override fun registerReworkWatcher(reworkWatcher: ReworkWatcher) {
@@ -53,15 +63,18 @@ class SingleMRToolWindowManager(
         }
     }
 
-    override fun requestHideChanges() {
+    override fun hideChangesAfterDoingCodeReview() {
         val reviewTab = myReviewChangesTab
         if (null !== reviewTab) {
             reviewTab.hide()
         }
-        myReworkChangesTabs.forEach { it.hide() }
     }
 
-    override fun requestShowChangesWhenDoingCodeReview(providerData: ProviderData, changes: List<Change>) {
+    override fun clearReworkTabs() {
+        removeAllReworkToolWindowTabs()
+    }
+
+    override fun showChangesWhenDoingCodeReview(providerData: ProviderData, changes: List<Change>) {
         removeAllReworkToolWindowTabs()
 
         val currentTab = myReviewChangesTab
@@ -82,7 +95,7 @@ class SingleMRToolWindowManager(
         myReviewChangesTab = newTab
     }
 
-    override fun requestShowChanges(
+    override fun showReworkChanges(
         providerData: ProviderData, changes: List<Change>
     ) = fillingDataForReworkTab(providerData) {
         val currentTab = myReworkChangesTabs.firstOrNull { it.providerData.id == providerData.id }
@@ -96,13 +109,16 @@ class SingleMRToolWindowManager(
         addTabToToolWindow(newTab, myReworkChangesTabs, SINGLE_MR_REWORK_CHANGES_PREFIX)
     }
 
-    override fun requestShowComments(
-        providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>
+    override fun showReworkComments(
+        providerData: ProviderData,
+        mergeRequestInfo: MergeRequestInfo,
+        comments: List<Comment>,
+        displayResolvedComments: Boolean
     ) = fillingDataForReworkTab(providerData) {
         val currentTab = myReworkCommentsTabs.firstOrNull { it.providerData.id == providerData.id }
         if (null !== currentTab) {
             currentTab.setMergeRequestInfo(mergeRequestInfo)
-            currentTab.setDisplayResolvedComments(false)
+            currentTab.setDisplayResolvedComments(displayResolvedComments)
             currentTab.setComments(comments)
             return@fillingDataForReworkTab
         }

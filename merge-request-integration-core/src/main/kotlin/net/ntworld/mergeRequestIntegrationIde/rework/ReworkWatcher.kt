@@ -24,6 +24,12 @@ interface ReworkWatcher : Watcher {
 
     val comments: List<Comment>
 
+    val displayResolvedComments: Boolean
+
+    fun isChangesBuilt(): Boolean
+
+    fun isFetchedComments(): Boolean
+
     fun shutdown()
 
     fun openChange(change: Change)

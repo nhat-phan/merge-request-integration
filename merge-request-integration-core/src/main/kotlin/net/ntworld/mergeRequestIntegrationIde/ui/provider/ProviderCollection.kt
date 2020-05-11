@@ -54,7 +54,9 @@ class ProviderCollection(
 
     init {
         myConnection.subscribe(ProjectNotifier.TOPIC, myProjectNotifier)
-        projectServiceProvider.initialize()
+        if (!projectServiceProvider.isInitialized()) {
+            projectServiceProvider.initialize()
+        }
 
         myComponent.setContent(myListUI.createComponent())
         myComponent.toolbar = myToolbarUI.createComponent()

@@ -63,6 +63,7 @@ class EditorManagerImpl(
             return initialize(textEditor, reworkWatcher)
         }
 
+        resetGutterIcons(textEditor)
         val virtualFile = textEditor.file ?: return
         val change = reworkWatcher.findChangeByPath(virtualFile.path) ?: return
         val commentsByLines = CommentUtil.groupCommentsByPositionNewLine(
@@ -92,6 +93,15 @@ class EditorManagerImpl(
         myInitializedEditors.remove(textEditor)
         myGutterIconRenderers.remove(textEditor)
         myThreads.remove(textEditor)
+    }
+
+    private fun resetGutterIcons(textEditor: TextEditor) {
+        val renderers = myGutterIconRenderers[textEditor]
+        if (null !== renderers) {
+            for (renderer in renderers.values) {
+                renderer.setState(GutterState.NO_COMMENT)
+            }
+        }
     }
 
     private fun initializeLine(

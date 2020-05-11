@@ -62,6 +62,8 @@ interface ProjectServiceProvider {
 
     fun initialize()
 
+    fun isInitialized(): Boolean
+
     fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest)
 
     fun stopCodeReview()

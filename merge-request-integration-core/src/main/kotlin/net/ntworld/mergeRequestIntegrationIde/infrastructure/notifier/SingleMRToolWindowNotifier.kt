@@ -16,11 +16,18 @@ interface SingleMRToolWindowNotifier {
 
     fun removeReworkWatcher(reworkWatcher: ReworkWatcher)
 
-    fun requestHideChanges()
+    fun hideChangesAfterDoingCodeReview()
 
-    fun requestShowChangesWhenDoingCodeReview(providerData: ProviderData, changes: List<Change>)
+    fun clearReworkTabs()
 
-    fun requestShowChanges(providerData: ProviderData, changes: List<Change>)
+    fun showChangesWhenDoingCodeReview(providerData: ProviderData, changes: List<Change>)
 
-    fun requestShowComments(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, comments: List<Comment>)
+    fun showReworkChanges(providerData: ProviderData, changes: List<Change>)
+
+    fun showReworkComments(
+        providerData: ProviderData,
+        mergeRequestInfo: MergeRequestInfo,
+        comments: List<Comment>,
+        displayResolvedComments: Boolean
+    )
 }

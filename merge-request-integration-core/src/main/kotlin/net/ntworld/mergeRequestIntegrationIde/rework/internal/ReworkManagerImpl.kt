@@ -34,6 +34,12 @@ internal class ReworkManagerImpl(
         myReworkWatchers.clear()
     }
 
+    override fun markBranchWatcherTerminated(branchWatcher: BranchWatcher) {
+        myBranchWatchers.remove(branchWatcher.providerData.id)
+
+        debug("clear BranchWatcher ${branchWatcher.providerData.id}")
+    }
+
     override fun markReworkWatcherTerminated(reworkWatcher: ReworkWatcher) {
         val key = keyOf(reworkWatcher.providerData, reworkWatcher.branchName)
         myReworkWatchers.remove(key)
@@ -58,7 +64,7 @@ internal class ReworkManagerImpl(
         val repository = gitRepository
         if (null !== repository) {
             val branchWatcher = BranchWatcherImpl(
-                this, providerData, repository
+                projectServiceProvider, this, providerData, repository
             )
             myBranchWatchers[providerData.id] = branchWatcher
 
@@ -149,6 +155,10 @@ internal class ReworkManagerImpl(
             return entry.value
         }
         return null
+    }
+
+    override fun getActiveReworkWatchers(): List<ReworkWatcher> {
+        return myReworkWatchers.values.toList()
     }
 
     private fun keyOf(providerData: ProviderData, branchName: String): String {

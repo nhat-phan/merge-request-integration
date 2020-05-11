@@ -7,7 +7,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.messages.MessageBus
@@ -57,6 +56,7 @@ abstract class AbstractProjectServiceProvider(
     private val myNotification: NotificationGroup = NotificationGroup(
         "Merge Request Integration", NotificationDisplayType.BALLOON, true
     )
+    private var myIsInitialized = false
 
     final override val providerStorage: ProviderStorage = DefaultProviderStorage()
 
@@ -171,12 +171,18 @@ abstract class AbstractProjectServiceProvider(
     }
 
     override fun initialize() {
+        myIsInitialized = false
         providerStorage.clear()
         reworkManager.clear()
         projectNotifierTopic.starting()
 
         getProviderConfigurations().forEach { registerProviderSettings(it) }
         projectNotifierTopic.initialized()
+        myIsInitialized = true
+    }
+
+    override fun isInitialized(): Boolean {
+        return myIsInitialized
     }
 
     override fun openSingleMRToolWindow(invoker: (() -> Unit)?) {
@@ -205,7 +211,7 @@ abstract class AbstractProjectServiceProvider(
         if (null !== reviewContext) {
             projectNotifierTopic.startCodeReview(reviewContext)
             openSingleMRToolWindow {
-                singleMRToolWindowNotifierTopic.requestShowChangesWhenDoingCodeReview(
+                singleMRToolWindowNotifierTopic.showChangesWhenDoingCodeReview(
                     reviewContext.providerData, reviewContext.changes
                 )
             }
@@ -218,9 +224,11 @@ abstract class AbstractProjectServiceProvider(
             projectNotifierTopic.stopCodeReview(reviewContext)
             reviewContext.closeAllChanges()
             hideSingleMRToolWindow {
-                singleMRToolWindowNotifierTopic.requestHideChanges()
+                singleMRToolWindowNotifierTopic.hideChangesAfterDoingCodeReview()
+                singleMRToolWindowNotifierTopic.clearReworkTabs()
             }
         }
+        println("After doing code review")
         providerStorage.registeredProviders.forEach {
             reworkManager.createBranchWatcher(it)
         }

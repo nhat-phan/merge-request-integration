@@ -8,6 +8,8 @@ interface ReworkManager {
 
     fun clear()
 
+    fun markBranchWatcherTerminated(branchWatcher: BranchWatcher)
+
     fun markReworkWatcherTerminated(reworkWatcher: ReworkWatcher)
 
     fun createBranchWatcher(providerData: ProviderData)
@@ -19,4 +21,6 @@ interface ReworkManager {
     fun findReworkWatcherByChange(providerData: ProviderData, change: Change): ReworkWatcher?
 
     fun findActiveReworkWatcher(providerData: ProviderData): ReworkWatcher?
+
+    fun getActiveReworkWatchers(): List<ReworkWatcher>
 }

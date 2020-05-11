@@ -1,7 +1,6 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.Change
@@ -14,6 +13,8 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.DiffPreviewProviderImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ReworkWatcherNotifier
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
 import net.ntworld.mergeRequestIntegrationIde.task.FindMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
@@ -28,26 +29,38 @@ class ReworkWatcherImpl(
     override val branchName: String,
     override val providerData: ProviderData,
     override val mergeRequestInfo: MergeRequestInfo
-) : ReworkWatcher {
+) : ReworkWatcher, ReworkWatcherNotifier {
+    private val myConnection = projectServiceProvider.messageBus.connect()
+
     private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
     private val myCommentsMap = Collections.synchronizedMap(mutableMapOf<String, List<Comment>>())
     private val myChangesMap = Collections.synchronizedMap(mutableMapOf<String, Change>())
+    private val myComments = mutableListOf<Comment>()
+
     @Volatile
     private var myTerminate = false
+    private var myIsChangesBuilt = false
+    private var myIsFetchedComments = false
     private var myRunCount = 0
     private var myMergeRequest: MergeRequest? = null
     override var commits: List<Commit> = listOf()
     override var changes: List<Change> = listOf()
-    override var comments: List<Comment> = listOf()
+    override var comments: MutableList<Comment> = mutableListOf()
+        private set
+
+    override var displayResolvedComments: Boolean = false
+        private set
+
     override val interval: Long = 10000
     private val myGetCommitsTaskListener = object : GetCommitsTask.Listener {
         override fun dataReceived(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
             this@ReworkWatcherImpl.commits = commits
             changes = projectServiceProvider.repositoryFile.findChanges(providerData, commits.map { it.id })
             buildChangesMap()
+            myIsChangesBuilt = true
             ApplicationManager.getApplication().invokeLater {
                 projectServiceProvider.openSingleMRToolWindow {
-                    projectServiceProvider.singleMRToolWindowNotifierTopic.requestShowChanges(
+                    projectServiceProvider.singleMRToolWindowNotifierTopic.showReworkChanges(
                         providerData, changes
                     )
                 }
@@ -66,20 +79,10 @@ class ReworkWatcherImpl(
             mergeRequestInfo: MergeRequestInfo,
             comments: List<Comment>
         ) {
-            this@ReworkWatcherImpl.comments = comments
-            buildCommentsMap()
-            ApplicationManager.getApplication().invokeLater {
-                projectServiceProvider.singleMRToolWindowNotifierTopic.requestShowComments(
-                    providerData, mergeRequestInfo, comments
-                )
-
-                val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
-                for (editor in editors) {
-                    if (editor is TextEditor) {
-                        projectServiceProvider.editorManager.updateComments(editor, this@ReworkWatcherImpl)
-                    }
-                }
-            }
+            myComments.clear()
+            myComments.addAll(comments)
+            buildCommentsAndSendCommentsUpdatedSignal()
+            myIsFetchedComments = true
         }
     }
     private val myFindMergeRequestTaskListener = object : FindMergeRequestTask.Listener {
@@ -89,9 +92,18 @@ class ReworkWatcherImpl(
     }
 
     init {
+        myConnection.subscribe(ReworkWatcherNotifier.TOPIC, this)
         projectServiceProvider.singleMRToolWindowNotifierTopic.registerReworkWatcher(this)
         fetchCommits()
         fetchMergeRequest()
+    }
+
+    override fun isChangesBuilt(): Boolean {
+        return myIsChangesBuilt
+    }
+
+    override fun isFetchedComments(): Boolean {
+        return myIsFetchedComments
     }
 
     override fun canExecute(): Boolean {
@@ -114,6 +126,7 @@ class ReworkWatcherImpl(
         debug("ReworkWatcher of ${providerData.id}:$branchName is terminated")
         projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
         projectServiceProvider.reworkManager.markReworkWatcherTerminated(this)
+        myConnection.disconnect()
     }
 
     override fun shutdown() {
@@ -126,6 +139,7 @@ class ReworkWatcherImpl(
             }
             myPreviewDiffVirtualFileMap.clear()
 
+            // TODO: Should replace by Message communication
             val editors = fileEditorManagerEx.allEditors
             for (editor in editors) {
                 if (editor is TextEditor) {
@@ -173,6 +187,25 @@ class ReworkWatcherImpl(
             listener = myGetCommentsTaskListener
         )
         task.start()
+    }
+
+    override fun requestFetchComment(providerData: ProviderData) = assertHasSameProvider(providerData) {
+        fetchComments()
+    }
+
+    override fun changeDisplayResolvedComments(
+        providerData: ProviderData, value: Boolean
+    ) = assertHasSameProvider(providerData) {
+        if (value != displayResolvedComments) {
+            displayResolvedComments = value
+            buildCommentsAndSendCommentsUpdatedSignal()
+        }
+    }
+
+    override fun commentTreeNodeSelected(providerData: ProviderData, node: Node) = assertHasSameProvider(providerData) {
+    }
+
+    override fun openCreateGeneralCommentForm(providerData: ProviderData) = assertHasSameProvider(providerData) {
     }
 
     private fun buildCommentsMap() {
@@ -243,5 +276,35 @@ class ReworkWatcherImpl(
             listener = myFindMergeRequestTaskListener
         )
         task.start()
+    }
+
+    private fun assertHasSameProvider(providerData: ProviderData, invoker: (() -> Unit)) {
+        if (this.providerData.id == providerData.id) {
+            invoker()
+        }
+    }
+
+    private fun buildCommentsAndSendCommentsUpdatedSignal() {
+        comments.clear()
+        if (displayResolvedComments) {
+            comments.addAll(myComments)
+        } else {
+            comments.addAll(myComments.filter { !it.resolved })
+        }
+        buildCommentsMap()
+
+        ApplicationManager.getApplication().invokeLater {
+            projectServiceProvider.singleMRToolWindowNotifierTopic.showReworkComments(
+                providerData, mergeRequestInfo, comments, displayResolvedComments
+            )
+
+            // TODO: Should replace by Message communication
+            val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
+            for (editor in editors) {
+                if (editor is TextEditor) {
+                    projectServiceProvider.editorManager.updateComments(editor, this@ReworkWatcherImpl)
+                }
+            }
+        }
     }
 }

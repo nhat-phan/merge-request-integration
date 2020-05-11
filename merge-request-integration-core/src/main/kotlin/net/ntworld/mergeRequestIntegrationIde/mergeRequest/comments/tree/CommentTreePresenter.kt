@@ -12,6 +12,8 @@ interface CommentTreePresenter : Presenter<CommentTreePresenter.Listener>, Compo
     override val component: JComponent
         get() = view.component
 
+    fun setToolbarMode(mode: CommentTreeView.ToolbarMode) = view.setToolbarMode(mode)
+
     fun hasGeneralCommentsTreeNode(): Boolean
 
     fun selectGeneralCommentsTreeNode()

@@ -10,6 +10,9 @@ abstract class SingleMRToolWindowFactoryBase(
 ) : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val projectServiceProvider = applicationServiceProvider.findProjectServiceProvider(project)
+        if (!projectServiceProvider.isInitialized()) {
+            projectServiceProvider.initialize()
+        }
         SingleMRToolWindowManager(projectServiceProvider, toolWindow)
     }
 }

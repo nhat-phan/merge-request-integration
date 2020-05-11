@@ -32,14 +32,14 @@
         <toolWindow id="Merge Request Integration"
                     secondary="false"
                     anchor="bottom"
-                    icon="/icons/comments.svg"
+                    icon="/icons/main-tool-window.svg"
                     canCloseContents="true"
                     factoryClass="net.ntworld.mergeRequestIntegrationIdeEE.MainToolWindowFactory"/>
 
         <toolWindow id="Merge Request"
                     secondary="true"
                     anchor="left"
-                    icon="/icons/compress-alt.svg"
+                    icon="/icons/single-mr-tool-window.svg"
                     factoryClass="net.ntworld.mergeRequestIntegrationIdeEE.SingleMRToolWindowFactory"/>
     </extensions>
 

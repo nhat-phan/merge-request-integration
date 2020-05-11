@@ -3,10 +3,12 @@ package net.ntworld.mergeRequestIntegrationIde.rework.internal
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.debug
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.rework.BranchWatcher
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
 
 class BranchWatcherImpl(
+    private val projectServiceProvider: ProjectServiceProvider,
     private val reworkManager: ReworkManager,
     override val providerData: ProviderData,
     override val repository: GitRepository
@@ -24,7 +26,7 @@ class BranchWatcherImpl(
     }
 
     override fun shouldTerminate(): Boolean {
-        return myTerminate
+        return myTerminate || projectServiceProvider.isDoingCodeReview()
     }
 
     override fun execute() {
@@ -38,6 +40,7 @@ class BranchWatcherImpl(
 
     override fun terminate() {
         debug("BranchWatcher of ${providerData.id} is terminated")
+        reworkManager.markBranchWatcherTerminated(this)
     }
 
     override fun shutdown() {

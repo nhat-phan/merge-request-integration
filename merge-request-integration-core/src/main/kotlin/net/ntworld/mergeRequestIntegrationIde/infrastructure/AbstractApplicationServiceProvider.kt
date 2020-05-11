@@ -33,6 +33,12 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
         "gitlab.personio-internal.de"
     )
     private val myAppLifecycleListener = object : AppLifecycleListener {
+        override fun appStarting(projectFromCommandLine: Project?) {
+            if (null !== projectFromCommandLine) {
+                findProjectServiceProvider(projectFromCommandLine).initialize()
+            }
+        }
+
         override fun appClosing() {
             watcherManager.dispose()
         }

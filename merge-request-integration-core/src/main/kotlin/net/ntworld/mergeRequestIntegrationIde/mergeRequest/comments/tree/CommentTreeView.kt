@@ -17,6 +17,8 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
 
     fun selectGeneralCommentsTreeNode()
 
+    fun setToolbarMode(mode: ToolbarMode)
+
     interface ActionListener : EventListener {
         fun onTreeNodeSelected(node: Node)
 
@@ -25,5 +27,10 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
         fun onCreateGeneralCommentClicked()
 
         fun onRefreshButtonClicked()
+    }
+
+    enum class ToolbarMode {
+        FULL,
+        MINI
     }
 }
