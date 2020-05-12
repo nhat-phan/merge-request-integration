@@ -37,17 +37,14 @@ class GitRemotePathInfo(private val input: String) {
     }
 
     private fun parseHttpUrl(input: String) {
-        try {
-            val url = URL(input)
-            val parts = url.path.split('/')
-            if (parts.size != 3) {
-                return
-            }
-            namespace = parts[1]
-            project = if (parts[2].endsWith(".git")) parts[2].substring(0, parts[2].length - 4) else parts[2]
-            isValid = true
-        } catch (exception: Exception) {
+        val url = URL(input)
+        val parts = url.path.split('/')
+        if (parts.size != 3) {
+            return
         }
+        namespace = parts[1]
+        project = if (parts[2].endsWith(".git")) parts[2].substring(0, parts[2].length - 4) else parts[2]
+        isValid = true
     }
 
     override fun toString(): String {

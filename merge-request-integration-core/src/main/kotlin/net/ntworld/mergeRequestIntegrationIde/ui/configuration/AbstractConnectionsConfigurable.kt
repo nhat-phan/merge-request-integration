@@ -5,6 +5,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.ui.tabs.TabInfo
@@ -271,7 +272,9 @@ abstract class AbstractConnectionsConfigurable(
 
     private fun initConnection(data: ProviderSettings): ConnectionUI {
         val ui = makeConnectionWithEventListener()
-        ui.initialize(findNameFromId(data.id), data.credentials, data.sharable, data.repository)
+        ApplicationManager.getApplication().invokeLater {
+            ui.initialize(findNameFromId(data.id), data.credentials, data.sharable, data.repository)
+        }
         return ui
     }
 

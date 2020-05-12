@@ -36,6 +36,7 @@ class MergeRequestFilterPropertiesPanel(
     private val myListener = object : FetchProjectMembersTask.Listener {
         override fun onError(exception: Exception) {
             isFetched = false
+            throw exception
         }
 
         override fun taskStarted() {

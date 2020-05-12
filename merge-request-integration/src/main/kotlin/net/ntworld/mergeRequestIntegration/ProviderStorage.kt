@@ -21,7 +21,7 @@ interface ProviderStorage {
         info: ProviderInfo,
         credentials: ApiCredentials,
         repository: String
-    ): ProviderData
+    ): Pair<ProviderData, Throwable?>
 
     fun clear()
 

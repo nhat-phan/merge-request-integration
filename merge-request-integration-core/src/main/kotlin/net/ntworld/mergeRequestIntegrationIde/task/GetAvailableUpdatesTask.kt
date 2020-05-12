@@ -29,7 +29,9 @@ class GetAvailableUpdatesTask(
     }
 
     interface Listener {
-        fun onError(exception: Exception) {}
+        fun onError(exception: Exception) {
+            throw exception
+        }
 
         fun dataReceived(updates: List<String>)
     }

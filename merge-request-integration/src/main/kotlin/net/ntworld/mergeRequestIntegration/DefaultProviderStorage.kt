@@ -33,9 +33,10 @@ class DefaultProviderStorage : ProviderStorage {
         info: ProviderInfo,
         credentials: ApiCredentials,
         repository: String
-    ): ProviderData {
+    ): Pair<ProviderData, Throwable?> {
         val api = createApiProvider(infrastructure = infrastructure, id = id, info = info, credentials = credentials)
-        var message: String? = ""
+        var throwable: Throwable? = null
+        var message: String? = null
         try {
             val user = api.user.me()
             val project = api.project.find(credentials.projectId)
@@ -53,10 +54,11 @@ class DefaultProviderStorage : ProviderStorage {
                     status = ProviderStatus.ACTIVE
                 )
                 data[id] = providerData
-                return providerData
+                return Pair(providerData, null)
             }
-        } catch (exception: Exception) {
+        } catch (exception: Throwable) {
             message = exception.message
+            throwable = exception
         }
         val invalid = ProviderDataImpl(
             id = id,
@@ -71,7 +73,7 @@ class DefaultProviderStorage : ProviderStorage {
             status = ProviderStatus.ERROR
         )
         data[id] = invalid
-        return invalid
+        return Pair(invalid, throwable)
     }
 
     override fun clear() {

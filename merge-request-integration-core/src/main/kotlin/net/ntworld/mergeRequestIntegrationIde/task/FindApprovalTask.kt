@@ -41,7 +41,9 @@ class FindApprovalTask(
     }
 
     interface Listener {
-        fun onError(exception: Exception) {}
+        fun onError(exception: Exception) {
+            throw exception
+        }
 
         fun taskStarted() {}
 
