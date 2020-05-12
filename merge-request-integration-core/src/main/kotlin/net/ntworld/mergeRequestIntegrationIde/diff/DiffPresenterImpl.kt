@@ -290,24 +290,6 @@ internal class DiffPresenterImpl(
         view.scrollToPosition(position, null !== showComments && showComments)
     }
 
-//    private fun scrollToLine(line: Int, side: Side?, showComments: Boolean?) {
-//        if (null !== showComments && showComments) {
-//            if (null !== side) {
-//                view.displayComments(line, side, DiffView.DisplayCommentMode.SHOW)
-//            } else {
-//                view.displayComments(line, Side.LEFT, DiffView.DisplayCommentMode.SHOW)
-//                view.displayComments(line, Side.RIGHT, DiffView.DisplayCommentMode.SHOW)
-//            }
-//        }
-//
-//        if (null !== side) {
-//            view.scrollToLine(line, side)
-//        } else {
-//            view.scrollToLine(line, Side.LEFT)
-//            view.scrollToLine(line, Side.RIGHT)
-//        }
-//    }
-
     private fun clearChangeDataOfScrollToLineInReviewContext() {
         model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollPosition, null)
         model.reviewContext.putChangeData(model.change, DiffNotifier.ScrollShowComments, null)

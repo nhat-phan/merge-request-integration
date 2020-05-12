@@ -20,6 +20,7 @@ import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import javax.swing.BoxLayout
 import javax.swing.JComponent
@@ -37,10 +38,10 @@ class CommentsTabViewImpl(
     )
     private val myTreePresenter: CommentTreePresenter = CommentTreeFactory.makePresenter(
         CommentTreeFactory.makeModel(providerData),
-        CommentTreeFactory.makeView(projectServiceProvider, providerData)
+        CommentTreeFactory.makeView(projectServiceProvider, providerData, showOpenDiffViewDescription = false)
     )
     private val myTreeListener = object : CommentTreePresenter.Listener {
-        override fun onTreeNodeSelected(node: Node) {
+        override fun onTreeNodeSelected(node: Node, type: CommentTreeView.TreeSelectType) {
             dispatcher.multicaster.onTreeNodeSelected(node)
         }
 

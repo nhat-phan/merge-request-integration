@@ -23,11 +23,11 @@ class CommentsToolWindowTabImpl(
     )
     private val myTreePresenter: CommentTreePresenter = CommentTreeFactory.makePresenter(
         CommentTreeFactory.makeModel(providerData),
-        CommentTreeFactory.makeView(projectServiceProvider, providerData)
+        CommentTreeFactory.makeView(projectServiceProvider, providerData, showOpenDiffViewDescription = true)
     )
     private val myTreePresenterListener = object: CommentTreePresenter.Listener {
-        override fun onTreeNodeSelected(node: Node) {
-            myPublisher.commentTreeNodeSelected(providerData, node)
+        override fun onTreeNodeSelected(node: Node, type: CommentTreeView.TreeSelectType) {
+            myPublisher.commentTreeNodeSelected(providerData, node, type)
         }
 
         override fun onShowResolvedCommentsToggled(displayResolvedComments: Boolean) {

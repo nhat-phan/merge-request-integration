@@ -8,8 +8,12 @@ object CommentTreeFactory {
         return CommentTreeModelImpl(providerData)
     }
 
-    fun makeView(projectServiceProvider: ProjectServiceProvider, providerData: ProviderData): CommentTreeView {
-        return CommentTreeViewImpl(projectServiceProvider, providerData)
+    fun makeView(
+        projectServiceProvider: ProjectServiceProvider,
+        providerData: ProviderData,
+        showOpenDiffViewDescription: Boolean
+    ): CommentTreeView {
+        return CommentTreeViewImpl(projectServiceProvider, providerData, showOpenDiffViewDescription)
     }
 
     fun makePresenter(

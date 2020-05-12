@@ -37,14 +37,14 @@ internal class ReworkManagerImpl(
     override fun markBranchWatcherTerminated(branchWatcher: BranchWatcher) {
         myBranchWatchers.remove(branchWatcher.providerData.id)
 
-        debug("clear BranchWatcher ${branchWatcher.providerData.id}")
+        debug("${branchWatcher.providerData.id}: clear BranchWatcher")
     }
 
     override fun markReworkWatcherTerminated(reworkWatcher: ReworkWatcher) {
-        val key = keyOf(reworkWatcher.providerData, reworkWatcher.branchName)
+        val key = reworkWatcher.key()
         myReworkWatchers.remove(key)
 
-        debug("clear ReworkManager $key")
+        debug("$key: clear ReworkManager")
     }
 
     override fun createBranchWatcher(providerData: ProviderData) {
@@ -55,7 +55,7 @@ internal class ReworkManagerImpl(
         var gitRepository = RepositoryUtil.findRepository(projectServiceProvider, providerData)
         var count = 0
         while (gitRepository === null && count < 100) {
-            debug("Cannot find repository for ${providerData.id}, retry in 10s")
+            debug("${providerData.id}: cannot find repository, retry in 10s")
             count++
             Thread.sleep(10000)
             gitRepository = RepositoryUtil.findRepository(projectServiceProvider, providerData)
@@ -68,7 +68,7 @@ internal class ReworkManagerImpl(
             )
             myBranchWatchers[providerData.id] = branchWatcher
 
-            debug("Create BranchWatcher for ${providerData.id}")
+            debug("${providerData.id}: create BranchWatcher")
             projectServiceProvider.applicationServiceProvider.watcherManager.addWatcher(branchWatcher)
         }
     }
@@ -83,7 +83,7 @@ internal class ReworkManagerImpl(
     }
 
     override fun requestCreateReworkWatcher(providerData: ProviderData, repository: GitRepository, branchName: String) {
-        val key = keyOf(providerData, branchName)
+        val key = ReworkWatcher.keyOf(providerData, branchName)
         if (myReworkWatchers.contains(key)) {
             return
         }
@@ -115,7 +115,7 @@ internal class ReworkManagerImpl(
                     ApplicationManager.getApplication().invokeLater {
                         if (list.isNotEmpty()) {
                             val mergeRequestInfo = list.first()
-                            debug("Create watcher for ${providerData.id}:${mergeRequestInfo.id}")
+                            debug("${providerData.id}:${branchName}: create watcher")
                             val reworkWatcher = ReworkWatcherImpl(
                                 projectServiceProvider,
                                 repository,
@@ -159,10 +159,6 @@ internal class ReworkManagerImpl(
 
     override fun getActiveReworkWatchers(): List<ReworkWatcher> {
         return myReworkWatchers.values.toList()
-    }
-
-    private fun keyOf(providerData: ProviderData, branchName: String): String {
-        return "${providerData.id}:${branchName}"
     }
 
     private fun findProviderData(

@@ -34,9 +34,19 @@ interface ReworkWatcher : Watcher {
 
     fun openChange(change: Change)
 
-    fun findChangeByPath(path: String): Change?
+    fun findChangeByPath(absolutePath: String): Change?
 
-    fun findCommentsByPath(path: String): List<Comment>
+    fun findCommentsByPath(absolutePath: String): List<Comment>
 
     fun fetchComments()
+
+    fun key(): String {
+        return keyOf(providerData, branchName)
+    }
+
+    companion object {
+        fun keyOf(providerData: ProviderData, branchName: String): String {
+            return "${providerData.id}:${branchName}"
+        }
+    }
 }

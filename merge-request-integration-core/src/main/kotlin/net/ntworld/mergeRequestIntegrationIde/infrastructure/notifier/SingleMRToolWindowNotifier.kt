@@ -22,12 +22,7 @@ interface SingleMRToolWindowNotifier {
 
     fun showChangesWhenDoingCodeReview(providerData: ProviderData, changes: List<Change>)
 
-    fun showReworkChanges(providerData: ProviderData, changes: List<Change>)
+    fun showReworkChanges(reworkWatcher: ReworkWatcher, changes: List<Change>)
 
-    fun showReworkComments(
-        providerData: ProviderData,
-        mergeRequestInfo: MergeRequestInfo,
-        comments: List<Comment>,
-        displayResolvedComments: Boolean
-    )
+    fun showReworkComments(reworkWatcher: ReworkWatcher, comments: List<Comment>, displayResolvedComments: Boolean)
 }

@@ -31,8 +31,15 @@ object NodeFactory {
         return node
     }
 
-    fun makeFileLine(parent: FileNode, path: String, line: Int, count: Int, position: CommentPosition): FileLineNode {
-        val node = FileLineNode(path, line, position, count)
+    fun makeFileLine(
+        parent: FileNode,
+        path: String,
+        line: Int,
+        count: Int,
+        position: CommentPosition,
+        showOpenDiffViewDescription: Boolean
+    ): FileLineNode {
+        val node = FileLineNode(path, line, position, count, showOpenDiffViewDescription)
         parent.add(node)
         return node
     }

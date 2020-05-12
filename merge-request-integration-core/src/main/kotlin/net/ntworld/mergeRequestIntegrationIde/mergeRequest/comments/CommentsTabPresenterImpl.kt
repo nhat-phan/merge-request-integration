@@ -73,17 +73,17 @@ class CommentsTabPresenterImpl(
      */
     override fun onTreeNodeSelected(node: Node) = assertMergeRequestInfoIsAvailable {
         if (node is GeneralCommentsNode) {
-            displayGeneralComments(it, node)
+            collectAndDisplayCommentThread(it, node)
             return@assertMergeRequestInfoIsAvailable
         }
 
         if (node is ThreadNode) {
-            displayGeneralComments(it, node.parent!!)
+            collectAndDisplayCommentThread(it, node.parent!!)
             return@assertMergeRequestInfoIsAvailable
         }
 
         if (node is CommentNode) {
-            displayGeneralComments(it, node.parent!!.parent!!)
+            collectAndDisplayCommentThread(it, node.parent!!.parent!!)
             return@assertMergeRequestInfoIsAvailable
         }
 
@@ -100,7 +100,7 @@ class CommentsTabPresenterImpl(
         }
 
         if (node is FileLineNode) {
-            displayGeneralComments(it, node)
+            collectAndDisplayCommentThread(it, node)
             val reviewContext = projectServiceProvider.reviewContextManager.findContext(model.providerData.id, it.id)
             if (null !== reviewContext) {
                 val change = reviewContext.findChangeByPath(node.path)
@@ -213,20 +213,7 @@ class CommentsTabPresenterImpl(
         }
     }
 
-    private fun displayGeneralComments(mergeRequestInfo: MergeRequestInfo, parent: Node) {
-        val groupedComments = mutableMapOf<String, MutableList<Comment>>()
-        parent.children.forEach {
-            if (it !is ThreadNode) {
-                return@forEach
-            }
-            groupedComments[it.threadId] = mutableListOf(it.comment)
-            it.children.forEach { node ->
-                if (node is CommentNode) {
-                    groupedComments[it.threadId]!!.add(node.comment)
-                }
-            }
-        }
-
-        view.renderThread(mergeRequestInfo, groupedComments)
+    private fun collectAndDisplayCommentThread(mergeRequestInfo: MergeRequestInfo, parent: Node) {
+        view.renderThread(mergeRequestInfo, parent.groupComments())
     }
 }

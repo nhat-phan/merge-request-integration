@@ -32,6 +32,7 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewCont
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.MergeRequestDataNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ProjectNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ReworkEditorNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.SingleMRToolWindowNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.provider.MergeRequestDataProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.FiltersStorageService
@@ -40,9 +41,9 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.internal.Fi
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.CachedRepositoryFile
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repositoryFile.LocalRepositoryFileService
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
-import net.ntworld.mergeRequestIntegrationIde.rework.EditorManager
+import net.ntworld.mergeRequestIntegrationIde.rework.ReworkEditorManager
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkManager
-import net.ntworld.mergeRequestIntegrationIde.rework.internal.EditorManagerImpl
+import net.ntworld.mergeRequestIntegrationIde.rework.internal.ReworkEditorManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.rework.internal.ReworkManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.task.RegisterProviderTask
 import net.ntworld.mergeRequestIntegrationIde.ui.configuration.GithubConnectionsConfigurableBase
@@ -87,7 +88,7 @@ abstract class AbstractProjectServiceProvider(
 
     override val reworkManager: ReworkManager = ReworkManagerImpl(this)
 
-    override val editorManager: EditorManager = EditorManagerImpl(this)
+    final override val reworkEditorManager: ReworkEditorManager = ReworkEditorManagerImpl(this)
 
     override val componentFactory: ComponentFactory = DefaultComponentFactory(this)
 
@@ -112,7 +113,7 @@ abstract class AbstractProjectServiceProvider(
                 val reworkWatcher = reworkManager.findActiveReworkWatcher(provider)
                 if (null !== reworkWatcher) {
                     ApplicationManager.getApplication().invokeLater {
-                        editorManager.initialize(editor, reworkWatcher)
+                        reworkEditorManager.bootstrap(editor, reworkWatcher)
                     }
                 }
             }
@@ -121,6 +122,7 @@ abstract class AbstractProjectServiceProvider(
 
     init {
         messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, myFileEditorManagerListener)
+        messageBus.connect().subscribe(ReworkEditorNotifier.TOPIC, reworkEditorManager)
     }
 
     protected fun initWithApplicationServiceProvider(applicationSP: ApplicationServiceProvider) {

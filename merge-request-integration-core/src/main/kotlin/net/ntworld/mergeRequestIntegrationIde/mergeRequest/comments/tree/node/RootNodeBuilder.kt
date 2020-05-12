@@ -3,7 +3,10 @@ package net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequestIntegrationIde.util.CommentUtil
 
-class RootNodeBuilder(comments: List<Comment>) {
+class RootNodeBuilder(
+    comments: List<Comment>,
+    private val showOpenDiffViewDescription: Boolean
+) {
     private val generalComments = comments.filter {
         null === it.position
     }
@@ -56,7 +59,7 @@ class RootNodeBuilder(comments: List<Comment>) {
             groupedByLine.forEach { (line, comments) ->
                 if (comments.isNotEmpty()) {
                     val fileLine = NodeFactory.makeFileLine(
-                        fileNode, path, line, comments.size, comments.last().position!!
+                        fileNode, path, line, comments.size, comments.last().position!!, showOpenDiffViewDescription
                     )
                     buildThreadComments(fileLine, comments)
                 }

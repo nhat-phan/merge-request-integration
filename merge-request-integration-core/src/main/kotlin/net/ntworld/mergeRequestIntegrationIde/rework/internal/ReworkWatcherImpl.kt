@@ -1,20 +1,31 @@
 package net.ntworld.mergeRequestIntegrationIde.rework.internal
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.vcs.changes.Change
+import com.intellij.openapi.vcs.changes.ChangesUtil
 import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile
-import com.intellij.openapi.vfs.LocalFileSystem
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.*
+import net.ntworld.mergeRequest.command.DeleteCommentCommand
+import net.ntworld.mergeRequest.command.ResolveCommentCommand
+import net.ntworld.mergeRequest.command.UnresolveCommentCommand
+import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
+import net.ntworld.mergeRequestIntegration.make
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
+import net.ntworld.mergeRequestIntegrationIde.component.gutter.GutterPosition
 import net.ntworld.mergeRequestIntegrationIde.debug
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.DiffPreviewProviderImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ReviewContextImpl
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.DiffNotifier
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ReworkEditorNotifier
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ReworkWatcherNotifier
-import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeView
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
 import net.ntworld.mergeRequestIntegrationIde.task.FindMergeRequestTask
 import net.ntworld.mergeRequestIntegrationIde.task.GetCommentsTask
@@ -31,11 +42,16 @@ class ReworkWatcherImpl(
     override val mergeRequestInfo: MergeRequestInfo
 ) : ReworkWatcher, ReworkWatcherNotifier {
     private val myConnection = projectServiceProvider.messageBus.connect()
+    private val myEditorManager = projectServiceProvider.messageBus.syncPublisher(
+        ReworkEditorNotifier.TOPIC
+    )
+    private val myDiffPublisher = projectServiceProvider.messageBus.syncPublisher(DiffNotifier.TOPIC)
 
     private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
     private val myCommentsMap = Collections.synchronizedMap(mutableMapOf<String, List<Comment>>())
-    private val myChangesMap = Collections.synchronizedMap(mutableMapOf<String, Change>())
+    private val myChangesMap = Collections.synchronizedMap(mutableMapOf<String, MutableList<Change>>())
     private val myComments = mutableListOf<Comment>()
+    private val myReworkGeneralCommentsView = ReworkGeneralCommentsView(projectServiceProvider, providerData, this)
 
     @Volatile
     private var myTerminate = false
@@ -61,15 +77,11 @@ class ReworkWatcherImpl(
             ApplicationManager.getApplication().invokeLater {
                 projectServiceProvider.openSingleMRToolWindow {
                     projectServiceProvider.singleMRToolWindowNotifierTopic.showReworkChanges(
-                        providerData, changes
+                        this@ReworkWatcherImpl, changes
                     )
                 }
-                val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
-                for (editor in editors) {
-                    if (editor is TextEditor) {
-                        projectServiceProvider.editorManager.initialize(editor, this@ReworkWatcherImpl)
-                    }
-                }
+
+                myEditorManager.bootstrap(this@ReworkWatcherImpl)
             }
         }
     }
@@ -90,6 +102,10 @@ class ReworkWatcherImpl(
             myMergeRequest = mergeRequest
         }
     }
+
+    private val reviewContext = ReviewContextImpl(
+        projectServiceProvider, providerData, mergeRequestInfo, projectServiceProvider.messageBus.connect()
+    )
 
     init {
         myConnection.subscribe(ReworkWatcherNotifier.TOPIC, this)
@@ -115,22 +131,22 @@ class ReworkWatcherImpl(
     }
 
     override fun execute() {
-        if (myRunCount % 3 == 0) {
+        // the watcher runs every 10 seconds, so 18x10s = 3 minutes
+        if (myRunCount % 18 == 0) {
             fetchComments()
         }
-
         myRunCount += 1
     }
 
     override fun terminate() {
-        debug("ReworkWatcher of ${providerData.id}:$branchName is terminated")
+        debug("${providerData.id}:$branchName: ReworkWatcher is terminated")
         projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
         projectServiceProvider.reworkManager.markReworkWatcherTerminated(this)
         myConnection.disconnect()
     }
 
     override fun shutdown() {
-        debug("Terminate ReworkWatcher of ${providerData.id}:$branchName")
+        debug("${providerData.id}:$branchName: terminate ReworkWatcher")
         projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
         ApplicationManager.getApplication().invokeLater {
             val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project)
@@ -139,13 +155,7 @@ class ReworkWatcherImpl(
             }
             myPreviewDiffVirtualFileMap.clear()
 
-            // TODO: Should replace by Message communication
-            val editors = fileEditorManagerEx.allEditors
-            for (editor in editors) {
-                if (editor is TextEditor) {
-                    projectServiceProvider.editorManager.shutdown(editor)
-                }
-            }
+            myEditorManager.shutdown(providerData)
         }
         myTerminate = true
     }
@@ -153,33 +163,28 @@ class ReworkWatcherImpl(
     override fun openChange(change: Change) {
         val afterRevision = change.afterRevision
         if (null === afterRevision) {
+            updateDataToReviewContext()
             return openChangeAsDiffView(change)
         }
+        myEditorManager.open(providerData, afterRevision.file.path)
+    }
 
-        val path = afterRevision.file.path
-        val file = LocalFileSystem.getInstance().findFileByPath(path)
-        if (null !== file) {
-            val fileEditors = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project).openFile(file, true)
-            ApplicationManager.getApplication().invokeLater {
-                for (fileEditor in fileEditors) {
-                    if (fileEditor is TextEditor) {
-                        projectServiceProvider.editorManager.initialize(fileEditor, this)
-                    }
-                }
+    override fun findChangeByPath(absolutePath: String): Change? {
+        return if (myTerminate) null else {
+            val changes = myChangesMap[absolutePath]
+            if (null === changes) {
+                return null
             }
+            return changes.first()
         }
     }
 
-    override fun findChangeByPath(path: String): Change? {
-        return if (myTerminate) null else myChangesMap[path]
-    }
-
-    override fun findCommentsByPath(path: String): List<Comment> {
-        return myCommentsMap[path] ?: listOf()
+    override fun findCommentsByPath(absolutePath: String): List<Comment> {
+        return myCommentsMap[absolutePath] ?: listOf()
     }
 
     override fun fetchComments() {
-        debug("Fetching comments of ${providerData.id}:$branchName")
+        debug("${providerData.id}:$branchName: fetching comments")
         val task = GetCommentsTask(
             projectServiceProvider = projectServiceProvider,
             providerData = providerData,
@@ -202,10 +207,211 @@ class ReworkWatcherImpl(
         }
     }
 
-    override fun commentTreeNodeSelected(providerData: ProviderData, node: Node) = assertHasSameProvider(providerData) {
+    override fun commentTreeNodeSelected(
+        providerData: ProviderData,
+        node: Node,
+        type: CommentTreeView.TreeSelectType
+    ) = assertHasSameProvider(providerData) {
+        if (type == CommentTreeView.TreeSelectType.NORMAL) {
+            return@assertHasSameProvider
+        }
+        when (node) {
+            is GeneralCommentsNode -> displayGeneralComments(node.groupComments(), false)
+            is ThreadNode -> when (val parent = node.parent) {
+                is GeneralCommentsNode -> displayGeneralComments(parent.groupComments(), false)
+                is FileLineNode -> openFileAndDisplayThreadByLineNode(parent)
+            }
+            is CommentNode -> when (val parent = node.parent!!.parent) {
+                is GeneralCommentsNode -> displayGeneralComments(parent.groupComments(), false)
+                is FileLineNode -> openFileAndDisplayThreadByLineNode(parent)
+            }
+            is FileNode -> openFileByNode(node)
+            is FileLineNode -> openFileAndDisplayThreadByLineNode(node)
+        }
     }
 
     override fun openCreateGeneralCommentForm(providerData: ProviderData) = assertHasSameProvider(providerData) {
+        val groupedComments = mutableMapOf<String, MutableList<Comment>>()
+        comments.forEach {
+            if (null !== it.position) {
+                return@forEach
+            }
+            if (!groupedComments.containsKey(it.parentId)) {
+                groupedComments[it.parentId] = mutableListOf()
+            }
+            groupedComments[it.parentId]!!.add(it)
+        }
+        displayGeneralComments(groupedComments, true)
+    }
+
+    override fun requestReplyComment(
+        providerData: ProviderData,
+        content: String,
+        repliedComment: Comment
+    ) = assertHasSameProvider(providerData) {
+        projectServiceProvider.infrastructure.serviceBus() process ReplyCommentRequest.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            repliedComment = repliedComment,
+            body = content
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchComments()
+    }
+
+    override fun requestCreateComment(
+        providerData: ProviderData,
+        content: String,
+        position: GutterPosition?
+    ) = assertHasSameProvider(providerData) {
+        val commentPosition = convertGutterPositionToCommentPosition(position)
+        projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            position = commentPosition,
+            body = content
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchComments()
+    }
+
+    override fun requestDeleteComment(
+        providerData: ProviderData,
+        comment: Comment
+    ) = assertHasSameProvider(providerData) {
+        projectServiceProvider.infrastructure.commandBus() process DeleteCommentCommand.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            comment = comment
+        )
+        fetchComments()
+    }
+
+    override fun requestResolveComment(
+        providerData: ProviderData,
+        comment: Comment
+    ) = assertHasSameProvider(providerData) {
+        projectServiceProvider.infrastructure.commandBus() process ResolveCommentCommand.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            comment = comment
+        )
+        fetchComments()
+    }
+
+    override fun requestUnresolveComment(
+        providerData: ProviderData,
+        comment: Comment
+    ) = assertHasSameProvider(providerData) {
+        projectServiceProvider.infrastructure.commandBus() process UnresolveCommentCommand.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            comment = comment
+        )
+        fetchComments()
+    }
+
+    private fun convertGutterPositionToCommentPosition(input: GutterPosition?): CommentPosition? {
+        if (null === input) return null
+
+        return CommentPositionImpl(
+            oldLine = input.oldLine,
+            oldPath = if (null === input.oldPath) null else RepositoryUtil.findRelativePath(repository, input.oldPath),
+            newLine = input.newLine,
+            newPath = if (null === input.newPath) null else RepositoryUtil.findRelativePath(repository, input.newPath),
+            baseHash = if (input.baseHash.isNullOrEmpty()) findBaseHash() else input.baseHash,
+            headHash = if (input.headHash.isNullOrEmpty()) findHeadHash() else input.headHash,
+            startHash = if (input.startHash.isNullOrEmpty()) findStartHash() else input.startHash,
+            source = CommentPositionSource.UNKNOWN,
+            changeType = CommentPositionChangeType.UNKNOWN
+        )
+    }
+
+    private fun findBaseHash(): String {
+        if (commits.isNotEmpty()) {
+            return commits.last().id
+        }
+
+        val mr = myMergeRequest ?: return ""
+        val diff = mr.diffReference
+        return if (null === diff) "" else diff.baseHash
+    }
+
+    private fun findStartHash(): String {
+        val mr = myMergeRequest ?: return ""
+        val diff = mr.diffReference
+        return if (null === diff) "" else diff.startHash
+    }
+
+    private fun findHeadHash(): String {
+        if (commits.isNotEmpty()) {
+            return commits.first().id
+        }
+
+        val mr = myMergeRequest ?: return ""
+        val diff = mr.diffReference
+        return if (null === diff) "" else diff.headHash
+    }
+
+    private fun openFileByNode(node: FileNode) {
+        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, node.path)
+        openFileAndDisplayThread(absolutePath = fullPath, line = null, position = null)
+    }
+
+    private fun openFileAndDisplayThreadByLineNode(node: FileLineNode) {
+        val fullPath = RepositoryUtil.findAbsoluteCrossPlatformsPath(repository, node.path)
+        if (null === node.position.newLine) {
+            // edge case, open diff view instead of editor view if there is no newLine
+            val change = findChangeByPath(fullPath)
+            if (null !== change) {
+                updateDataToReviewContext()
+                openChangeAsDiffView(change)
+                reviewContext.putChangeData(change, DiffNotifier.ScrollPosition, node.position)
+                reviewContext.putChangeData(change, DiffNotifier.ScrollShowComments, true)
+                myDiffPublisher.hideAllCommentsRequested(reviewContext, change)
+                myDiffPublisher.scrollToPositionRequested(reviewContext, change, node.position, true)
+            }
+        } else {
+            openFileAndDisplayThread(absolutePath = fullPath, line = node.line, position = node.position)
+        }
+    }
+
+    private fun openFileAndDisplayThread(absolutePath: String, line: Int?, position: CommentPosition?) {
+        val change = findChangeByPath(absolutePath)
+        if (null === change) {
+            return myEditorManager.open(providerData, absolutePath, line)
+        }
+
+        val afterRevision = change.afterRevision
+        if (null === afterRevision) {
+            updateDataToReviewContext()
+            openChangeAsDiffView(change)
+            if (null !== position) {
+                reviewContext.putChangeData(change, DiffNotifier.ScrollPosition, position)
+                reviewContext.putChangeData(change, DiffNotifier.ScrollShowComments, true)
+                myDiffPublisher.hideAllCommentsRequested(reviewContext, change)
+                myDiffPublisher.scrollToPositionRequested(reviewContext, change, position, true)
+            }
+            return
+        }
+        return myEditorManager.open(providerData, absolutePath, line)
+    }
+
+    private fun displayGeneralComments(groupedComments: Map<String, List<Comment>>, focusToEditor: Boolean) {
+        myReworkGeneralCommentsView.render(groupedComments)
+        if (focusToEditor) {
+            myReworkGeneralCommentsView.focusMainEditor()
+        }
     }
 
     private fun buildCommentsMap() {
@@ -218,12 +424,20 @@ class ReworkWatcherImpl(
     }
 
     private fun buildChangesMap() {
+        myChangesMap.clear()
         for (change in changes) {
-            val afterRevision = change.afterRevision
-            if (null === afterRevision) {
-                continue
+            val filePaths = ChangesUtil.getPathsCaseSensitive(change)
+            for (filePath in filePaths) {
+                val path = filePath.path
+                val list = myChangesMap.get(path)
+                if (null === list) {
+                    myChangesMap[path] = mutableListOf(change)
+                } else {
+                    if (!list.contains(change)) {
+                        list.add(change)
+                    }
+                }
             }
-            myChangesMap[afterRevision.file.path] = change
         }
     }
 
@@ -231,7 +445,7 @@ class ReworkWatcherImpl(
         val project = projectServiceProvider.project
         val diffFile = myPreviewDiffVirtualFileMap[change]
         if (null === diffFile) {
-            val provider = DiffPreviewProviderImpl(project, change, buildReviewContext(), false)
+            val provider = DiffPreviewProviderImpl(project, change, reviewContext, false)
             val created = PreviewDiffVirtualFile(provider)
             myPreviewDiffVirtualFileMap[change] = created
             FileEditorManagerEx.getInstanceEx(project).openFile(created, true)
@@ -240,24 +454,20 @@ class ReworkWatcherImpl(
         }
     }
 
-    private fun buildReviewContext(): ReviewContext? {
-        val context = ReviewContextImpl(
-            projectServiceProvider, providerData, mergeRequestInfo, projectServiceProvider.messageBus.connect()
-        )
+    private fun updateDataToReviewContext() {
         val mr = myMergeRequest
         if (null !== mr) {
-            context.diffReference = mr.diffReference
+            reviewContext.diffReference = mr.diffReference
         }
-        context.commits = commits
-        context.reviewingCommits = commits
-        context.changes = changes
-        context.reviewingChanges = changes
-        context.comments = comments
-        return context
+        reviewContext.commits = commits
+        reviewContext.reviewingCommits = commits
+        reviewContext.changes = changes
+        reviewContext.reviewingChanges = changes
+        reviewContext.comments = comments
     }
 
     private fun fetchCommits() {
-        debug("Fetching commits of ${providerData.id}:$branchName")
+        debug("${providerData.id}:$branchName: fetching commits")
         val task = GetCommitsTask(
             projectServiceProvider = projectServiceProvider,
             providerData = providerData,
@@ -268,7 +478,7 @@ class ReworkWatcherImpl(
     }
 
     private fun fetchMergeRequest() {
-        debug("Fetching mergeRequest of ${providerData.id}:$branchName")
+        debug("${providerData.id}:$branchName: fetching mergeRequest")
         val task = FindMergeRequestTask(
             projectServiceProvider = projectServiceProvider,
             providerData = providerData,
@@ -293,18 +503,11 @@ class ReworkWatcherImpl(
         }
         buildCommentsMap()
 
+        myEditorManager.commentsUpdated(providerData)
         ApplicationManager.getApplication().invokeLater {
             projectServiceProvider.singleMRToolWindowNotifierTopic.showReworkComments(
-                providerData, mergeRequestInfo, comments, displayResolvedComments
+                this, comments, displayResolvedComments
             )
-
-            // TODO: Should replace by Message communication
-            val editors = FileEditorManagerEx.getInstance(projectServiceProvider.project).allEditors
-            for (editor in editors) {
-                if (editor is TextEditor) {
-                    projectServiceProvider.editorManager.updateComments(editor, this@ReworkWatcherImpl)
-                }
-            }
         }
     }
 }

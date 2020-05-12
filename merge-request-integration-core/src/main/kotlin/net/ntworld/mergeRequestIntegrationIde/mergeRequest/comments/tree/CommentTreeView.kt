@@ -20,7 +20,7 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
     fun setToolbarMode(mode: ToolbarMode)
 
     interface ActionListener : EventListener {
-        fun onTreeNodeSelected(node: Node)
+        fun onTreeNodeSelected(node: Node, type: TreeSelectType)
 
         fun onShowResolvedCommentsToggled(displayResolvedComments: Boolean)
 
@@ -32,5 +32,11 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
     enum class ToolbarMode {
         FULL,
         MINI
+    }
+
+    enum class TreeSelectType {
+        NORMAL,
+        DOUBLE_CLICK,
+        PRESS_ENTER
     }
 }

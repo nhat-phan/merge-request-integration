@@ -13,11 +13,16 @@ import com.intellij.ui.ScrollPaneFactory
 import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeView
 import net.ntworld.mergeRequestIntegrationIde.toolWindow.FilesToolWindowTab
 import net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest.tab.commit.CommitChanges
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.ui.util.ToolbarUtil
 import java.awt.GridBagLayout
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -25,6 +30,7 @@ import javax.swing.SwingConstants
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
+import javax.swing.tree.TreePath
 
 class FilesToolWindowTabImpl(
     private val projectServiceProvider: ProjectServiceProvider,
@@ -57,25 +63,58 @@ class FilesToolWindowTabImpl(
         )
         panel
     }
-    private val myTreeSelectionListener = TreeSelectionListener {
-        if (null === it) {
-            return@TreeSelectionListener
-        }
+    private val myTreeMouseListener = object : MouseAdapter() {
+        override fun mousePressed(e: MouseEvent?) {
+            if (null === e) {
+                return
+            }
 
-        val node = it.path.lastPathComponent
-        if (node !is DefaultMutableTreeNode) {
-            return@TreeSelectionListener
+            if (e.clickCount == 2) {
+                handleTreeItemSelected(myTree.selectionPath)
+            }
         }
+    }
+    private val myKeyListener = object: KeyAdapter() {
+        override fun keyPressed(e: KeyEvent?) {
+            if (null === e) {
+                return
+            }
+            if (e.keyCode == KeyEvent.VK_ENTER) {
+                handleTreeItemSelected(myTree.selectionPath)
+            }
+        }
+    }
 
-        val change = node.userObject
-        if (change !is Change) {
-            return@TreeSelectionListener
-        }
+    init {
+        myLabelEmpty.text = "<html>Files' changes will be displayed when you do Code Review<br/>or<br/>open a branch which has an opened Merge Request</html>"
+        myComponentEmpty.background = JBColor.background()
+        myComponentEmpty.layout = GridBagLayout()
+        myComponentEmpty.add(myLabelEmpty)
+        myComponent.toolbar = myToolbar
+        myTree.addMouseListener(myTreeMouseListener)
+        myTree.addKeyListener(myKeyListener)
 
         val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
+            setChanges(reviewContext.providerData, reviewContext.reviewingChanges)
+        } else {
+            hide()
+        }
+    }
+
+    override val component: JComponent = myComponent
+
+    private fun handleTreeItemSelected(path: TreePath?) {
+        if (null === path) {
+            return
+        }
+
+        val node = path.lastPathComponent as? DefaultMutableTreeNode ?: return
+        val change = node.userObject as? Change ?: return
+        val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
+        if (null !== reviewContext) {
             reviewContext.openChange(change, focus = true, displayMergeRequestId = false)
-            return@TreeSelectionListener
+            return
         }
 
         val providerData = myProviderData
@@ -89,24 +128,6 @@ class FilesToolWindowTabImpl(
             }
         }
     }
-
-    init {
-        myLabelEmpty.text = "<html>Files' changes will be displayed when you do Code Review<br/>or<br/>open a branch which has an opened Merge Request</html>"
-        myComponentEmpty.background = JBColor.background()
-        myComponentEmpty.layout = GridBagLayout()
-        myComponentEmpty.add(myLabelEmpty)
-        myComponent.toolbar = myToolbar
-        myTree.addTreeSelectionListener(myTreeSelectionListener)
-
-        val reviewContext = projectServiceProvider.reviewContextManager.findDoingCodeReviewContext()
-        if (null !== reviewContext) {
-            setChanges(reviewContext.providerData, reviewContext.reviewingChanges)
-        } else {
-            hide()
-        }
-    }
-
-    override val component: JComponent = myComponent
 
     override fun setChanges(providerData: ProviderData, changes: List<Change>) {
         myProviderData = providerData

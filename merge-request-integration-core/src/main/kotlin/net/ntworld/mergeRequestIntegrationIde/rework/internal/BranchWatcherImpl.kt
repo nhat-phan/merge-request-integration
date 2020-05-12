@@ -33,18 +33,18 @@ class BranchWatcherImpl(
         val branchName = currentBranchName
         if (null !== branchName && myPrevBranchName != branchName) {
             myPrevBranchName = branchName
-            debug("BranchWatcher of ${providerData.id} found branch changed, request create watcher")
+            debug("${providerData.id}: BranchWatcher found branch changed, request create watcher")
             reworkManager.requestCreateReworkWatcher(providerData, repository, branchName)
         }
     }
 
     override fun terminate() {
-        debug("BranchWatcher of ${providerData.id} is terminated")
+        debug("${providerData.id}: BranchWatcher is terminated")
         reworkManager.markBranchWatcherTerminated(this)
     }
 
     override fun shutdown() {
-        debug("Terminate BranchWatcher of ${providerData.id}")
+        debug("${providerData.id}: terminate BranchWatcher")
         myTerminate = true
     }
 }

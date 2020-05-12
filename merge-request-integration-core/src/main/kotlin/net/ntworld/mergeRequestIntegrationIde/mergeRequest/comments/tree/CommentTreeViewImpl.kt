@@ -13,13 +13,18 @@ import net.ntworld.mergeRequestIntegrationIde.AbstractView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class CommentTreeViewImpl(
     private val projectServiceProvider: ProjectServiceProvider,
-    private val providerData: ProviderData
+    private val providerData: ProviderData,
+    private val showOpenDiffViewDescription: Boolean
 ) : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
 
@@ -43,7 +48,28 @@ class CommentTreeViewImpl(
     }
     private val myTreeSelectionListener = TreeSelectionListener {
         if (null !== it && !myIsTreeRendering) {
-            handleOnTreeNodeSelectedEvent(it.path)
+            handleOnTreeNodeSelectedEvent(it.path, CommentTreeView.TreeSelectType.NORMAL)
+        }
+    }
+    private val myTreeMouseListener = object : MouseAdapter() {
+        override fun mousePressed(e: MouseEvent?) {
+            if (null === e) {
+                return
+            }
+
+            if (e.clickCount == 2) {
+                handleOnTreeNodeSelectedEvent(myTree.selectionPath, CommentTreeView.TreeSelectType.DOUBLE_CLICK)
+            }
+        }
+    }
+    private val myKeyListener = object: KeyAdapter() {
+        override fun keyPressed(e: KeyEvent?) {
+            if (null === e) {
+                return
+            }
+            if (e.keyCode == KeyEvent.VK_ENTER) {
+                handleOnTreeNodeSelectedEvent(myTree.selectionPath, CommentTreeView.TreeSelectType.PRESS_ENTER)
+            }
         }
     }
 
@@ -65,6 +91,8 @@ class CommentTreeViewImpl(
         myTree.selectionModel = treeSelectionModel
 
         myTree.addTreeSelectionListener(myTreeSelectionListener)
+        myTree.addMouseListener(myTreeMouseListener)
+        myTree.addKeyListener(myKeyListener)
 
         myComponent.setContent(ScrollPaneFactory.createScrollPane(myTree, true))
         myComponent.toolbar = myToolbar.component
@@ -72,10 +100,10 @@ class CommentTreeViewImpl(
 
     override fun renderTree(mergeRequestInfo: MergeRequestInfo, comments: List<Comment>) {
         myIsTreeRendering = true
-        val builder = RootNodeBuilder(comments)
+        val builder = RootNodeBuilder(comments, showOpenDiffViewDescription)
         val root = builder.build()
         nodeSyncManager.sync(mergeRequestInfo, root, mySyncedTree)
-        handleOnTreeNodeSelectedEvent(myTree.selectionPath)
+        handleOnTreeNodeSelectedEvent(myTree.selectionPath, CommentTreeView.TreeSelectType.NORMAL)
 
         myIsTreeRendering = false
     }
@@ -114,7 +142,7 @@ class CommentTreeViewImpl(
         return descriptor.element is GeneralCommentsNode
     }
 
-    private fun handleOnTreeNodeSelectedEvent(selectedPath: TreePath?) {
+    private fun handleOnTreeNodeSelectedEvent(selectedPath: TreePath?, type: CommentTreeView.TreeSelectType) {
         if (null === selectedPath) {
             return
         }
@@ -122,7 +150,7 @@ class CommentTreeViewImpl(
         val lastPath = selectedPath.lastPathComponent as? DefaultMutableTreeNode ?: return
         val descriptor = lastPath.userObject as? PresentableNodeDescriptor<*> ?: return
         val element = descriptor.element as? Node ?: return
-        dispatcher.multicaster.onTreeNodeSelected(element)
+        dispatcher.multicaster.onTreeNodeSelected(element, type)
     }
 
     override val component: JComponent = myComponent
