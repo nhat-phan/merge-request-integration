@@ -48,6 +48,10 @@ internal class ReworkManagerImpl(
     }
 
     override fun createBranchWatcher(providerData: ProviderData) {
+        if (!projectServiceProvider.applicationSettings.enableReworkProcess) {
+            return
+        }
+
         if (providerData.status != ProviderStatus.ACTIVE || myBranchWatchers.containsKey(providerData.id)) {
             return
         }
@@ -74,6 +78,10 @@ internal class ReworkManagerImpl(
     }
 
     override fun requestCreateReworkWatcher(providers: List<ProviderData>, branchName: String) {
+        if (!projectServiceProvider.applicationSettings.enableReworkProcess) {
+            return
+        }
+
         val pair = findProviderData(providers, branchName)
         val providerData = pair.first
         val repository = pair.second
@@ -83,6 +91,10 @@ internal class ReworkManagerImpl(
     }
 
     override fun requestCreateReworkWatcher(providerData: ProviderData, repository: GitRepository, branchName: String) {
+        if (!projectServiceProvider.applicationSettings.enableReworkProcess) {
+            return
+        }
+
         val key = ReworkWatcher.keyOf(providerData, branchName)
         if (myReworkWatchers.contains(key)) {
             return

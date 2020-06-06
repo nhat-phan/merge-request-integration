@@ -70,6 +70,8 @@ interface ProjectServiceProvider {
 
     fun isDoingCodeReview(): Boolean
 
+    fun onApplicationSettingsChanged(old: ApplicationSettings, new: ApplicationSettings)
+
     fun notify(message: String)
 
     fun notify(message: String, type: NotificationType)

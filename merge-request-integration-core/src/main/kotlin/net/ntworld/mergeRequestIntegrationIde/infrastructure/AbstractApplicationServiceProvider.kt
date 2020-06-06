@@ -14,6 +14,7 @@ import net.ntworld.mergeRequestIntegrationIde.compatibility.IntellijIdeApi
 import net.ntworld.mergeRequestIntegrationIde.compatibility.*
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ProviderSettingsImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.internal.ServiceBase
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsManager
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettingsManagerImpl
 import net.ntworld.mergeRequestIntegrationIde.watcher.WatcherManager
@@ -63,7 +64,7 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
 
     override val intellijIdeApi: IntellijIdeApi = Version201Adapter()
 
-    override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl()
+    override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl(::onSettingsChanged)
 
     override fun getAllProjectServiceProviders(): List<ProjectServiceProvider> {
         return myProjectServiceProviders.toList()
@@ -118,5 +119,11 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
             return true
         }
         return legalGrantedDomains.contains(url.host)
+    }
+
+    private fun onSettingsChanged(old: ApplicationSettings, new: ApplicationSettings) {
+        getAllProjectServiceProviders().forEach {
+            it.onApplicationSettingsChanged(old, new)
+        }
     }
 }

@@ -3,7 +3,9 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.setting
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.option.*
 import org.jdom.Element
 
-class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
+class ApplicationSettingsManagerImpl(
+    private val changedInvoker: ((ApplicationSettings, ApplicationSettings) -> Unit)
+) : ApplicationSettingsManager {
     private var mySettings: ApplicationSettings = ApplicationSettingsImpl.DEFAULT
     private val myOptionEnableRequestCache = EnableRequestCacheOption()
     private val myOptionSaveMRFilterState = SaveMRFilterStateOption()
@@ -13,6 +15,7 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
     private val myOptionMaxDiffChangesOpenedAutomatically = MaxDiffChangesOpenedAutomaticallyOption()
     private val myOptionDisplayUpVotesAndDownVotes = DisplayUpVotesAndDownVotesOption()
     private val myOptionDisplayMergeRequestState = DisplayMergeRequestStateOption()
+    private val myOptionEnableReworkProcess = EnableReworkProcessOption()
     private val myAllSettingOptions = listOf<SettingOption<*>>(
         myOptionEnableRequestCache,
         myOptionSaveMRFilterState,
@@ -21,7 +24,8 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
         myOptionCheckoutTargetBranch,
         myOptionMaxDiffChangesOpenedAutomatically,
         myOptionDisplayUpVotesAndDownVotes,
-        myOptionDisplayMergeRequestState
+        myOptionDisplayMergeRequestState,
+        myOptionEnableReworkProcess
     )
 
     val settings: ApplicationSettings
@@ -50,6 +54,9 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
 
     override val displayMergeRequestState: Boolean
         get() = mySettings.displayMergeRequestState
+
+    override val enableReworkProcess: Boolean
+        get() = mySettings.enableReworkProcess
 
     override fun readFrom(elements: List<Element>): ApplicationSettings {
         var settings = ApplicationSettingsImpl.DEFAULT
@@ -87,10 +94,13 @@ class ApplicationSettingsManagerImpl : ApplicationSettingsManager {
         writeOption(element, myOptionMaxDiffChangesOpenedAutomatically, mySettings.maxDiffChangesOpenedAutomatically)
         writeOption(element, myOptionDisplayUpVotesAndDownVotes, mySettings.displayUpVotesAndDownVotes)
         writeOption(element, myOptionDisplayMergeRequestState, mySettings.displayMergeRequestState)
+        writeOption(element, myOptionEnableReworkProcess, mySettings.enableReworkProcess)
     }
 
     override fun update(settings: ApplicationSettings) {
+        val oldSettings = mySettings
         mySettings = settings
+        changedInvoker.invoke(oldSettings, settings)
     }
 
     private fun<T> writeOption(root: Element, option: SettingOption<T>, value: T) {

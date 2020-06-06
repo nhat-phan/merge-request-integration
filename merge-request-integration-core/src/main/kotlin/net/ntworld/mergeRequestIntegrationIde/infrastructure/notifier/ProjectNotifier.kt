@@ -3,6 +3,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier
 import com.intellij.util.messages.Topic
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.setting.ApplicationSettings
 
 interface ProjectNotifier {
     companion object {

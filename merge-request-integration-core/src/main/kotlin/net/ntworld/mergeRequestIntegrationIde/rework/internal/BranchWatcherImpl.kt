@@ -22,11 +22,14 @@ class BranchWatcherImpl(
     override val interval: Long = 3000
 
     override fun canExecute(): Boolean {
-        return true
+        return !projectServiceProvider.project.isDisposed
     }
 
     override fun shouldTerminate(): Boolean {
-        return myTerminate || projectServiceProvider.isDoingCodeReview()
+        return myTerminate ||
+            projectServiceProvider.project.isDisposed ||
+            projectServiceProvider.isDoingCodeReview() ||
+            !projectServiceProvider.applicationSettings.enableReworkProcess
     }
 
     override fun execute() {

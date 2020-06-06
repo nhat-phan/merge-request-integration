@@ -8,7 +8,8 @@ data class ApplicationSettingsImpl(
     override val checkoutTargetBranch: Boolean,
     override val maxDiffChangesOpenedAutomatically: Int,
     override val displayUpVotesAndDownVotes: Boolean,
-    override val displayMergeRequestState: Boolean
+    override val displayMergeRequestState: Boolean,
+    override val enableReworkProcess: Boolean
 ) : ApplicationSettings {
     companion object {
         val DEFAULT = ApplicationSettingsImpl(
@@ -19,7 +20,8 @@ data class ApplicationSettingsImpl(
             checkoutTargetBranch = false,
             maxDiffChangesOpenedAutomatically = 10,
             displayUpVotesAndDownVotes = false,
-            displayMergeRequestState = true
+            displayMergeRequestState = true,
+            enableReworkProcess = true
         )
     }
 }

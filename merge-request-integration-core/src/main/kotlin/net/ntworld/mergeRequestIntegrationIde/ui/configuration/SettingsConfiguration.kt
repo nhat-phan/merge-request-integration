@@ -28,6 +28,9 @@ class SettingsConfiguration : SettingsUI {
 
     var myMaxDiffChangesOpenedAutomatically: JTextField? = null
 
+    var myReworkProcessOptionsPanel: JPanel? = null
+    var myEnableReworkProcess: JCheckBox? = null
+
     override val dispatcher = EventDispatcher.create(SettingsUI.Listener::class.java)
 
     init {
@@ -38,6 +41,7 @@ class SettingsConfiguration : SettingsUI {
         myShowAddCommentIconsInDiffViewGutter!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayUpVotesAndDownVotes!!.addActionListener { dispatchSettingsUpdated() }
         myDisplayMergeRequestState!!.addActionListener { dispatchSettingsUpdated() }
+        myEnableReworkProcess!!.addActionListener { dispatchSettingsUpdated() }
 
         myCheckoutTargetBranch!!.addActionListener { dispatchSettingsUpdated() }
         myMaxDiffChangesOpenedAutomatically!!.document.addDocumentListener(object : DocumentListener {
@@ -62,7 +66,8 @@ class SettingsConfiguration : SettingsUI {
                     myMaxDiffChangesOpenedAutomatically!!.text
                 ),
                 displayUpVotesAndDownVotes = myDisplayUpVotesAndDownVotes!!.isSelected,
-                displayMergeRequestState = myDisplayMergeRequestState!!.isSelected
+                displayMergeRequestState = myDisplayMergeRequestState!!.isSelected,
+                enableReworkProcess = myEnableReworkProcess!!.isSelected
             )
         dispatcher.multicaster.change(settings)
     }
@@ -76,6 +81,7 @@ class SettingsConfiguration : SettingsUI {
         myMaxDiffChangesOpenedAutomatically!!.text = settings.maxDiffChangesOpenedAutomatically.toString()
         myDisplayUpVotesAndDownVotes!!.isSelected = settings.displayUpVotesAndDownVotes
         myDisplayMergeRequestState!!.isSelected = settings.displayMergeRequestState
+        myEnableReworkProcess!!.isSelected = settings.enableReworkProcess
     }
 
     override fun createComponent(): JComponent = myWholePanel!!

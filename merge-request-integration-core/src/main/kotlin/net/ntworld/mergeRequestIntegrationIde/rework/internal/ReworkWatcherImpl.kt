@@ -123,11 +123,15 @@ class ReworkWatcherImpl(
     }
 
     override fun canExecute(): Boolean {
-        return !myTerminate
+        return !myTerminate && !projectServiceProvider.project.isDisposed
     }
 
     override fun shouldTerminate(): Boolean {
-        return myTerminate || repository.currentBranchName != branchName || projectServiceProvider.isDoingCodeReview()
+        return myTerminate ||
+            projectServiceProvider.project.isDisposed ||
+            repository.currentBranchName != branchName ||
+            projectServiceProvider.isDoingCodeReview() ||
+            !projectServiceProvider.applicationSettings.enableReworkProcess
     }
 
     override fun execute() {

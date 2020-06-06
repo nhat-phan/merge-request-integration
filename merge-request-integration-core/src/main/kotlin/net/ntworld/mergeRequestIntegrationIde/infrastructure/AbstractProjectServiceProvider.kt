@@ -207,6 +207,14 @@ abstract class AbstractProjectServiceProvider(
 
     override fun isDoingCodeReview(): Boolean = null !== reviewContextManager.findDoingCodeReviewContext()
 
+    override fun onApplicationSettingsChanged(old: ApplicationSettings, new: ApplicationSettings) {
+        if (!old.enableReworkProcess && new.enableReworkProcess) {
+            for (provider in providerStorage.registeredProviders) {
+                reworkManager.createBranchWatcher(provider)
+            }
+        }
+    }
+
     override fun startCodeReview(providerData: ProviderData, mergeRequest: MergeRequest) {
         reviewContextManager.setContextToDoingCodeReview(providerData.id, mergeRequest.id)
         val reviewContext = reviewContextManager.findDoingCodeReviewContext()

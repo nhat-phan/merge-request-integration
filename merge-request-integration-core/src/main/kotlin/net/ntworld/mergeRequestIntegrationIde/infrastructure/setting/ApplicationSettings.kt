@@ -20,6 +20,8 @@ interface ApplicationSettings {
 
     val displayMergeRequestState: Boolean
 
+    val enableReworkProcess: Boolean
+
     fun toApiOptions(): ApiOptions {
         return ApiOptionsImpl(
             enableRequestCache = this.enableRequestCache
