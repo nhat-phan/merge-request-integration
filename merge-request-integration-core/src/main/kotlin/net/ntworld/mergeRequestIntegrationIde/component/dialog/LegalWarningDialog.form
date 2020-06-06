@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.ntworld.mergeRequestIntegrationIde.component.dialog.LegalWarningDialog">
+  <grid id="27dc6" binding="myWrapper" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="584" height="182"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="4e9d3" class="javax.swing.JLabel" binding="myLegalWarning">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <foreground color="-6015167"/>
+          <text value="You cannot use CE for private repositories, please buy Enterprise Edition, only 1$/month."/>
+        </properties>
+      </component>
+      <vspacer id="48a38">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="e53e7" class="javax.swing.JLabel" binding="myWords1">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="The plugin is still working properly so you don't need to hack or find a cracked version."/>
+        </properties>
+      </component>
+      <component id="51b61" class="javax.swing.JLabel" binding="myWords2">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Cracking software invites virus to your computer. "/>
+        </properties>
+      </component>
+      <component id="72f32" class="javax.swing.JLabel" binding="myWords3">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="It would be nice if you purchase the paid version. This would help me constantly improve the plugin."/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

@@ -17,7 +17,6 @@ import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.Comment
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreePresenter
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
-import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeView
@@ -88,8 +87,9 @@ class CommentsTabViewImpl(
         }
     }
     private val myMainEditor by lazy {
-        val editor = ComponentFactory.makeEditor(
-            projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0, false
+        val editor = projectServiceProvider.componentFactory.commentComponents.makeEditor(
+            projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0,
+            borderLeftRight = 0, showCancelAction = false
         )
         editor.isVisible = true
         editor.addListener(myMainEditorEventListener)
@@ -182,8 +182,9 @@ class CommentsTabViewImpl(
                 return@forEach
             }
 
-            val group = ComponentFactory.makeGroup(
-                providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments, 0, false
+            val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
+                providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments,
+                borderLeftRight = 0, showMoveToDialog = false
             )
             myCommentPosition = comments.first().position
 

@@ -7,6 +7,8 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.ui.DialogBuilder
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.JBColor
@@ -16,7 +18,10 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegration.util.DateTimeUtil
+import net.ntworld.mergeRequestIntegrationIde.ENTERPRISE_EDITION_URL
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
+import net.ntworld.mergeRequestIntegrationIde.component.dialog.LegalWarningDialog
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.util.HtmlHelper
 import java.awt.Color
 import java.awt.Cursor
@@ -27,6 +32,7 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 class CommentComponentImpl(
+    private val projectServiceProvider: ProjectServiceProvider,
     private val groupComponent: GroupComponent,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
@@ -52,6 +58,7 @@ class CommentComponentImpl(
     private val myReplyAction = MyReplyAction(this)
     private val myDeleteAction = MyDeleteAction(this)
     private val myMoveToDialogAction = MyMoveToDialogAction(this)
+    private val myLegalWarningAction = MyLegalWarningAction(this)
 
     private class MyResolveAction(private val self: CommentComponentImpl) : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
@@ -143,6 +150,12 @@ class CommentComponentImpl(
             rightActionGroup.add(myResolveAction)
         }
         rightActionGroup.add(myReplyAction)
+
+        if (!projectServiceProvider.applicationServiceProvider.isLegal(providerData)) {
+            rightActionGroup.addSeparator()
+            rightActionGroup.add(myLegalWarningAction)
+        }
+
         val rightToolbar = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-right",
             rightActionGroup,
@@ -210,7 +223,7 @@ class CommentComponentImpl(
         }
     }
 
-    private class MyDeleteAction(private val self: CommentComponentImpl) : AnAction(
+    private class MyDeleteAction(private val self: CommentComponentImpl): AnAction(
         "Delete comment", "Delete comment", Icons.Trash
     ) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -219,6 +232,27 @@ class CommentComponentImpl(
             )
             if (result == Messages.YES) {
                 self.groupComponent.requestDeleteComment(self.comment)
+            }
+        }
+    }
+
+    private class MyLegalWarningAction(private val self: CommentComponentImpl): AnAction(
+        "Illegal",
+        "You cannot use CE for private repositories, please buy Enterprise Edition, only 1\$/month.",
+        Icons.LegalWarning
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val builder = DialogBuilder()
+            builder.title("Please buy Enterprise Edition")
+            builder.setCenterPanel(LegalWarningDialog().component)
+            builder.addOkAction()
+            builder.okAction.setText("Buy Enterprise Edition")
+
+            val code = builder.show()
+
+            // This line run after the dialog is closed
+            if (code == DialogWrapper.OK_EXIT_CODE) {
+                BrowserUtil.open(ENTERPRISE_EDITION_URL)
             }
         }
     }

@@ -55,7 +55,9 @@ class ThreadViewImpl(
     private val myCreatedEditors = mutableMapOf<String, EditorComponent>()
     private val myGroups = mutableMapOf<String, GroupComponent>()
     private val myEditor by lazy {
-        val editorComponent = ComponentFactory.makeEditor(editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0)
+        val editorComponent = projectServiceProvider.componentFactory.commentComponents.makeEditor(
+            editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0, borderLeftRight = 1, showCancelAction = true
+        )
         editorComponent.isVisible = false
         editorComponent.addListener(myEditorComponentEventListener)
         Disposer.register(this@ThreadViewImpl, editorComponent)
@@ -191,8 +193,9 @@ class ThreadViewImpl(
     override fun hasGroupOfComments(groupId: String): Boolean = myGroups.containsKey(groupId)
 
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
-        val group = ComponentFactory.makeGroup(
-            providerData, mergeRequestInfo, editor.project!!, myGroups.isEmpty(), groupId, comments
+        val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
+            providerData, mergeRequestInfo, editor.project!!, myGroups.isEmpty(), groupId, comments,
+            borderLeftRight = 1, showMoveToDialog = true
         )
         group.addListener(myGroupComponentEventListener)
         Disposer.register(this, group)

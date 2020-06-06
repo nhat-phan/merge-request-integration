@@ -1,5 +1,7 @@
 package net.ntworld.mergeRequestIntegrationIde.configuration.vos
 
+import com.intellij.util.VersionUtil
+import com.intellij.util.text.VersionComparatorUtil
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -127,5 +129,13 @@ class GitRemotePathInfoTest {
                 assertEquals(it.toStringValue, info.toString(), "failed case $it")
             }
         }
+    }
+
+    @Test
+    fun testVersion() {
+        println(VersionComparatorUtil.compare("2020.2.0-eap-1-for-ide-2020.1.x", "2020.2.0-built-for-ide-2020.1.x"))
+        println(VersionComparatorUtil.compare("2020.2.0-built-for-ide-2020.1.x", "2020.2.1-built-for-ide-2020.1.x"))
+        println(VersionComparatorUtil.compare("2020.2.0-built-for-ide-2020.1.x", "2020.1.5-built-for-ide-2020.1"))
+        println(VersionComparatorUtil.compare("2020.2.0-eap-1-for-ide-2020.1.x", "2020.1.5-built-for-ide-2020.1"))
     }
 }

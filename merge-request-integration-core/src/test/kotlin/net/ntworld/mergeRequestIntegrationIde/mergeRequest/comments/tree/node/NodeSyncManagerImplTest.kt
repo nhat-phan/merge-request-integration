@@ -205,11 +205,11 @@ class NodeSyncManagerImplTest {
         root.add(generalComments)
 
         val fileOne = FileNode("/dir/file-1")
-        val line1 = FileLineNode("/dir/file-1", 1, commentPosition, 1)
+        val line1 = FileLineNode("/dir/file-1", 1, commentPosition, 1, false)
         val threadThree = ThreadNode("thread-three", 0, makeComment("4", "thread-three"), null)
         line1.add(threadThree)
 
-        val line2 = FileLineNode("/dir/file-1", 2, commentPosition, 0)
+        val line2 = FileLineNode("/dir/file-1", 2, commentPosition, 0, false)
         val threadFour = ThreadNode("thread-four", 2, makeComment("5", "thread-four"), null)
         threadFour.add(CommentNode(makeComment("6", "thread-four"), null))
         threadFour.add(CommentNode(makeComment("7", "thread-four"), null))
@@ -224,7 +224,7 @@ class NodeSyncManagerImplTest {
         fileOne.add(line2)
 
         val fileTwo = FileNode("/file-2")
-        val line3 = FileLineNode("/file-2", 3, commentPosition, 1)
+        val line3 = FileLineNode("/file-2", 3, commentPosition, 1, false)
         val threadSix = ThreadNode("thread-six", 0, makeComment("12", "thread-six"), null)
         line3.add(threadSix)
         fileTwo.add(line3)

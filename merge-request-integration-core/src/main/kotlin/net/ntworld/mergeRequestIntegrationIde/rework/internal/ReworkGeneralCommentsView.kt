@@ -8,7 +8,6 @@ import com.intellij.ui.components.Panel
 import com.intellij.util.ui.JBUI
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.component.comment.ComponentFactory
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
@@ -56,8 +55,9 @@ class ReworkGeneralCommentsView(
     }
 
     private val myMainEditor by lazy {
-        val editor = ComponentFactory.makeEditor(
-            projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0, 0, false
+        val editor = projectServiceProvider.componentFactory.commentComponents.makeEditor(
+            projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0,
+            borderLeftRight = 0, showCancelAction = false
         )
         editor.isVisible = true
         editor.addListener(myMainEditorEventListener)
@@ -127,11 +127,13 @@ class ReworkGeneralCommentsView(
                 return@forEach
             }
 
-            val group = ComponentFactory.makeGroup(
+            val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
                 reworkWatcher.providerData,
                 reworkWatcher.mergeRequestInfo,
                 projectServiceProvider.project,
-                false, groupId, comments, 0, false
+                false, groupId, comments,
+                borderLeftRight = 0,
+                showMoveToDialog = false
             )
 
             group.addListener(myGroupComponentEventListener)

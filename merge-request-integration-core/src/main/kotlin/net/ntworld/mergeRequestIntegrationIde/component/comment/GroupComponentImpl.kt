@@ -14,6 +14,7 @@ import javax.swing.BoxLayout
 import javax.swing.JComponent
 
 class GroupComponentImpl(
+    private val factory: CommentComponentFactory,
     private val borderTop: Boolean,
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
@@ -128,11 +129,12 @@ class GroupComponentImpl(
     override fun showReplyEditor() {
         val editor = myEditor
         if (null === editor) {
-            val createdEditor = ComponentFactory.makeEditor(
+            val createdEditor = factory.makeEditor(
                 project,
                 EditorComponent.Type.REPLY,
                 1,
-                borderLeftRight
+                borderLeftRight,
+                showCancelAction = true
             )
             dispatcher.multicaster.onEditorCreated(this.id, createdEditor)
             // createdEditor.drawBorderTop(true)
@@ -196,7 +198,7 @@ class GroupComponentImpl(
         myCommentComponents.clear()
 
         items.forEachIndexed { index, comment ->
-            val commentComponent = ComponentFactory.makeComment(
+            val commentComponent = factory.makeComment(
                 this,
                 providerData,
                 mergeRequestInfo,

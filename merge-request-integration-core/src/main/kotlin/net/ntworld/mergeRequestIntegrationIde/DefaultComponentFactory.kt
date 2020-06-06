@@ -5,6 +5,8 @@ import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.component.PaginationToolbar
 import net.ntworld.mergeRequestIntegrationIde.component.PaginationToolbarImpl
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentComponentFactory
+import net.ntworld.mergeRequestIntegrationIde.component.comment.CommentComponentFactoryImpl
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.toolWindow.CommentsToolWindowTab
 import net.ntworld.mergeRequestIntegrationIde.toolWindow.FilesToolWindowTab
@@ -15,6 +17,8 @@ class DefaultComponentFactory(
     private val projectServiceProvider: ProjectServiceProvider
 ) : ComponentFactory {
     override val toolWindowTabs: ComponentFactory.ToolWindowTabFactory = MyToolWindowTabFactory(projectServiceProvider)
+
+    override val commentComponents: CommentComponentFactory = CommentComponentFactoryImpl(projectServiceProvider)
 
     override fun makePaginationToolbar(displayRefreshButton: Boolean): PaginationToolbar {
         return PaginationToolbarImpl(displayRefreshButton)

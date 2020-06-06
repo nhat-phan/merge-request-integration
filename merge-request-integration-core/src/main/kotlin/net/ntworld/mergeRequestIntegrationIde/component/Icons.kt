@@ -25,6 +25,7 @@ object Icons {
     val Resolved = IconLoader.getIcon("/icons/check-circle.svg", this::class.java)
     val CaretDown = IconLoader.getIcon("/icons/chevron-down.svg", this::class.java)
     val CaretRight = IconLoader.getIcon("/icons/chevron-right.svg", this::class.java)
+    val LegalWarning = IconLoader.getIcon("/icons/exclamation-triangle.svg", this::class.java)
 
     object Gutter {
         val Empty = IconLoader.getIcon("/icons/1px.svg", this::class.java)

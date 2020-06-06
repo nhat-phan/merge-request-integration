@@ -21,7 +21,7 @@ You can download the plugin on intellij plugins repository:
 [Community Edition](https://plugins.jetbrains.com/plugin/13607-merge-request-integration-ce--code-review-for-gitlab/),
 [Enterprise Edition](https://plugins.jetbrains.com/plugin/13615-merge-request-integration-ee--code-review-for-gitlab/)
 
-### How to setup Gitlab connection
+### How to set up Gitlab connection
 
 #### Create Gitlab Personal Access Tokens
 

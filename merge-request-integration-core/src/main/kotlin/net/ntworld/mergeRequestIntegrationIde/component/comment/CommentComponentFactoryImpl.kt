@@ -4,21 +4,24 @@ import com.intellij.openapi.project.Project as IdeaProject
 import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
-import net.ntworld.mergeRequestIntegrationIde.component.comment.*
+import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 
-object ComponentFactory {
+internal class CommentComponentFactoryImpl(
+    private val projectServiceProvider: ProjectServiceProvider
+) : CommentComponentFactory {
 
-    fun makeGroup(
+    override fun makeGroup(
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
         ideaProject: IdeaProject,
         borderTop: Boolean,
         groupId: String,
         comments: List<Comment>,
-        borderLeftRight: Int = 1,
-        showMoveToDialog: Boolean = true
+        borderLeftRight: Int,
+        showMoveToDialog: Boolean
     ) : GroupComponent {
         return GroupComponentImpl(
+            this,
             borderTop,
             providerData,
             mergeRequestInfo,
@@ -30,16 +33,17 @@ object ComponentFactory {
         )
     }
 
-    fun makeComment(
+    override fun makeComment(
         groupComponent: GroupComponent,
         providerData: ProviderData,
         mergeRequestInfo: MergeRequestInfo,
         comment: Comment,
         indent: Int,
-        borderLeftRight: Int = 1,
-        showMoveToDialog: Boolean = true
+        borderLeftRight: Int,
+        showMoveToDialog: Boolean
     ): CommentComponent {
         return CommentComponentImpl(
+            projectServiceProvider,
             groupComponent,
             providerData,
             mergeRequestInfo,
@@ -50,12 +54,12 @@ object ComponentFactory {
         )
     }
 
-    fun makeEditor(
+    override fun makeEditor(
         ideaProject: IdeaProject,
         type: EditorComponent.Type,
         indent: Int,
-        borderLeftRight: Int = 1,
-        showCancelAction: Boolean = true
+        borderLeftRight: Int,
+        showCancelAction: Boolean
     ): EditorComponent {
         return EditorComponentImpl(
             ideaProject,

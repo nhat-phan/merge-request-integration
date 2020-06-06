@@ -12,9 +12,14 @@ val prettyTimeVersion: String by project
 val commonmarkVersion: String by project
 val intellijSinceBuild: String by project
 val intellijUntilBuild: String by project
+val eapRelease: String by project
 
 group = artifactGroup
-version = "$enterpriseEditionVersion-built-for-ide-$targetIDEVersion"
+version = if (eapRelease == "false") {
+    "$enterpriseEditionVersion-built-for-ide-$targetIDEVersion"
+} else {
+    "$enterpriseEditionVersion-eap-$eapRelease-for-ide-$targetIDEVersion"
+}
 
 repositories {
     jcenter()
