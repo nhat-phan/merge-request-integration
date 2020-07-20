@@ -69,9 +69,9 @@ class ReworkWatcherImpl(
 
     override val interval: Long = 10000
     private val myGetCommitsTaskListener = object : GetCommitsTask.Listener {
-        override fun dataReceived(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
+        override fun dataReceived(mergeRequest: MergeRequest, commits: List<Commit>) {
             this@ReworkWatcherImpl.commits = commits
-            changes = projectServiceProvider.repositoryFile.findChanges(providerData, commits.map { it.id })
+            changes = projectServiceProvider.repositoryFile.findChanges(providerData, mergeRequest, commits.map { it.id })
             buildChangesMap()
             myIsChangesBuilt = true
             ApplicationManager.getApplication().invokeLater {
@@ -100,6 +100,8 @@ class ReworkWatcherImpl(
     private val myFindMergeRequestTaskListener = object : FindMergeRequestTask.Listener {
         override fun dataReceived(mergeRequest: MergeRequest) {
             myMergeRequest = mergeRequest
+
+            fetchCommits(mergeRequest)
         }
     }
 
@@ -110,7 +112,6 @@ class ReworkWatcherImpl(
     init {
         myConnection.subscribe(ReworkWatcherNotifier.TOPIC, this)
         projectServiceProvider.singleMRToolWindowNotifierTopic.registerReworkWatcher(this)
-        fetchCommits()
         fetchMergeRequest()
     }
 
@@ -470,12 +471,12 @@ class ReworkWatcherImpl(
         reviewContext.comments = comments
     }
 
-    private fun fetchCommits() {
+    private fun fetchCommits(mergeRequest: MergeRequest) {
         debug("${providerData.id}:$branchName: fetching commits")
         val task = GetCommitsTask(
             projectServiceProvider = projectServiceProvider,
             providerData = providerData,
-            mergeRequestInfo = mergeRequestInfo,
+            mergeRequest = mergeRequest,
             listener = myGetCommitsTaskListener
         )
         task.start()
