@@ -62,7 +62,7 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
         projectServiceProvider.providerStorage.updateApiOptions(settingsManager.toApiOptions())
     }
 
-    override val intellijIdeApi: IntellijIdeApi = Version201Adapter()
+    override val intellijIdeApi: IntellijIdeApi = Version193Adapter()
 
     override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl(::onSettingsChanged)
 
