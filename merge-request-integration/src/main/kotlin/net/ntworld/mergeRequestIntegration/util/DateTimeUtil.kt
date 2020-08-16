@@ -3,10 +3,9 @@ package net.ntworld.mergeRequestIntegration.util
 import net.ntworld.mergeRequest.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
-import java.text.SimpleDateFormat
-import java.time.ZoneId
-import java.util.*
 import org.ocpsoft.prettytime.PrettyTime
+import java.text.SimpleDateFormat
+import java.util.*
 
 object DateTimeUtil {
     private val timezone = TimeZone.getTimeZone("UTC")
@@ -21,7 +20,7 @@ object DateTimeUtil {
         df
     }
     private val parser = ISODateTimeFormat.dateTimeParser()
-    private val localTimeZone = DateTimeZone.forID(ZoneId.systemDefault().id)
+    private val localTimeZone = DateTimeZone.getDefault()
     private val prettyTime = PrettyTime()
 
     @Synchronized

@@ -9,7 +9,7 @@ const val SINGLE_MR_CHANGES_WHEN_DOING_CODE_REVIEW_NAME = "Changed Files"
 const val SINGLE_MR_REWORK_CHANGES_PREFIX = "Files"
 const val SINGLE_MR_REWORK_COMMENTS_PREFIX = "Comments"
 
-private const val DEBUG = true
+private const val DEBUG = false
 
 val logger = Logger.getInstance("MRI")
 fun debug(message: String) {
