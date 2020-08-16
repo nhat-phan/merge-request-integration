@@ -21,8 +21,7 @@ class GroupComponentImpl(
     private val project: IdeaProject,
     override val id: String,
     comments: List<Comment>,
-    private val borderLeftRight: Int = 1,
-    private val showMoveToDialog: Boolean = true
+    private val options: Options
 ) : GroupComponent {
     private val dispatcher = EventDispatcher.create(GroupComponent.EventListener::class.java)
     private val myBoxLayoutPanel = JBUI.Panels.simplePanel()
@@ -133,7 +132,7 @@ class GroupComponentImpl(
                 project,
                 EditorComponent.Type.REPLY,
                 1,
-                borderLeftRight,
+                options.borderLeftRight,
                 showCancelAction = true
             )
             dispatcher.multicaster.onEditorCreated(this.id, createdEditor)
@@ -204,8 +203,7 @@ class GroupComponentImpl(
                 mergeRequestInfo,
                 comment,
                 if (index == 0) 0 else 1,
-                borderLeftRight,
-                showMoveToDialog
+                options
             )
 
             myPanel.add(commentComponent.component)

@@ -10,6 +10,7 @@ import net.ntworld.mergeRequest.Comment
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
+import net.ntworld.mergeRequestIntegrationIde.component.comment.Options
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.notifier.ReworkWatcherNotifier
 import net.ntworld.mergeRequestIntegrationIde.rework.ReworkWatcher
@@ -132,8 +133,7 @@ class ReworkGeneralCommentsView(
                 reworkWatcher.mergeRequestInfo,
                 projectServiceProvider.project,
                 false, groupId, comments,
-                borderLeftRight = 0,
-                showMoveToDialog = false
+                Options(borderLeftRight = 0, showMoveToDialog = false)
             )
 
             group.addListener(myGroupComponentEventListener)

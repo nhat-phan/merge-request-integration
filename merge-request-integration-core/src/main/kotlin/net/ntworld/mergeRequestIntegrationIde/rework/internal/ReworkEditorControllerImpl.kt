@@ -175,7 +175,8 @@ class ReworkEditorControllerImpl(
                     oldLine = null,
                     oldPath = null,
                     headHash = revisionNumber
-                )
+                ),
+                replyInDialog = true
             )
             val presenter = ThreadFactory.makePresenter(model, view)
 

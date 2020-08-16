@@ -19,6 +19,7 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvi
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.component.comment.EditorComponent
 import net.ntworld.mergeRequestIntegrationIde.component.comment.GroupComponent
+import net.ntworld.mergeRequestIntegrationIde.component.comment.Options
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.CommentTreeView
 import net.ntworld.mergeRequestIntegrationIde.mergeRequest.comments.tree.node.Node
 import javax.swing.BoxLayout
@@ -184,7 +185,7 @@ class CommentsTabViewImpl(
 
             val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
                 providerData, mergeRequestInfo, projectServiceProvider.project, false, groupId, comments,
-                borderLeftRight = 0, showMoveToDialog = false
+                Options(borderLeftRight = 0, showMoveToDialog = false)
             )
             myCommentPosition = comments.first().position
 

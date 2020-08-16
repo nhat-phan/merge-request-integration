@@ -13,8 +13,7 @@ interface CommentComponentFactory {
         borderTop: Boolean,
         groupId: String,
         comments: List<Comment>,
-        borderLeftRight: Int,
-        showMoveToDialog: Boolean
+        options: Options
     ) : GroupComponent
 
     fun makeComment(
@@ -23,8 +22,7 @@ interface CommentComponentFactory {
         mergeRequestInfo: MergeRequestInfo,
         comment: Comment,
         indent: Int,
-        borderLeftRight: Int,
-        showMoveToDialog: Boolean
+        options: Options
     ): CommentComponent
 
     fun makeEditor(

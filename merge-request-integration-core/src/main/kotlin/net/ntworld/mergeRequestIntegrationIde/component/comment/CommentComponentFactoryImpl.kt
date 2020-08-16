@@ -17,8 +17,7 @@ internal class CommentComponentFactoryImpl(
         borderTop: Boolean,
         groupId: String,
         comments: List<Comment>,
-        borderLeftRight: Int,
-        showMoveToDialog: Boolean
+        options: Options
     ) : GroupComponent {
         return GroupComponentImpl(
             this,
@@ -28,8 +27,7 @@ internal class CommentComponentFactoryImpl(
             ideaProject,
             groupId,
             comments,
-            borderLeftRight,
-            showMoveToDialog
+            options
         )
     }
 
@@ -39,8 +37,7 @@ internal class CommentComponentFactoryImpl(
         mergeRequestInfo: MergeRequestInfo,
         comment: Comment,
         indent: Int,
-        borderLeftRight: Int,
-        showMoveToDialog: Boolean
+        options: Options
     ): CommentComponent {
         return CommentComponentImpl(
             projectServiceProvider,
@@ -49,8 +46,7 @@ internal class CommentComponentFactoryImpl(
             mergeRequestInfo,
             comment,
             indent,
-            borderLeftRight,
-            showMoveToDialog
+            options
         )
     }
 

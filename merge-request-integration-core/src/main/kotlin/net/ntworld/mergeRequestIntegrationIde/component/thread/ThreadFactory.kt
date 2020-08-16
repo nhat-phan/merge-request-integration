@@ -20,10 +20,11 @@ object ThreadFactory {
         mergeRequestInfo: MergeRequestInfo,
         logicalLine: Int,
         side: Side,
-        position: GutterPosition
+        position: GutterPosition,
+        replyInDialog: Boolean = false
     ): ThreadView {
         return ThreadViewImpl(
-            projectServiceProvider, editor, providerData, mergeRequestInfo, logicalLine, side, position
+            projectServiceProvider, editor, providerData, mergeRequestInfo, logicalLine, side, position, replyInDialog
         )
     }
 

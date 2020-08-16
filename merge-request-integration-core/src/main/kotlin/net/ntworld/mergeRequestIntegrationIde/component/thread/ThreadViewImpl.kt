@@ -43,7 +43,8 @@ class ThreadViewImpl(
     private val mergeRequestInfo: MergeRequestInfo,
     override val logicalLine: Int,
     override val side: Side,
-    override val position: GutterPosition
+    override val position: GutterPosition,
+    private val replyInDialog: Boolean
 ) : AbstractView<ThreadView.ActionListener>(), ThreadView {
     override val dispatcher = EventDispatcher.create(ThreadView.ActionListener::class.java)
 
@@ -195,7 +196,7 @@ class ThreadViewImpl(
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
         val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
             providerData, mergeRequestInfo, editor.project!!, myGroups.isEmpty(), groupId, comments,
-            borderLeftRight = 1, showMoveToDialog = true
+            Options(borderLeftRight = 1, showMoveToDialog = true, replyInDialog = replyInDialog)
         )
         group.addListener(myGroupComponentEventListener)
         Disposer.register(this, group)

@@ -38,10 +38,9 @@ class CommentComponentImpl(
     private val mergeRequestInfo: MergeRequestInfo,
     private val comment: Comment,
     private val indent: Int,
-    private val borderLeftRight: Int = 1,
-    private val showMoveToDialog: Boolean = true
+    private val options: Options
 ) : CommentComponent {
-    private var displayMoveToDialog: Boolean = showMoveToDialog
+    private var displayMoveToDialog: Boolean = options.showMoveToDialog
     private val myPanel = SimpleToolWindowPanel(true, false)
     private val myNameLabel = Label(comment.author.name)
     private val myUsernameLabel = Label("@${comment.author.username}")
@@ -110,7 +109,7 @@ class CommentComponentImpl(
         myPanel.setContent(myWebView.component)
 
         myPanel.border = BorderFactory.createMatteBorder(
-            0, indent * 40 + borderLeftRight, 1, borderLeftRight, JBColor.border()
+            0, indent * 40 + options.borderLeftRight, 1, options.borderLeftRight, JBColor.border()
         )
     }
 
@@ -134,7 +133,7 @@ class CommentComponentImpl(
         )
 
         val rightActionGroup = DefaultActionGroup()
-        if (showMoveToDialog) {
+        if (options.showMoveToDialog) {
             rightActionGroup.add(myMoveToDialogAction)
             rightActionGroup.addSeparator()
         }
@@ -220,6 +219,9 @@ class CommentComponentImpl(
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             self.groupComponent.showReplyEditor()
+            if (self.options.replyInDialog) {
+                self.groupComponent.requestOpenDialog()
+            }
         }
     }
 
