@@ -20,47 +20,47 @@ class RegisterProviderTask(
     private val listener: Listener
 ) : Task.Backgroundable(projectServiceProvider.project, "Fetching provider information...", true) {
 
-  fun start() {
-    ProgressManager.getInstance().runProcessWithProgressAsynchronously(
-        this,
-        Indicator(this)
-    )
-  }
+    fun start() {
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(
+            this,
+            Indicator(this)
+        )
+    }
 
-  override fun run(indicator: ProgressIndicator) {
-    val job = GlobalScope.launch {
-      val pair = projectServiceProvider.providerStorage.register(
-          infrastructure = projectServiceProvider.infrastructure,
-          id = id,
-          key = settings.id,
-          name = name,
-          info = settings.info,
-          credentials = settings.credentials,
-          repository = settings.repository
-      )
-      if (!indicator.isCanceled) {
-        listener.providerRegistered(pair.first)
-        if (pair.first.status == ProviderStatus.ERROR) {
-          projectServiceProvider.notify(pair.first.errorMessage ?: "", NotificationType.ERROR)
+    override fun run(indicator: ProgressIndicator) {
+        val job = GlobalScope.launch {
+            val pair = projectServiceProvider.providerStorage.register(
+                infrastructure = projectServiceProvider.infrastructure,
+                id = id,
+                key = settings.id,
+                name = name,
+                info = settings.info,
+                credentials = settings.credentials,
+                repository = settings.repository
+            )
+            if (!indicator.isCanceled) {
+                listener.providerRegistered(pair.first)
+                if (pair.first.status == ProviderStatus.ERROR) {
+                    projectServiceProvider.notify(pair.first.errorMessage ?: "", NotificationType.ERROR)
+                }
+                if (null !== pair.second) {
+                    throw pair.second!!
+                }
+            }
         }
-        if (null !== pair.second) {
-          throw pair.second!!
+        job.start()
+        while (job.isActive && !indicator.isCanceled) {
+            Thread.sleep(100);
         }
-      }
+        if (job.isActive) {
+            job.cancel()
+        }
+        indicator.checkCanceled()
     }
-    job.start()
-    while (job.isActive && !indicator.isCanceled) {
-      Thread.sleep(100);
-    }
-    if (job.isActive) {
-      job.cancel()
-    }
-    indicator.checkCanceled()
-  }
 
-  private class Indicator(private val task: RegisterProviderTask) : BackgroundableProcessIndicator(task)
+    private class Indicator(private val task: RegisterProviderTask) : BackgroundableProcessIndicator(task)
 
-  interface Listener {
-    fun providerRegistered(providerData: ProviderData)
-  }
+    interface Listener {
+        fun providerRegistered(providerData: ProviderData)
+    }
 }
