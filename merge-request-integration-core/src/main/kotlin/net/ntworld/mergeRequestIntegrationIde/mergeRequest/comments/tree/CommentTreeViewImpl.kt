@@ -22,9 +22,9 @@ import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.*
 
 class CommentTreeViewImpl(
-    private val projectServiceProvider: ProjectServiceProvider,
-    private val providerData: ProviderData,
-    private val showOpenDiffViewDescription: Boolean
+        private val projectServiceProvider: ProjectServiceProvider,
+        private val providerData: ProviderData,
+        private val showOpenDiffViewDescription: Boolean
 ) : AbstractView<CommentTreeView.ActionListener>(), CommentTreeView {
     override val dispatcher = EventDispatcher.create(CommentTreeView.ActionListener::class.java)
 
@@ -37,13 +37,13 @@ class CommentTreeViewImpl(
     private var myIsTreeRendering = false
     private val myTreeCellRenderer = TreeCellRenderer { tree, value, selected, expanded, leaf, row, hasFocus ->
         myRenderer.getTreeCellRendererComponent(
-            tree,
-            value,
-            selected,
-            expanded,
-            leaf,
-            row,
-            hasFocus
+                tree,
+                value,
+                selected,
+                expanded,
+                leaf,
+                row,
+                hasFocus
         )
     }
     private val myTreeSelectionListener = TreeSelectionListener {
@@ -115,7 +115,7 @@ class CommentTreeViewImpl(
     override fun hasGeneralCommentsTreeNode(): Boolean {
         val children = myRoot.children()
         for (child in children) {
-            if (isGeneralCommentsTreeNode(child)) {
+            if (isGeneralCommentsTreeNode(child as TreeNode)) {
                 return true
             }
         }
@@ -125,8 +125,8 @@ class CommentTreeViewImpl(
     override fun selectGeneralCommentsTreeNode() {
         val children = myRoot.children()
         for (child in children) {
-            if (isGeneralCommentsTreeNode(child)) {
-                myTree.selectionPath = TreeUtil.getPath(myRoot, child)
+            if (isGeneralCommentsTreeNode(child as TreeNode)) {
+                myTree.selectionPath = TreeUtil.getPath(myRoot, child as @org.jetbrains.annotations.NotNull TreeNode)
                 break
             }
         }
