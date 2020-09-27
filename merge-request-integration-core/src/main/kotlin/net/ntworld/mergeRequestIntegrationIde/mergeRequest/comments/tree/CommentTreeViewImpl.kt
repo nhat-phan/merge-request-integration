@@ -62,7 +62,7 @@ class CommentTreeViewImpl(
             }
         }
     }
-    private val myKeyListener = object : KeyAdapter() {
+    private val myKeyListener = object: KeyAdapter() {
         override fun keyPressed(e: KeyEvent?) {
             if (null === e) {
                 return
@@ -136,7 +136,7 @@ class CommentTreeViewImpl(
         myToolbar.setMode(mode)
     }
 
-    private fun isGeneralCommentsTreeNode(node: TreeNode): Boolean {
+    private fun isGeneralCommentsTreeNode(node: TreeNode) : Boolean {
         val treeNode = node as? DefaultMutableTreeNode ?: return false
         val descriptor = treeNode.userObject as? PresentableNodeDescriptor<*> ?: return false
         return descriptor.element is GeneralCommentsNode
