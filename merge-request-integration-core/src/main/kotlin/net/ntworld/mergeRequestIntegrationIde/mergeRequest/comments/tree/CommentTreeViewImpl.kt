@@ -115,7 +115,7 @@ class CommentTreeViewImpl(
     override fun hasGeneralCommentsTreeNode(): Boolean {
         val children = myRoot.children()
         for (child in children) {
-            if (isGeneralCommentsTreeNode(child)) {
+            if (isGeneralCommentsTreeNode(child as TreeNode)) {
                 return true
             }
         }
@@ -125,7 +125,7 @@ class CommentTreeViewImpl(
     override fun selectGeneralCommentsTreeNode() {
         val children = myRoot.children()
         for (child in children) {
-            if (isGeneralCommentsTreeNode(child)) {
+            if (isGeneralCommentsTreeNode(child as TreeNode)) {
                 myTree.selectionPath = TreeUtil.getPath(myRoot, child)
                 break
             }
