@@ -131,7 +131,7 @@ class GithubProjectFinder(
         private val projectServiceProvider: ProjectServiceProvider,
         private val term: String,
         private val self: GithubProjectFinder
-    ) : Task.Backgroundable(projectServiceProvider.project, "Searching github projects...", false) {
+    ) : Task.Backgroundable(projectServiceProvider.project, "Searching github projects...", true) {
         fun start() {
             if (self.myIsTermTouched) {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(this, Indicator(this))

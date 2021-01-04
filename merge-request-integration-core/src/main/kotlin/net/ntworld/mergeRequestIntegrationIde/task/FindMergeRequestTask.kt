@@ -16,7 +16,7 @@ class FindMergeRequestTask(
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge request...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge request...", true) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,

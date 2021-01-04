@@ -16,7 +16,7 @@ class GetCommitsTask(
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching commit data...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching commit data...", true) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,

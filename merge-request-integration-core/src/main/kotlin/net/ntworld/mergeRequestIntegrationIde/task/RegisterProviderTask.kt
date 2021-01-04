@@ -16,7 +16,7 @@ class RegisterProviderTask(
     private val name: String,
     private val settings: ProviderSettings,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching provider information...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching provider information...", true) {
 
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(

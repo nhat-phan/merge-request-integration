@@ -19,7 +19,7 @@ class SearchMergeRequestTask(
     private val filtering: GetMergeRequestFilter,
     private val ordering: MergeRequestOrdering,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge requests...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching merge requests...", true) {
     var page: Int = 1
     fun start() = start(1)
 

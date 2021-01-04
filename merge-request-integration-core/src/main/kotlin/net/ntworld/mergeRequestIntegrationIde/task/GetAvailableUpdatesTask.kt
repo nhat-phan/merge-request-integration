@@ -10,7 +10,7 @@ import net.ntworld.mergeRequestIntegration.update.UpdateManager
 class GetAvailableUpdatesTask(
     ideaProject: Project,
     private val listener: Listener
-) : Task.Backgroundable(ideaProject, "Check available updates...", false) {
+) : Task.Backgroundable(ideaProject, "Check available updates...", true) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,

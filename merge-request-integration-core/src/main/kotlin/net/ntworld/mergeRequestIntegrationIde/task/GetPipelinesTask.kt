@@ -16,7 +16,7 @@ class GetPipelinesTask(
     private val providerData: ProviderData,
     private val mergeRequestInfo: MergeRequestInfo,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching pipeline data...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching pipeline data...", true) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,

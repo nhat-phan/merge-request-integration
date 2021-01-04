@@ -19,7 +19,7 @@ class FetchProjectMembersTask(
     private val providerData: ProviderData,
     private val addEmptyMember: Boolean,
     private val listener: Listener
-) : Task.Backgroundable(projectServiceProvider.project, "Fetching project members...", false) {
+) : Task.Backgroundable(projectServiceProvider.project, "Fetching project members...", true) {
     fun start() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             this,
