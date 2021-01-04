@@ -105,6 +105,7 @@ internal class ReworkManagerImpl(
             providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
+                id = null,
                 search = "",
                 authorId = "",
                 assigneeId = "",

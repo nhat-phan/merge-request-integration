@@ -43,6 +43,7 @@ class GitlabSearchMRsRequestHandler : RequestHandler<GitlabSearchMRsRequest, Git
         filter.state = request.state
         filter.projectId = request.credentials.projectId.toInt()
 
+        setFilterByIdIfNotEmpty(filter, request)
         setSearchFilterParamIfNotEmpty(filter, request)
         setAuthorFilterParamIfNotEmpty(filter, request)
         setAssigneeFilterParamIfNotEmpty(filter, request)
@@ -51,6 +52,12 @@ class GitlabSearchMRsRequestHandler : RequestHandler<GitlabSearchMRsRequest, Git
         filter.orderBy = request.orderBy
         filter.sort = request.sort
         return filter
+    }
+
+    private fun setFilterByIdIfNotEmpty(filter: MyMergeRequestFilter, request: GitlabSearchMRsRequest) {
+        if (null !== request.filterById && request.filterById > 0) {
+            filter.withIids(listOf(request.filterById))
+        }
     }
 
     private fun setSearchFilterParamIfNotEmpty(filter: MyMergeRequestFilter, request: GitlabSearchMRsRequest) {

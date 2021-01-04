@@ -21,6 +21,7 @@ class SavedFiltersUtil {
         fun toPair(): Pair<GetMergeRequestFilter, MergeRequestOrdering> {
             return Pair(
                 GetMergeRequestFilterImpl(
+                    id = null,
                     state = when (state) {
                         "all" -> MergeRequestState.ALL
                         "opened" -> MergeRequestState.OPENED

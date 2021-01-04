@@ -21,6 +21,7 @@ class FiltersStorageServiceImpl(
         } else {
             Pair(
                 GetMergeRequestFilterImpl(
+                    id = null,
                     state = MergeRequestState.OPENED,
                     search = "",
                     authorId = "",

@@ -109,8 +109,21 @@ class MergeRequestFilterPropertiesPanel(
 
     fun buildFilter(search: String): GetMergeRequestFilter {
         return GetMergeRequestFilter.make(
+            id = null,
             state = findState(),
             search = search.trim(),
+            authorId = findMemberInComboBox(myAuthor!!),
+            assigneeId = findMemberInComboBox(myAssignee!!),
+            approverIds = listOf(findMemberInComboBox(myApprover!!)),
+            sourceBranch = ""
+        )
+    }
+
+    fun buildFilterForSearchById(id: Int): GetMergeRequestFilter {
+        return GetMergeRequestFilter.make(
+            id = id,
+            state = findState(),
+            search = "",
             authorId = findMemberInComboBox(myAuthor!!),
             assigneeId = findMemberInComboBox(myAssignee!!),
             approverIds = listOf(findMemberInComboBox(myApprover!!)),

@@ -3,7 +3,6 @@ package net.ntworld.mergeRequestIntegrationIde.ui.mergeRequest
 import com.intellij.icons.AllIcons
 import com.intellij.ide.HelpTooltip
 import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.SearchTextField
 import com.intellij.ui.components.panels.Wrapper
@@ -14,7 +13,6 @@ import net.miginfocom.swing.MigLayout
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.MergeRequestOrdering
 import net.ntworld.mergeRequest.query.GetMergeRequestFilter
-import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.ui.panel.MergeRequestFilterPropertiesPanel
 import java.awt.Point
@@ -86,6 +84,8 @@ class MergeRequestCollectionFilter(
         "Order by oldest", "Order by oldest", AllIcons.Vcs.History
     )
     private val myKeyListener = object : KeyListener {
+        private var searchingById: Boolean = false
+
         override fun keyTyped(e: KeyEvent?) {
         }
 
@@ -94,12 +94,36 @@ class MergeRequestCollectionFilter(
 
         override fun keyReleased(e: KeyEvent?) {
             if (null === e || (e.keyCode != 10 && e.keyCode != 13)) {
+                handleSearchingByIdIfCurrentInputIsAnInteger()
                 return
             }
-            val filter = myAdvanceFilterButton.buildFilter(mySearchField.text)
+
+            val id = mySearchField.text.toIntOrNull()
+            val filter = if (null !== id)
+                myAdvanceFilterButton.buildFilterForSearchById(id)
+            else
+                myAdvanceFilterButton.buildFilter(mySearchField.text)
             eventDispatcher.multicaster.filterChanged(filter)
             saveFilterAndOrdering(filter, null)
             mySearchField.addCurrentTextToHistory()
+        }
+
+        private fun handleSearchingByIdIfCurrentInputIsAnInteger() {
+            val id = mySearchField.text.toIntOrNull()
+            if (null !== id) {
+                // This is a special filter which filter by id, so do not save to history unless
+                val filter = myAdvanceFilterButton.buildFilterForSearchById(id)
+                eventDispatcher.multicaster.filterChanged(filter)
+                searchingById = true
+                return
+            }
+
+            if (searchingById) {
+                // If searching by id we need to reload the old result
+                val filter = myAdvanceFilterButton.buildFilter("")
+                eventDispatcher.multicaster.filterChanged(filter)
+                searchingById = false
+            }
         }
     }
 
@@ -209,6 +233,8 @@ class MergeRequestCollectionFilter(
         }
 
         fun buildFilter(search: String) = myFilterPropertiesPanel.buildFilter(search)
+
+        fun buildFilterForSearchById(id: Int) = myFilterPropertiesPanel.buildFilterForSearchById(id)
 
         fun setPreselectedValues(value: GetMergeRequestFilter) {
             if (myIsReady) {

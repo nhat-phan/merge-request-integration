@@ -87,6 +87,7 @@ class ProviderDetails(
             providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
+                id = null,
                 search = "",
                 authorId = "",
                 assigneeId = "",
@@ -112,6 +113,7 @@ class ProviderDetails(
             providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
+                id = null,
                 search = "",
                 authorId = providerData.currentUser.id,
                 assigneeId = "",
@@ -137,6 +139,7 @@ class ProviderDetails(
             providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
+                id = null,
                 search = "",
                 authorId = "",
                 assigneeId = providerData.currentUser.id,
@@ -162,6 +165,7 @@ class ProviderDetails(
             providerData,
             GetMergeRequestFilter.make(
                 state = MergeRequestState.OPENED,
+                id = null,
                 search = "",
                 authorId = "",
                 assigneeId = "",

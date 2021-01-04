@@ -100,6 +100,7 @@ class GitlabMergeRequestApi(
         val out = infrastructure.serviceBus() process GitlabSearchMRsRequest(
             credentials = credentials,
             state = resolveState(filterBy.state),
+            filterById = filterBy.id,
             search = filterBy.search,
             authorId = filterBy.authorId,
             assigneeId = filterBy.assigneeId,

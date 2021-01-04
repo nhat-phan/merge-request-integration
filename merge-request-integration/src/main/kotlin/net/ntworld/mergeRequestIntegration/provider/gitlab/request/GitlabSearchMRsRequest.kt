@@ -10,6 +10,7 @@ import org.gitlab4j.api.Constants
 data class GitlabSearchMRsRequest(
     override val credentials: ApiCredentials,
     val state: Constants.MergeRequestState,
+    val filterById: Int?,
     val search: String,
     val authorId: String,
     val assigneeId: String,

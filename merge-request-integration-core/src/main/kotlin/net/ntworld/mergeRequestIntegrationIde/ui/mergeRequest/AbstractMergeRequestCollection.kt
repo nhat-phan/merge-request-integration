@@ -41,6 +41,7 @@ abstract class AbstractMergeRequestCollection(
     private val myContent: JComponent by myContentDelegate
     private var myFilter = GetMergeRequestFilter.make(
         state = MergeRequestState.OPENED,
+        id = null,
         search = "",
         authorId = "",
         assigneeId = "",
