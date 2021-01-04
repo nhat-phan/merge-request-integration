@@ -8,14 +8,21 @@ import net.ntworld.mergeRequestIntegration.provider.gitlab.request.GitlabSearchP
 import org.gitlab4j.api.Constants
 import org.gitlab4j.api.GitLabApi
 import org.gitlab4j.api.GitLabApiException
+import org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT
+import org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT
 
 class GitlabClient {
     companion object {
         private fun makeGitLabApi(credentials: ApiCredentials): GitLabApi {
+            val config: HashMap<String, Any> = HashMap()
+            config.put(READ_TIMEOUT, 10000)
+            config.put(CONNECT_TIMEOUT, 10000)
             val api = GitLabApi(
                 credentials.url,
                 Constants.TokenType.PRIVATE,
-                credentials.token
+                credentials.token,
+                null,
+                config
             )
             if (credentials.ignoreSSLCertificateErrors) {
                 api.ignoreCertificateErrors = true

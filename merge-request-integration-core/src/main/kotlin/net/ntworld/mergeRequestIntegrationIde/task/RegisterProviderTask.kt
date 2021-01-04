@@ -5,6 +5,8 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderStatus
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
@@ -26,22 +28,34 @@ class RegisterProviderTask(
     }
 
     override fun run(indicator: ProgressIndicator) {
-        val pair = projectServiceProvider.providerStorage.register(
-            infrastructure = projectServiceProvider.infrastructure,
-            id = id,
-            key = settings.id,
-            name = name,
-            info = settings.info,
-            credentials = settings.credentials,
-            repository = settings.repository
-        )
-        listener.providerRegistered(pair.first)
-        if (pair.first.status == ProviderStatus.ERROR) {
-            projectServiceProvider.notify(pair.first.errorMessage ?: "", NotificationType.ERROR)
+        val job = GlobalScope.launch {
+            val pair = projectServiceProvider.providerStorage.register(
+                infrastructure = projectServiceProvider.infrastructure,
+                id = id,
+                key = settings.id,
+                name = name,
+                info = settings.info,
+                credentials = settings.credentials,
+                repository = settings.repository
+            )
+            if (!indicator.isCanceled) {
+                listener.providerRegistered(pair.first)
+                if (pair.first.status == ProviderStatus.ERROR) {
+                    projectServiceProvider.notify(pair.first.errorMessage ?: "", NotificationType.ERROR)
+                }
+                if (null !== pair.second) {
+                    throw pair.second!!
+                }
+            }
         }
-        if (null !== pair.second) {
-            throw pair.second!!
+        job.start()
+        while (job.isActive && !indicator.isCanceled) {
+            Thread.sleep(100);
         }
+        if (job.isActive) {
+            job.cancel()
+        }
+        indicator.checkCanceled()
     }
 
     private class Indicator(private val task: RegisterProviderTask) : BackgroundableProcessIndicator(task)

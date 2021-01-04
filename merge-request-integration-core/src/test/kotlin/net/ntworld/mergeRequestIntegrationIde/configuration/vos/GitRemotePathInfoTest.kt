@@ -120,13 +120,17 @@ class GitRemotePathInfoTest {
         )
 
         dataset.forEach {
-            val info = GitRemotePathInfo(it.input)
-
-            assertEquals(it.valid, info.isValid, "failed case $it")
-            if (it.valid) {
-                assertEquals(it.namespace, info.namespace, "failed case $it")
-                assertEquals(it.project, info.project, "failed case $it")
-                assertEquals(it.toStringValue, info.toString(), "failed case $it")
+            val info: GitRemotePathInfo
+            try {
+                info = GitRemotePathInfo(it.input)
+                assertEquals(it.valid, info.isValid, "failed case $it")
+                if (it.valid) {
+                    assertEquals(it.namespace, info.namespace, "failed case $it")
+                    assertEquals(it.project, info.project, "failed case $it")
+                    assertEquals(it.toStringValue, info.toString(), "failed case $it")
+                }
+            } catch (exception: Exception) {
+                assertEquals(it.valid, false, "failed case $it")
             }
         }
     }
