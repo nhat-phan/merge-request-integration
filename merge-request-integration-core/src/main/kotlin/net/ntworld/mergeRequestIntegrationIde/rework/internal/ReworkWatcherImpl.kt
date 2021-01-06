@@ -144,14 +144,18 @@ class ReworkWatcherImpl(
 
     override fun terminate() {
         debug("${providerData.id}:$branchName: ReworkWatcher is terminated")
-        projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
+        if (!projectServiceProvider.messageBus.isDisposed) {
+            projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
+        }
         projectServiceProvider.reworkManager.markReworkWatcherTerminated(this)
         myConnection.disconnect()
     }
 
     override fun shutdown() {
         debug("${providerData.id}:$branchName: terminate ReworkWatcher")
-        projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
+        if (!projectServiceProvider.messageBus.isDisposed) {
+            projectServiceProvider.singleMRToolWindowNotifierTopic.removeReworkWatcher(this)
+        }
         ApplicationManager.getApplication().invokeLater {
             val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(projectServiceProvider.project)
             myPreviewDiffVirtualFileMap.forEach { (_, diffFile) ->

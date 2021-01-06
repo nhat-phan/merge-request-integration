@@ -8,7 +8,7 @@ data class UserImpl(
     override val id: String,
     override val name: String,
     override val username: String,
-    override val avatarUrl: String,
+    override val avatarUrl: String?,
     override val url: String,
     override val status: UserStatus,
     override val email: String,

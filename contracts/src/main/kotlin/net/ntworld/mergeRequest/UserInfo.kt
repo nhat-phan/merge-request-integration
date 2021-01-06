@@ -7,7 +7,7 @@ interface UserInfo {
 
     val username: String
 
-    val avatarUrl: String
+    val avatarUrl: String?
 
     val url: String
 
