@@ -41,6 +41,6 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
 
         fun onReplyCommentRequested(repliedComment: Comment, content: String)
 
-        fun onCreateCommentRequested(content: String, position: CommentPosition?)
+        fun onCreateCommentRequested(content: String, position: CommentPosition?, isDraft: Boolean)
     }
 }

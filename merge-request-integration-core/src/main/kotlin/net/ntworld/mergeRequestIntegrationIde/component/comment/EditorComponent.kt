@@ -6,9 +6,13 @@ import net.ntworld.mergeRequestIntegrationIde.Component
 interface EditorComponent : Component, Disposable {
     var text: String
 
-    var addCommentButtonText: String
+    var addCommentNowButtonText: String
 
-    var addCommentButtonDesc: String
+    var addCommentNowButtonDesc: String
+
+    var startAReviewButtonText: String
+
+    var startAReviewButtonDesc: String
 
     var isVisible: Boolean
 
@@ -25,7 +29,7 @@ interface EditorComponent : Component, Disposable {
 
         fun onCancelClicked(editor: EditorComponent)
 
-        fun onSubmitClicked(editor: EditorComponent)
+        fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean)
     }
 
     enum class Type {

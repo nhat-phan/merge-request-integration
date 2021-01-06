@@ -275,14 +275,16 @@ class ReworkWatcherImpl(
     override fun requestCreateComment(
         providerData: ProviderData,
         content: String,
-        position: GutterPosition?
+        position: GutterPosition?,
+        isDraft: Boolean
     ) = assertHasSameProvider(providerData) {
         val commentPosition = convertGutterPositionToCommentPosition(position)
         projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = providerData.id,
             mergeRequestId = mergeRequestInfo.id,
             position = commentPosition,
-            body = content
+            body = content,
+            isDraft = false
         ) ifError {
             projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",

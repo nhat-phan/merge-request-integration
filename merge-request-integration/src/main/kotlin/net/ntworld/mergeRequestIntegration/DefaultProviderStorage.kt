@@ -39,6 +39,8 @@ class DefaultProviderStorage : ProviderStorage {
         var message: String? = null
         try {
             val user = api.user.me()
+            api.initialize(user)
+
             val project = api.project.find(credentials.projectId)
             if (null !== project) {
                 val providerData = ProviderDataImpl(

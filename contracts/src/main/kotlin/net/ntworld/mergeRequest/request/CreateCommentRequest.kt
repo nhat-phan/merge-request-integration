@@ -13,5 +13,7 @@ interface CreateCommentRequest : Request<CreateCommentResponse> {
 
     val position: CommentPosition?
 
+    val isDraft: Boolean
+
     companion object
 }

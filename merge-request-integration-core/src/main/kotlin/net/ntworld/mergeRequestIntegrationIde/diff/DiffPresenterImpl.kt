@@ -143,13 +143,20 @@ internal class DiffPresenterImpl(
         view.resetEditorOnLine(logicalLine, side, repliedComment)
     }
 
-    override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
+    override fun onCreateCommentRequested(
+        content: String,
+        position: GutterPosition,
+        logicalLine: Int,
+        side: Side,
+        isDraft: Boolean
+    ) {
         val commentPosition = convertGutterPositionToCommentPosition(position)
         projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             position = commentPosition,
-            body = content
+            body = content,
+            isDraft = isDraft
         ) ifError {
             projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",

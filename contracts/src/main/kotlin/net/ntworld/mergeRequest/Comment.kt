@@ -23,5 +23,7 @@ interface Comment {
 
     val resolvedBy: UserInfo?
 
+    val isDraft: Boolean
+
     companion object
 }

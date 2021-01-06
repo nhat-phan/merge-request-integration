@@ -7,7 +7,13 @@ import net.ntworld.mergeRequest.Project
 interface CommentApi {
     fun getAll(project: Project, mergeRequestId: String): List<Comment>
 
-    fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String?
+    fun create(
+        project: Project,
+        mergeRequestId: String,
+        body: String,
+        position: CommentPosition?,
+        isDraft: Boolean
+    ): String?
 
     fun reply(project: Project, mergeRequestId: String, repliedComment: Comment, body: String): String?
 
@@ -18,4 +24,12 @@ interface CommentApi {
     fun unresolve(project: Project, mergeRequestId: String, comment: Comment)
 
     // fun update(projectId: String, mergeRequestId: String, comment: Comment): Boolean
+
+    fun hasDraft(project: Project, mergeRequestId: String): Boolean {
+        return this.getDraftCount(project, mergeRequestId) > 0
+    }
+
+    fun getDraftCount(project: Project, mergeRequestId: String): Int
+
+    fun publishAllDraftComments(project: Project, mergeRequestId: String)
 }

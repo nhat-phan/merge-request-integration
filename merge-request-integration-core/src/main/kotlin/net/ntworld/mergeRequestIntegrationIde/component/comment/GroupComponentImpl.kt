@@ -52,7 +52,7 @@ class GroupComponentImpl(
             }
         }
 
-        override fun onSubmitClicked(editor: EditorComponent) {
+        override fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean) {
             dispatcher.multicaster.onReplyCommentRequested(comments.first(), editor.text)
         }
     }

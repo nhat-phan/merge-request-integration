@@ -24,13 +24,14 @@ class ThreadPresenterImpl(
 
         override fun onCreateCommentRequested(
             content: String, logicalLine: Int, side: Side,
-            repliedComment: Comment?, position: GutterPosition?
+            repliedComment: Comment?, position: GutterPosition?,
+            isDraft: Boolean
         ) {
             if (null !== repliedComment) {
                 dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, side)
             }
             if (null !== position) {
-                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side)
+                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side, isDraft)
             }
         }
     }

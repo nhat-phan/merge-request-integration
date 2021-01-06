@@ -20,7 +20,8 @@ class CreateCommentRequestHandler(
                 project = data.project,
                 mergeRequestId = request.mergeRequestId,
                 body = request.body,
-                position = request.position
+                position = request.position,
+                isDraft = request.isDraft
             )
             CreateCommentResponse.make(error = null, createdCommentId = createdCommentId)
         } catch (exception: ProviderException) {

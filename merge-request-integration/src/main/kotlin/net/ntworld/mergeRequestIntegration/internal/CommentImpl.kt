@@ -16,5 +16,7 @@ data class CommentImpl(
     override val updatedAt: DateTime,
     override val resolvable: Boolean,
     override val resolved: Boolean,
-    override val resolvedBy: UserInfo?
-) : Comment
+    override val resolvedBy: UserInfo?,
+    override val isDraft: Boolean
+) : Comment {
+}

@@ -44,7 +44,8 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
             logicalLine: Int,
             side: Side,
             repliedComment: Comment?,
-            position: GutterPosition?
+            position: GutterPosition?,
+            isDraft: Boolean
         )
     }
 }

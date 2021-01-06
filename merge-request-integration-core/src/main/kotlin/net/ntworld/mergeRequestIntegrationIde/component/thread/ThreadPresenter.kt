@@ -17,6 +17,6 @@ interface ThreadPresenter : Presenter<ThreadPresenter.EventListener>, Disposable
 
         fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side)
 
-        fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side)
+        fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side, isDraft: Boolean)
     }
 }

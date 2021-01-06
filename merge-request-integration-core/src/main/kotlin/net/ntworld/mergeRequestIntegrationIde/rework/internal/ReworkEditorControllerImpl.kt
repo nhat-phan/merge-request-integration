@@ -259,8 +259,8 @@ class ReworkEditorControllerImpl(
             self.resetEditorOnLine(logicalLine, repliedComment)
         }
 
-        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
-            self.myReworkRequester.requestCreateComment(self.providerData, content, position)
+        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side, isDraft: Boolean) {
+            self.myReworkRequester.requestCreateComment(self.providerData, content, position, isDraft)
             self.resetEditorOnLine(logicalLine, null)
         }
 

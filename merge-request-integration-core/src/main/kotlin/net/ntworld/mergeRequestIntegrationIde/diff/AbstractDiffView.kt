@@ -63,9 +63,9 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             }
         }
 
-        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side) {
+        override fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side, isDraft: Boolean) {
             if (content.trim().isNotEmpty()) {
-                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side)
+                dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side, isDraft)
             }
         }
     }

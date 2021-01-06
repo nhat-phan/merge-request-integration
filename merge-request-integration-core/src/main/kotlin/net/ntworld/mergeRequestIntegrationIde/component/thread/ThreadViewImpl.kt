@@ -95,7 +95,7 @@ class ThreadViewImpl(
             }
         }
 
-        override fun onSubmitClicked(editor: EditorComponent) {
+        override fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean) {
             val mainEditor = myCreatedEditors[""]
             if (null !== mainEditor && editor === mainEditor) {
                 dispatcher.multicaster.onCreateCommentRequested(
@@ -103,7 +103,8 @@ class ThreadViewImpl(
                     logicalLine,
                     side,
                     repliedComment = null,
-                    position = position
+                    position = position,
+                    isDraft = isDraft
                 )
             }
         }
@@ -149,7 +150,8 @@ class ThreadViewImpl(
                 logicalLine,
                 side,
                 repliedComment = comment,
-                position = null
+                position = null,
+                isDraft = false
             )
         }
     }

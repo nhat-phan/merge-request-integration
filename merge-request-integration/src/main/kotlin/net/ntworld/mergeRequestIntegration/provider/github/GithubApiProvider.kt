@@ -2,6 +2,7 @@ package net.ntworld.mergeRequestIntegration.provider.github
 
 import net.ntworld.foundation.Infrastructure
 import net.ntworld.mergeRequest.ProviderInfo
+import net.ntworld.mergeRequest.UserInfo
 import net.ntworld.mergeRequest.api.*
 
 class GithubApiProvider(
@@ -26,5 +27,8 @@ class GithubApiProvider(
         get() = TODO("Not yet implemented")
 
     override fun setOptions(options: ApiOptions) {
+    }
+
+    override fun initialize(currentUser: UserInfo) {
     }
 }

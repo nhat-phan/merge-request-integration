@@ -79,11 +79,11 @@ class CommentsTabViewImpl(
             editor.text = ""
         }
 
-        override fun onSubmitClicked(editor: EditorComponent) {
+        override fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean) {
             val text = editor.text.trim()
             val position = myCommentPosition
             if (text.isNotEmpty()) {
-                dispatcher.multicaster.onCreateCommentRequested(editor.text, position)
+                dispatcher.multicaster.onCreateCommentRequested(editor.text, position, isDraft)
             }
         }
     }
@@ -195,11 +195,11 @@ class CommentsTabViewImpl(
         }
 
         if (null !== myCommentPosition) {
-            myMainEditor.addCommentButtonText = "Add comment"
-            myMainEditor.addCommentButtonDesc = "Add comment to current line"
+            myMainEditor.addCommentNowButtonText = "Add comment"
+            myMainEditor.addCommentNowButtonDesc = "Add comment to current line"
         } else {
-            myMainEditor.addCommentButtonText = "Add general comment"
-            myMainEditor.addCommentButtonDesc = "Create new thread of general comment"
+            myMainEditor.addCommentNowButtonText = "Add general comment"
+            myMainEditor.addCommentNowButtonDesc = "Create new thread of general comment"
         }
         mySplitter.secondComponent = myThreadWrapper
     }

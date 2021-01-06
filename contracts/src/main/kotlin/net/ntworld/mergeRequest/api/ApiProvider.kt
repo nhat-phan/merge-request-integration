@@ -2,6 +2,7 @@ package net.ntworld.mergeRequest.api
 
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.User
+import net.ntworld.mergeRequest.UserInfo
 
 interface ApiProvider {
     val info: ProviderInfo
@@ -21,4 +22,6 @@ interface ApiProvider {
     val commit: CommitApi
 
     fun setOptions(options: ApiOptions)
+
+    fun initialize(currentUser: UserInfo)
 }

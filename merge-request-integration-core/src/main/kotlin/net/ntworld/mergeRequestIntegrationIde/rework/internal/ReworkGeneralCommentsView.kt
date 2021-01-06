@@ -47,10 +47,10 @@ class ReworkGeneralCommentsView(
             editor.text = ""
         }
 
-        override fun onSubmitClicked(editor: EditorComponent) {
+        override fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean) {
             val text = editor.text.trim()
             if (text.isNotEmpty()) {
-                myReworkRequester.requestCreateComment(providerData, text, null)
+                myReworkRequester.requestCreateComment(providerData, text, null, isDraft)
             }
         }
     }
@@ -98,8 +98,8 @@ class ReworkGeneralCommentsView(
     }
 
     init {
-        myMainEditor.addCommentButtonText = "Add general comment"
-        myMainEditor.addCommentButtonDesc = "Create new thread of general comment"
+        myMainEditor.addCommentNowButtonText = "Add general comment"
+        myMainEditor.addCommentNowButtonDesc = "Create new thread of general comment"
 
         myThreadPanel.background = JBColor.border()
         myThreadBoxLayout.background = JBColor.border()

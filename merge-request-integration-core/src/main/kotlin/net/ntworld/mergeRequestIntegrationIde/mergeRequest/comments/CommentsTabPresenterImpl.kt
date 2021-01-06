@@ -177,12 +177,13 @@ class CommentsTabPresenterImpl(
         requestFetchComments()
     }
 
-    override fun onCreateCommentRequested(content: String, position: CommentPosition?) = assertMergeRequestInfoIsAvailable {
+    override fun onCreateCommentRequested(content: String, position: CommentPosition?, isDraft: Boolean) = assertMergeRequestInfoIsAvailable {
         projectServiceProvider.infrastructure.serviceBus() process CreateCommentRequest.make(
             providerId = model.providerData.id,
             mergeRequestId = model.mergeRequestInfo.id,
             position = position,
-            body = content
+            body = content,
+            isDraft = isDraft
         ) ifError {
             projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",

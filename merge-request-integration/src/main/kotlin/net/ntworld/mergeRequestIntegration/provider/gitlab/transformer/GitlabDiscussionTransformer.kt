@@ -60,7 +60,8 @@ object GitlabDiscussionTransformer :
                 source = CommentPositionSource.SERVER,
                 changeType = CommentPositionChangeType.UNKNOWN
             )
-        } else null
+        } else null,
+        isDraft = false
     )
 
 }

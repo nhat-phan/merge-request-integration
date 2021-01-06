@@ -69,7 +69,20 @@ class GitlabCommentApi(
         return comments
     }
 
-    override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
+    override fun create(
+        project: Project,
+        mergeRequestId: String,
+        body: String,
+        position: CommentPosition?,
+        isDraft: Boolean
+    ): String? {
+        if (isDraft) {
+            println(body)
+            println(position)
+            // TODO: do something
+            return ""
+        }
+
         val createdCommentId = if (null === position) {
             createGeneralComment(mergeRequestId, body)
         } else {
@@ -170,6 +183,14 @@ class GitlabCommentApi(
             discussionId = comment.parentId,
             resolve = false
         )
+    }
+
+    override fun getDraftCount(project: Project, mergeRequestId: String): Int {
+        throw Exception("Not implemented in GitlabCommentApi, see DraftCommentApi")
+    }
+
+    override fun publishAllDraftComments(project: Project, mergeRequestId: String) {
+        throw Exception("Not implemented in GitlabCommentApi, see DraftCommentApi")
     }
 
     private fun findProjectFullPath(project: Project): String {

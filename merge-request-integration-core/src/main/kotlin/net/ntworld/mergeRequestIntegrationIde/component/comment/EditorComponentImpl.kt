@@ -61,20 +61,20 @@ class EditorComponentImpl(
     }
     private val myCancelAction = MyCancelAction(this)
 
-    private class MyAddCommentAction(private val self: EditorComponentImpl) : AnAction(
-        "Add comment", "Add comment to the current position", null
+    private class MyAddCommentNowAction(private val self: EditorComponentImpl) : AnAction(
+        "Add comment now", "Add comment to the current position", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             if (self.myEditorTextField.text.trim().isNotBlank()) {
-                self.dispatcher.multicaster.onSubmitClicked(self)
+                self.dispatcher.multicaster.onSubmitClicked(self, false)
             }
         }
 
         override fun update(e: AnActionEvent) {
             when (self.type) {
                 EditorComponent.Type.NEW_DISCUSSION -> {
-                    e.presentation.text = self.addCommentButtonText
-                    e.presentation.description = self.addCommentButtonDesc
+                    e.presentation.text = self.addCommentNowButtonText
+                    e.presentation.description = self.addCommentNowButtonDesc
                 }
                 EditorComponent.Type.REPLY -> {
                     e.presentation.text = "Reply"
@@ -86,7 +86,33 @@ class EditorComponentImpl(
         override fun useSmallerFontForTextInToolbar(): Boolean = false
         override fun displayTextInToolbar() = true
     }
-    private val myAddCommentAction = MyAddCommentAction(this)
+    private class MyStartAReviewAction(private val self: EditorComponentImpl) : AnAction(
+        "Start a review", "Save a comment for now then publish all comments later", null
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            if (self.myEditorTextField.text.trim().isNotBlank()) {
+                self.dispatcher.multicaster.onSubmitClicked(self, true)
+            }
+        }
+
+        override fun update(e: AnActionEvent) {
+            when (self.type) {
+                EditorComponent.Type.NEW_DISCUSSION -> {
+                    e.presentation.text = self.startAReviewButtonText
+                    e.presentation.description = self.startAReviewButtonDesc
+                    e.presentation.isVisible = true
+                }
+                EditorComponent.Type.REPLY -> {
+                    e.presentation.isVisible = false
+                }
+            }
+        }
+
+        override fun useSmallerFontForTextInToolbar(): Boolean = false
+        override fun displayTextInToolbar() = true
+    }
+    private val myAddCommentNowAction = MyAddCommentNowAction(this)
+    private val myStartAReviewAction = MyStartAReviewAction(this)
 
     private val myEditorFocusListener = object: FocusListener {
         override fun focusLost(e: FocusEvent?) {
@@ -134,8 +160,11 @@ class EditorComponentImpl(
             myEditorTextField.text = value
         }
 
-    override var addCommentButtonText: String = "Add comment"
-    override var addCommentButtonDesc: String = "Add comment to the current position"
+    override var addCommentNowButtonText: String = "Add comment now"
+    override var addCommentNowButtonDesc: String = "Add comment to the current position"
+
+    override var startAReviewButtonText: String = "Start a review"
+    override var startAReviewButtonDesc: String = "Save a comment for now then publish all comments later"
 
     override var isVisible: Boolean
         get() = myPanel.isVisible
@@ -163,7 +192,9 @@ class EditorComponentImpl(
         val panel = JPanel(MigLayout("ins 0, fill", "15[left]push[right]5", "center"))
 
         val leftActionGroup = DefaultActionGroup()
-        leftActionGroup.add(myAddCommentAction)
+        leftActionGroup.add(myStartAReviewAction)
+        leftActionGroup.addSeparator()
+        leftActionGroup.add(myAddCommentNowAction)
         if (showCancelAction) {
             leftActionGroup.addSeparator()
             leftActionGroup.add(myCancelAction)
