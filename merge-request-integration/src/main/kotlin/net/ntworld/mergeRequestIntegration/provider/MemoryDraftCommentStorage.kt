@@ -11,48 +11,68 @@ import org.joda.time.DateTime
 import java.util.*
 
 class MemoryDraftCommentStorage(private val currentUser: UserInfo) : DraftCommentStorage {
-    private val data = mutableMapOf<String, MutableList<Comment>>()
+    private val data = mutableMapOf<String, MutableMap<String, Comment>>()
 
-    private fun getMutableList(project: Project, mergeRequestId: String): MutableList<Comment> {
+    private fun getMutableMap(project: Project, mergeRequestId: String): MutableMap<String, Comment> {
         val key = project.id + "-" + mergeRequestId
         if (!data.contains(key)) {
-            data[key] = mutableListOf()
+            data[key] = mutableMapOf()
         }
-        return data[key] as MutableList<Comment>
+        return data[key] as MutableMap<String, Comment>
     }
 
     override fun getAll(project: Project, mergeRequestId: String): List<Comment> {
-        return getMutableList(project, mergeRequestId)
+        return getMutableMap(project, mergeRequestId).values.toList()
     }
 
     override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
-        val mutableList = getMutableList(project, mergeRequestId)
+        val mutableMap = getMutableMap(project, mergeRequestId)
         val id = "tmp:${UUID.randomUUID()}"
-        mutableList.add(CommentImpl(
+        mutableMap[id] = CommentImpl(
             id = id,
             parentId = "",
             replyId = "",
             body = body,
             position = position,
-            createdAt = DateTimeUtil.formatDate(DateTime.now().toDate()),
-            updatedAt = DateTimeUtil.formatDate(DateTime.now().toDate()),
+            createdAt = DateTimeUtil.fromDate(DateTime.now().toDate()),
+            updatedAt = DateTimeUtil.fromDate(DateTime.now().toDate()),
             resolvable = false,
             resolved = false,
             resolvedBy = null,
             author = currentUser,
             isDraft = true
-        ))
+        )
         return id
+    }
+
+    override fun update(project: Project, mergeRequestId: String, comment: Comment, body: String) {
+        if (!comment.isDraft) {
+            return
+        }
+        val mutableMap = getMutableMap(project, mergeRequestId)
+        if (mutableMap.contains(comment.id)) {
+            mutableMap[comment.id] = CommentImpl(
+                id = comment.id,
+                parentId = "",
+                replyId = "",
+                body = body,
+                position = comment.position,
+                createdAt = comment.createdAt,
+                updatedAt = DateTimeUtil.fromDate(DateTime.now().toDate()),
+                resolvable = false,
+                resolved = false,
+                resolvedBy = null,
+                author = currentUser,
+                isDraft = true
+            )
+        }
     }
 
     override fun delete(project: Project, mergeRequestId: String, comment: Comment) {
         if (!comment.isDraft) {
             return
         }
-        val mutableList = getMutableList(project, mergeRequestId)
-        val item = mutableList.find { it.id === comment.id }
-        if (null !== item) {
-            mutableList.remove(item)
-        }
+        val mutableMap = getMutableMap(project, mergeRequestId)
+        mutableMap.remove(comment.id)
     }
 }

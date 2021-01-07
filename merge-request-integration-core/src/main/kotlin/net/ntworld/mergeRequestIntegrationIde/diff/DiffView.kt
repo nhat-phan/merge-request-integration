@@ -74,6 +74,8 @@ interface DiffView<V : FrameDiffTool.DiffViewer> : View<DiffView.ActionListener>
 
         fun onGutterActionPerformed(renderer: GutterIconRenderer, type: GutterActionType, mode: DisplayCommentMode)
 
+        fun onEditCommentRequested(comment: Comment, content: String)
+
         fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side)
 
         fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side, isDraft: Boolean)

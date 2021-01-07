@@ -84,6 +84,10 @@ class ReworkGeneralCommentsView(
             }
         }
 
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            myReworkRequester.requestEditComment(providerData, comment, content)
+        }
+
         override fun onDeleteCommentRequested(comment: Comment) {
             myReworkRequester.requestDeleteComment(providerData, comment)
         }

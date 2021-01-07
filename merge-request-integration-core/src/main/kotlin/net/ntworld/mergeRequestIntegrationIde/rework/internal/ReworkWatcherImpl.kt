@@ -13,6 +13,7 @@ import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
@@ -285,6 +286,22 @@ class ReworkWatcherImpl(
             position = commentPosition,
             body = content,
             isDraft = false
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchComments()
+    }
+
+    override fun requestEditComment(providerData: ProviderData, comment: Comment, content: String) {
+        projectServiceProvider.infrastructure.serviceBus() process UpdateCommentRequest.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            comment = comment,
+            body = content
         ) ifError {
             projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",

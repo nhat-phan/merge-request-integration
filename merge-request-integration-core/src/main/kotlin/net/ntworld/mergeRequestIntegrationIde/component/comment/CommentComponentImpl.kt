@@ -32,6 +32,7 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 class CommentComponentImpl(
+    private val factory: CommentComponentFactory,
     private val projectServiceProvider: ProjectServiceProvider,
     private val groupComponent: GroupComponent,
     private val providerData: ProviderData,
@@ -47,16 +48,42 @@ class CommentComponentImpl(
     private val myNameSeparatorLabel = Label("·")
     private var myUsePrettyTime: Boolean = true
 
+    private var myEditEditor: EditorComponent? = null
     private val myWebView = TipUIUtil.createBrowser() as TipUIUtil.Browser
     private val myHtmlTemplate = CommentComponentImpl::class.java.getResource(
         "/templates/mr.comment.html"
     ).readText()
+
+    private val myEditEditorListener = object: EditorComponent.EventListener {
+        override fun onEditorFocused(editor: EditorComponent) {
+        }
+
+        override fun onEditorResized(editor: EditorComponent) {
+
+        }
+
+        override fun onCancelClicked(editor: EditorComponent) {
+            myWebView.component.isVisible = true
+            myPanel.setContent(myWebView.component)
+
+            groupComponent.editEditorDestroyed(comment, editor)
+            myEditEditor = null
+        }
+
+        override fun onSubmitClicked(editor: EditorComponent, isDraft: Boolean) {
+            val text = editor.text.trim()
+            if (text.isNotEmpty() && text !== comment.body) {
+                groupComponent.requestEditComment(comment, text)
+            }
+        }
+    }
 
     private val myTimeAction = MyTimeAction(this)
     private val myDraftStatusAction = MyDraftStatusAction(this)
     private val myOpenInBrowserAction = MyOpenInBrowserAction(this)
     private val myReplyAction = MyReplyAction(this)
     private val myDeleteAction = MyDeleteAction(this)
+    private val myEditAction = MyEditAction(this)
     private val myMoveToDialogAction = MyMoveToDialogAction(this)
     private val myLegalWarningAction = MyLegalWarningAction(this)
 
@@ -114,6 +141,27 @@ class CommentComponentImpl(
         )
     }
 
+    private fun hideWebViewAndShowEditEditor()
+    {
+        myWebView.component.isVisible = false
+        if (null === this.myEditEditor) {
+            val createdEditor = factory.makeEditor(
+                projectServiceProvider.project,
+                EditorComponent.Type.EDIT,
+                0,
+                borderLeftRight = 0,
+                showCancelAction = true
+            )
+            groupComponent.editEditorCreated(comment, createdEditor)
+
+            createdEditor.addListener(myEditEditorListener)
+            createdEditor.text = comment.body + "\n"
+            myEditEditor = createdEditor
+        }
+        myPanel.setContent(this.myEditEditor!!.component)
+        myEditEditor!!.focus()
+    }
+
     override fun hideMoveToDialogButtons() {
         displayMoveToDialog = false
     }
@@ -141,16 +189,21 @@ class CommentComponentImpl(
         }
 
         if (providerData.currentUser.id == comment.author.id) {
+            rightActionGroup.add(myEditAction)
             rightActionGroup.add(myDeleteAction)
-            rightActionGroup.addSeparator()
+            if (!comment.isDraft) {
+                rightActionGroup.addSeparator()
+            }
         }
 
-        rightActionGroup.add(myOpenInBrowserAction)
-        rightActionGroup.addSeparator()
-        if (comment.resolvable) {
-            rightActionGroup.add(myResolveAction)
+        if (!comment.isDraft) {
+            rightActionGroup.add(myOpenInBrowserAction)
+            rightActionGroup.addSeparator()
+            if (comment.resolvable) {
+                rightActionGroup.add(myResolveAction)
+            }
+            rightActionGroup.add(myReplyAction)
         }
-        rightActionGroup.add(myReplyAction)
 
         if (!projectServiceProvider.applicationServiceProvider.isLegal(providerData)) {
             rightActionGroup.addSeparator()
@@ -237,7 +290,7 @@ class CommentComponentImpl(
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             self.groupComponent.showReplyEditor()
-            if (self.options.replyInDialog) {
+            if (self.options.openEditorInDialog) {
                 self.groupComponent.requestOpenDialog()
             }
         }
@@ -253,6 +306,21 @@ class CommentComponentImpl(
             if (result == Messages.YES) {
                 self.groupComponent.requestDeleteComment(self.comment)
             }
+        }
+    }
+
+    private class MyEditAction(private val self: CommentComponentImpl): AnAction(
+        "Edit comment", "Edit comment", Icons.Edit
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            self.hideWebViewAndShowEditEditor()
+            if (self.options.openEditorInDialog) {
+                self.groupComponent.requestOpenDialog()
+            }
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isEnabled = null === self.myEditEditor
         }
     }
 

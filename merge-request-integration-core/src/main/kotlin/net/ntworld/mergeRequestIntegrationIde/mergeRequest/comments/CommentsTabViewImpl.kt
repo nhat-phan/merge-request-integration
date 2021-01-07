@@ -115,6 +115,10 @@ class CommentsTabViewImpl(
             }
         }
 
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            dispatcher.multicaster.onEditCommentRequested(comment, content)
+        }
+
         override fun onDeleteCommentRequested(comment: Comment) {
             dispatcher.multicaster.onDeleteCommentRequested(comment)
         }

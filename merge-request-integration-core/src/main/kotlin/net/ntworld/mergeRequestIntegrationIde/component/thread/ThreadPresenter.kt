@@ -15,6 +15,8 @@ interface ThreadPresenter : Presenter<ThreadPresenter.EventListener>, Disposable
     interface EventListener: CommentEvent {
         fun onMainEditorClosed(threadPresenter: ThreadPresenter)
 
+        fun onEditCommentRequested(comment: Comment, content: String)
+
         fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side)
 
         fun onCreateCommentRequested(content: String, position: GutterPosition, logicalLine: Int, side: Side, isDraft: Boolean)

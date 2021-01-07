@@ -39,6 +39,8 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
     interface ActionListener : CommentEvent {
         fun onMainEditorClosed()
 
+        fun onEditCommentRequested(comment: Comment, content: String)
+
         fun onCreateCommentRequested(
             content: String,
             logicalLine: Int,

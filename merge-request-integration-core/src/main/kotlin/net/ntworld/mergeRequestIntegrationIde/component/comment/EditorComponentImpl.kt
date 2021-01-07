@@ -81,6 +81,10 @@ class EditorComponentImpl(
                     e.presentation.text = "Reply"
                     e.presentation.description = "Reply to current discussion thread"
                 }
+                EditorComponent.Type.EDIT -> {
+                    e.presentation.text = "Save"
+                    e.presentation.description = "Update current comment"
+                }
             }
         }
 
@@ -103,7 +107,7 @@ class EditorComponentImpl(
                     e.presentation.description = self.startAReviewButtonDesc
                     e.presentation.isVisible = true
                 }
-                EditorComponent.Type.REPLY -> {
+                EditorComponent.Type.REPLY, EditorComponent.Type.EDIT -> {
                     e.presentation.isVisible = false
                 }
             }

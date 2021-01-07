@@ -185,6 +185,16 @@ class GitlabCommentApi(
         )
     }
 
+    override fun update(project: Project, mergeRequestId: String, comment: Comment, body: String) {
+        infrastructure.commandBus() process GitlabUpdateDiffNoteCommand(
+            credentials = credentials,
+            mergeRequestInternalId = mergeRequestId.toInt(),
+            discussionId = comment.parentId,
+            body = body,
+            noteId = comment.id.toInt()
+        )
+    }
+
     override fun getDraftCount(project: Project, mergeRequestId: String): Int {
         throw Exception("Not implemented in GitlabCommentApi, see DraftCommentApi")
     }

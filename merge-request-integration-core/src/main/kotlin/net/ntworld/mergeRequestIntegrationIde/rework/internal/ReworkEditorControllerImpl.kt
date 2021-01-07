@@ -254,6 +254,10 @@ class ReworkEditorControllerImpl(
         override fun onMainEditorClosed(threadPresenter: ThreadPresenter) {
         }
 
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            self.myReworkRequester.requestEditComment(self.providerData, comment, content)
+        }
+
         override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
             self.myReworkRequester.requestReplyComment(self.providerData, content, repliedComment)
             self.resetEditorOnLine(logicalLine, repliedComment)

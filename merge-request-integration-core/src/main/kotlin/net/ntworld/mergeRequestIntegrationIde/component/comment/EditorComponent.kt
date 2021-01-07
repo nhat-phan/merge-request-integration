@@ -34,6 +34,7 @@ interface EditorComponent : Component, Disposable {
 
     enum class Type {
         NEW_DISCUSSION,
+        EDIT,
         REPLY
     }
 }

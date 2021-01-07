@@ -11,7 +11,6 @@ class NodeDescriptorServiceImpl(
 ) : NodeDescriptorService {
 
     override fun make(node: Node): PresentableNodeDescriptor<Node> {
-        println("making ${node.id} with childCount = ${node.childCount}" )
         val presentation = MyPresentableNodeDescriptor(projectServiceProvider, providerData, node)
         presentation.update()
         return presentation

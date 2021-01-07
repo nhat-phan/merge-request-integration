@@ -57,6 +57,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
             }
         }
 
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            dispatcher.multicaster.onEditCommentRequested(comment, content)
+        }
+
         override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {
             if (content.trim().isNotEmpty()) {
                 dispatcher.multicaster.onReplyCommentRequested(content, repliedComment, logicalLine, side)

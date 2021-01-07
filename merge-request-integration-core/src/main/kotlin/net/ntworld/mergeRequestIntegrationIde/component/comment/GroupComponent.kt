@@ -15,6 +15,8 @@ interface GroupComponent : Component, Disposable {
 
     fun requestDeleteComment(comment: Comment)
 
+    fun requestEditComment(comment: Comment, content: String)
+
     fun requestToggleResolvedStateOfComment(comment: Comment)
 
     fun resetReplyEditor()
@@ -22,6 +24,10 @@ interface GroupComponent : Component, Disposable {
     fun showReplyEditor()
 
     fun destroyReplyEditor()
+
+    fun editEditorCreated(comment: Comment, editor: EditorComponent)
+
+    fun editEditorDestroyed(comment: Comment, editor: EditorComponent)
 
     fun addListener(listener: EventListener)
 
@@ -39,5 +45,7 @@ interface GroupComponent : Component, Disposable {
         fun onEditorDestroyed(groupId: String, editor: EditorComponent)
 
         fun onReplyCommentRequested(comment: Comment, content: String)
+
+        fun onEditCommentRequested(comment: Comment, content: String)
     }
 }

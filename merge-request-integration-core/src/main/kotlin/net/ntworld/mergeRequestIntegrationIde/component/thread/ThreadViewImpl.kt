@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
 import com.intellij.openapi.ui.DialogBuilder
-import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBScrollPane
@@ -154,6 +153,10 @@ class ThreadViewImpl(
                 isDraft = false
             )
         }
+
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            dispatcher.multicaster.onEditCommentRequested(comment, content)
+        }
     }
 
     init {
@@ -198,7 +201,7 @@ class ThreadViewImpl(
     override fun addGroupOfComments(groupId: String, comments: List<Comment>) {
         val group = projectServiceProvider.componentFactory.commentComponents.makeGroup(
             providerData, mergeRequestInfo, editor.project!!, myGroups.isEmpty(), groupId, comments,
-            Options(borderLeftRight = 1, showMoveToDialog = true, replyInDialog = replyInDialog)
+            Options(borderLeftRight = 1, showMoveToDialog = true, openEditorInDialog = replyInDialog)
         )
         group.addListener(myGroupComponentEventListener)
         Disposer.register(this, group)

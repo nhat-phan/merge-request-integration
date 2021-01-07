@@ -9,5 +9,7 @@ interface DraftCommentStorage {
 
     fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String?
 
+    fun update(project: Project, mergeRequestId: String, comment: Comment, body: String)
+
     fun delete(project: Project, mergeRequestId: String, comment: Comment)
 }

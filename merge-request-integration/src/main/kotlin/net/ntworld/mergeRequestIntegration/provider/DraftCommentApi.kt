@@ -51,6 +51,13 @@ class DraftCommentApi(private val api: CommentApi, private val storage: DraftCom
         }
     }
 
+    override fun update(project: Project, mergeRequestId: String, comment: Comment, body: String) {
+        if (!comment.isDraft) {
+            return api.update(project, mergeRequestId, comment, body)
+        }
+        return storage.update(project, mergeRequestId, comment, body)
+    }
+
     override fun getDraftCount(project: Project, mergeRequestId: String): Int {
         return storage.getAll(project, mergeRequestId).count()
     }

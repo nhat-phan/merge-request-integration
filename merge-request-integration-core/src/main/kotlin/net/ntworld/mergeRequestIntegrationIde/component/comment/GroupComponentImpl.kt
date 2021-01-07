@@ -110,6 +110,10 @@ class GroupComponentImpl(
         dispatcher.multicaster.onDeleteCommentRequested(comment)
     }
 
+    override fun requestEditComment(comment: Comment, content: String) {
+        dispatcher.multicaster.onEditCommentRequested(comment, content)
+    }
+
     override fun requestToggleResolvedStateOfComment(comment: Comment) {
         if (comment.resolved) {
             dispatcher.multicaster.onUnresolveCommentRequested(comment)
@@ -155,6 +159,18 @@ class GroupComponentImpl(
             dispatcher.multicaster.onEditorDestroyed(this.id, editor)
             myEditor = null
         }
+    }
+
+    override fun editEditorCreated(comment: Comment, editor: EditorComponent)
+    {
+        dispatcher.multicaster.onEditorCreated(this.id, editor)
+    }
+
+    override fun editEditorDestroyed(comment: Comment, editor: EditorComponent)
+    {
+        editor.dispose()
+        dispatcher.multicaster.onEditorDestroyed(this.id, editor)
+        dispatcher.multicaster.onResized()
     }
 
     override fun addListener(listener: GroupComponent.EventListener) = dispatcher.addListener(listener)

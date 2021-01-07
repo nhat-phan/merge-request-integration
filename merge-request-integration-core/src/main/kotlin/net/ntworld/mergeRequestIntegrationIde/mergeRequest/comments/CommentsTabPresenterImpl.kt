@@ -11,6 +11,7 @@ import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegrationIde.AbstractPresenter
@@ -174,6 +175,22 @@ class CommentsTabPresenterImpl(
             throw ProviderException(exception)
         }
         view.clearMainEditorText()
+        requestFetchComments()
+    }
+
+    override fun onEditCommentRequested(comment: Comment, content: String) = assertMergeRequestInfoIsAvailable {
+        projectServiceProvider.infrastructure.serviceBus() process UpdateCommentRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = it.id,
+            comment = comment,
+            body = content
+        ) ifError { exception ->
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${exception.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(exception)
+        }
         requestFetchComments()
     }
 

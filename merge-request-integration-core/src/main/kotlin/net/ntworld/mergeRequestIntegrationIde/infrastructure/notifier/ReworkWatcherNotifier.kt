@@ -24,6 +24,8 @@ interface ReworkWatcherNotifier {
 
     fun requestCreateComment(providerData: ProviderData, content: String, position: GutterPosition?, isDraft: Boolean)
 
+    fun requestEditComment(providerData: ProviderData, comment: Comment, content: String)
+
     fun requestDeleteComment(providerData: ProviderData, comment: Comment)
 
     fun requestResolveComment(providerData: ProviderData, comment: Comment)

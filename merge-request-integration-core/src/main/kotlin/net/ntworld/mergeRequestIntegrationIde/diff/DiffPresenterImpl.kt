@@ -16,6 +16,7 @@ import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
+import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
 import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.ProviderException
@@ -124,6 +125,22 @@ internal class DiffPresenterImpl(
                 view.displayComments(renderer, mode)
             }
         }
+    }
+
+    override fun onEditCommentRequested(comment: Comment, content: String) {
+        projectServiceProvider.infrastructure.serviceBus() process UpdateCommentRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = model.mergeRequestInfo.id,
+            comment = comment,
+            body = content
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchAndUpdateComments()
     }
 
     override fun onReplyCommentRequested(content: String, repliedComment: Comment, logicalLine: Int, side: Side) {

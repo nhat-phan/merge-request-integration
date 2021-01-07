@@ -22,6 +22,10 @@ class ThreadPresenterImpl(
             dispatcher.multicaster.onMainEditorClosed(this@ThreadPresenterImpl)
         }
 
+        override fun onEditCommentRequested(comment: Comment, content: String) {
+            dispatcher.multicaster.onEditCommentRequested(comment, content)
+        }
+
         override fun onCreateCommentRequested(
             content: String, logicalLine: Int, side: Side,
             repliedComment: Comment?, position: GutterPosition?,

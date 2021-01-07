@@ -40,6 +40,7 @@ internal class CommentComponentFactoryImpl(
         options: Options
     ): CommentComponent {
         return CommentComponentImpl(
+            this,
             projectServiceProvider,
             groupComponent,
             providerData,

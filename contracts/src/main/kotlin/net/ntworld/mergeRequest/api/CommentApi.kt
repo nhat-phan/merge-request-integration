@@ -23,7 +23,7 @@ interface CommentApi {
 
     fun unresolve(project: Project, mergeRequestId: String, comment: Comment)
 
-    // fun update(projectId: String, mergeRequestId: String, comment: Comment): Boolean
+    fun update(project: Project, mergeRequestId: String, comment: Comment, body: String)
 
     fun hasDraft(project: Project, mergeRequestId: String): Boolean {
         return this.getDraftCount(project, mergeRequestId) > 0
