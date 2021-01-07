@@ -22,7 +22,7 @@ class DraftCommentApi(private val api: CommentApi, private val storage: DraftCom
         position: CommentPosition?,
         isDraft: Boolean
     ): String? {
-        if (!isDraft) {
+        if (isDraft) {
             return storage.create(project, mergeRequestId, body, position)
         }
         return api.create(project, mergeRequestId, body, position, false)

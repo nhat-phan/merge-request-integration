@@ -2,6 +2,8 @@
 //
 //import com.intellij.openapi.editor.ex.EditorEx
 //import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager
+//import com.intellij.vcs.log.impl.VcsLogContentUtil
+//import com.intellij.vcs.log.impl.VcsLogManager
 //import gnu.trove.TIntFunction
 //
 //class Version193Adapter : IntellijIdeApi {
@@ -36,5 +38,13 @@
 //            0,
 //            offset
 //        )
+//    }
+//
+//    override fun getVcsLogManager(ideaProject: Project, action: (VcsLogManager) -> Unit) {
+//        val log = VcsLogContentUtil.getOrCreateLog(ideaProject)
+//        if (null === log) {
+//            return
+//        }
+//        action.invoke(log)
 //    }
 //}

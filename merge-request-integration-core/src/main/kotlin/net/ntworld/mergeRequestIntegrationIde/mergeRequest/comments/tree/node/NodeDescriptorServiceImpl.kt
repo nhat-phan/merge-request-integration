@@ -11,6 +11,7 @@ class NodeDescriptorServiceImpl(
 ) : NodeDescriptorService {
 
     override fun make(node: Node): PresentableNodeDescriptor<Node> {
+        println("making ${node.id} with childCount = ${node.childCount}" )
         val presentation = MyPresentableNodeDescriptor(projectServiceProvider, providerData, node)
         presentation.update()
         return presentation
@@ -20,13 +21,6 @@ class NodeDescriptorServiceImpl(
         return if (null !== input && input is MyPresentableNodeDescriptor) {
             input.element
         } else null
-    }
-
-    override fun isHolding(input: Any?, node: Node): Boolean {
-        if (null !== input && input is MyPresentableNodeDescriptor) {
-            return node.id == input.element.id
-        }
-        return false
     }
 
     private class MyPresentableNodeDescriptor(

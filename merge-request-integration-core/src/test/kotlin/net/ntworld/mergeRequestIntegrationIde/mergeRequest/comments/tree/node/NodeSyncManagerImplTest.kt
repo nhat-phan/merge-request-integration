@@ -251,7 +251,8 @@ class NodeSyncManagerImplTest {
             updatedAt = "",
             resolvable = true,
             resolved = false,
-            resolvedBy = null
+            resolvedBy = null,
+            isDraft = true
         )
     }
 

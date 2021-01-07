@@ -10,6 +10,7 @@ const val SINGLE_MR_REWORK_CHANGES_PREFIX = "Files"
 const val SINGLE_MR_REWORK_COMMENTS_PREFIX = "Comments"
 
 private const val DEBUG = false
+const val ALLOW_DRAFT_COMMENTS = false
 
 val logger = Logger.getInstance("MRI")
 fun debug(message: String) {

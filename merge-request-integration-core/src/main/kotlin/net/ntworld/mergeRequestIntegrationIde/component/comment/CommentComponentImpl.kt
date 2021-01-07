@@ -53,6 +53,7 @@ class CommentComponentImpl(
     ).readText()
 
     private val myTimeAction = MyTimeAction(this)
+    private val myDraftStatusAction = MyDraftStatusAction(this)
     private val myOpenInBrowserAction = MyOpenInBrowserAction(this)
     private val myReplyAction = MyReplyAction(this)
     private val myDeleteAction = MyDeleteAction(this)
@@ -126,6 +127,7 @@ class CommentComponentImpl(
 
         val leftActionGroupTwo = DefaultActionGroup()
         leftActionGroupTwo.add(myTimeAction)
+        leftActionGroupTwo.add(myDraftStatusAction)
         val leftToolbarTwo = ActionManager.getInstance().createActionToolbar(
             "${CommentComponentImpl::class.java.canonicalName}/toolbar-left-two",
             leftActionGroupTwo,
@@ -200,6 +202,22 @@ class CommentComponentImpl(
             } else {
                 DateTimeUtil.formatDate(DateTimeUtil.toDate(self.comment.updatedAt))
             }
+            e.presentation.isVisible = !self.comment.isDraft
+        }
+
+        override fun useSmallerFontForTextInToolbar(): Boolean = false
+        override fun displayTextInToolbar() = true
+    }
+
+    private class MyDraftStatusAction(private val self: CommentComponentImpl) : AnAction(
+        "Draft, click to publish this comment", "This is a draft comment, click to publish", null
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            // TODO: publish a comment
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isVisible = self.comment.isDraft
         }
 
         override fun useSmallerFontForTextInToolbar(): Boolean = false

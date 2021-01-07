@@ -22,7 +22,8 @@ class ReviewContextImpl(
     override val messageBusConnection: MessageBusConnection
 ) : ReviewContext {
     private val myLogger = Logger.getInstance(this.javaClass)
-    private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
+    // private val myPreviewDiffVirtualFileMap = mutableMapOf<Change, PreviewDiffVirtualFile>()
+    private val myPreviewDiffVirtualFileMap = mutableMapOf<Int, PreviewDiffVirtualFile>()
     private val myCommentsMap = mutableMapOf<String, MutableList<Comment>>()
     private val myChangesMap = mutableMapOf<String, MutableList<Change>>()
     private val myChangesDataMap = mutableMapOf<Change, UserDataHolderBase>()
@@ -76,11 +77,11 @@ class ReviewContextImpl(
     }
 
     override fun openChange(change: Change, focus: Boolean, displayMergeRequestId: Boolean) {
-        val diffFile = myPreviewDiffVirtualFileMap[change]
+        val diffFile = myPreviewDiffVirtualFileMap[change.hashCode()]
         if (null === diffFile) {
             val provider = DiffPreviewProviderImpl(project, change, this, displayMergeRequestId)
             val created = PreviewDiffVirtualFile(provider)
-            myPreviewDiffVirtualFileMap[change] = created
+            myPreviewDiffVirtualFileMap[change.hashCode()] = created
             FileEditorManagerEx.getInstanceEx(project).openFile(created, focus)
         } else {
             FileEditorManagerEx.getInstanceEx(project).openFile(diffFile, focus)

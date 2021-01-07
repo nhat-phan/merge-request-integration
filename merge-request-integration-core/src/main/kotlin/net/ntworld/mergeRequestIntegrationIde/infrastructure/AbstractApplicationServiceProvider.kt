@@ -4,7 +4,6 @@ import com.intellij.ide.AppLifecycleListener
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.impl.ProjectLifecycleListener
-import com.intellij.openapi.wm.ToolWindowManager
 import net.ntworld.mergeRequest.ProjectVisibility
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
@@ -62,7 +61,7 @@ abstract class AbstractApplicationServiceProvider : ApplicationServiceProvider, 
         projectServiceProvider.providerStorage.updateApiOptions(settingsManager.toApiOptions())
     }
 
-    override val intellijIdeApi: IntellijIdeApi = Version201Adapter()
+    override val intellijIdeApi: IntellijIdeApi = Version203Adapter()
 
     override val settingsManager: ApplicationSettingsManager = ApplicationSettingsManagerImpl(::onSettingsChanged)
 

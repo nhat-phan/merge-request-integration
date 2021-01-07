@@ -65,9 +65,7 @@ class NodeSyncManagerImpl(
         visitor: ((Node, DefaultMutableTreeNode) -> Unit)
     ) {
         visitor(parent, treeNode)
-        if (!nodeDescriptorService.isHolding(treeNode.userObject, parent)) {
-            treeNode.userObject = nodeDescriptorService.make(parent)
-        }
+        treeNode.userObject = nodeDescriptorService.make(parent)
 
         val treeNodeChildren = treeNode.children().toList()
         val treeNodeChildCount = treeNodeChildren.size

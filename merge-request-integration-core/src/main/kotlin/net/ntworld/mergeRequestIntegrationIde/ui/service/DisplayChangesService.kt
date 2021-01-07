@@ -7,7 +7,6 @@ import com.intellij.openapi.vcs.changes.*
 import com.intellij.openapi.project.Project as IdeaProject
 import com.intellij.ui.tabs.JBTabsPosition
 import com.intellij.vcs.log.Hash
-import com.intellij.vcs.log.impl.VcsLogContentUtil
 import com.intellij.vcs.log.impl.VcsLogManager
 import com.intellij.vcs.log.util.VcsLogUtil
 import git4idea.repo.GitRepository
@@ -48,39 +47,35 @@ object DisplayChangesService {
         if (null === repository || null === diff) {
             return
         }
-        val log = VcsLogContentUtil.getOrCreateLog(ideaProject)
-        if (null === log) {
-            return
-        }
 
-        val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(ideaProject)
-        if (commits.size <= 1) {
-            thread {
-                val hash = if (commits.isEmpty()) diff.headHash else commits.first().id
-                displayChangesForOneCommit(
-                    applicationServiceProvider,
-                    ideaProject,
-                    providerData,
-                    mergeRequest,
-                    repository,
-                    log,
-                    hash
-                )
-            }
-        } else {
-            thread {
-                displayChangesForCommits(
-                    applicationServiceProvider,
-                    ideaProject,
-                    providerData,
-                    mergeRequest,
-                    repository,
-                    log,
-                    commits
-                )
+        applicationServiceProvider.intellijIdeApi.getVcsLogManager(ideaProject) {
+            if (commits.size <= 1) {
+                thread {
+                    val hash = if (commits.isEmpty()) diff.headHash else commits.first().id
+                    displayChangesForOneCommit(
+                        applicationServiceProvider,
+                        ideaProject,
+                        providerData,
+                        mergeRequest,
+                        repository,
+                        it,
+                        hash
+                    )
+                }
+            } else {
+                thread {
+                    displayChangesForCommits(
+                        applicationServiceProvider,
+                        ideaProject,
+                        providerData,
+                        mergeRequest,
+                        repository,
+                        it,
+                        commits
+                    )
+                }
             }
         }
-        // rearrangeTabPlacement(fileEditorManagerEx)
     }
 
     private fun displayChangesForOneCommit(
