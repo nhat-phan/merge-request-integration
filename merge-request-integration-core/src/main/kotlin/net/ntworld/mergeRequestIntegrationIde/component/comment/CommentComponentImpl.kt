@@ -151,7 +151,8 @@ class CommentComponentImpl(
                 EditorComponent.Type.EDIT,
                 0,
                 borderLeftRight = 0,
-                showCancelAction = true
+                showCancelAction = true,
+                isDoingCodeReview = projectServiceProvider.isDoingCodeReview()
             )
             groupComponent.editEditorCreated(comment, createdEditor)
 

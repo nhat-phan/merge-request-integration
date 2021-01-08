@@ -24,7 +24,8 @@ class EditorComponentImpl(
     private val type: EditorComponent.Type,
     val indent: Int,
     private val borderLeftRight: Int = 1,
-    private val showCancelAction: Boolean = true
+    private val showCancelAction: Boolean = true,
+    private val isDoingCodeReview: Boolean = false
 ) : EditorComponent {
     private val dispatcher = EventDispatcher.create(EditorComponent.EventListener::class.java)
     private val myPanel = CustomSimpleToolWindowPanel(vertical = true, borderless = false)
@@ -92,7 +93,7 @@ class EditorComponentImpl(
         override fun displayTextInToolbar() = true
     }
     private class MyStartAReviewAction(private val self: EditorComponentImpl) : AnAction(
-        "Start a review", "Save a comment for now then publish all comments later", null
+        "Save as Draft", "Save a comment for now then publish (all) comments later", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             if (self.myEditorTextField.text.trim().isNotBlank()) {
@@ -110,6 +111,12 @@ class EditorComponentImpl(
                 EditorComponent.Type.REPLY, EditorComponent.Type.EDIT -> {
                     e.presentation.isVisible = false
                 }
+            }
+
+            if (self.isDoingCodeReview) {
+                e.presentation.text = "Start a review"
+            } else {
+                e.presentation.text = "Save as Draft"
             }
         }
 

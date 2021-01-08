@@ -56,14 +56,16 @@ internal class CommentComponentFactoryImpl(
         type: EditorComponent.Type,
         indent: Int,
         borderLeftRight: Int,
-        showCancelAction: Boolean
+        showCancelAction: Boolean,
+        isDoingCodeReview: Boolean
     ): EditorComponent {
         return EditorComponentImpl(
             ideaProject,
             type,
             indent,
             borderLeftRight,
-            showCancelAction
+            showCancelAction,
+            isDoingCodeReview
         )
     }
 }

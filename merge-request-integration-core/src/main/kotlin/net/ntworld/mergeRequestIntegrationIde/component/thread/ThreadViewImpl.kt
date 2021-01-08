@@ -56,7 +56,8 @@ class ThreadViewImpl(
     private val myGroups = mutableMapOf<String, GroupComponent>()
     private val myEditor by lazy {
         val editorComponent = projectServiceProvider.componentFactory.commentComponents.makeEditor(
-            editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0, borderLeftRight = 1, showCancelAction = true
+            editor.project!!, EditorComponent.Type.NEW_DISCUSSION, 0, borderLeftRight = 1, showCancelAction = true,
+            isDoingCodeReview = projectServiceProvider.isDoingCodeReview()
         )
         editorComponent.isVisible = false
         editorComponent.addListener(myEditorComponentEventListener)

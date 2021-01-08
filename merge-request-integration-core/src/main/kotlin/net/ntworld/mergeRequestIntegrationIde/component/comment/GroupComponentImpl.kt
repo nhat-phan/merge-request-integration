@@ -137,7 +137,8 @@ class GroupComponentImpl(
                 EditorComponent.Type.REPLY,
                 1,
                 options.borderLeftRight,
-                showCancelAction = true
+                showCancelAction = true,
+                isDoingCodeReview = false
             )
             dispatcher.multicaster.onEditorCreated(this.id, createdEditor)
             // createdEditor.drawBorderTop(true)

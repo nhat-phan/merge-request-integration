@@ -58,7 +58,8 @@ class ReworkGeneralCommentsView(
     private val myMainEditor by lazy {
         val editor = projectServiceProvider.componentFactory.commentComponents.makeEditor(
             projectServiceProvider.project, EditorComponent.Type.NEW_DISCUSSION, 0,
-            borderLeftRight = 0, showCancelAction = false
+            borderLeftRight = 0, showCancelAction = false,
+            isDoingCodeReview = projectServiceProvider.isDoingCodeReview()
         )
         editor.isVisible = true
         editor.addListener(myMainEditorEventListener)

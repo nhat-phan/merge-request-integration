@@ -17,9 +17,13 @@ import net.ntworld.mergeRequest.MergeRequest
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.ProviderInfo
 import net.ntworld.mergeRequest.api.ApiCredentials
+import net.ntworld.mergeRequest.request.PublishAllCommentsRequest
+import net.ntworld.mergeRequest.request.PublishCommentsRequest
 import net.ntworld.mergeRequestIntegration.DefaultProviderStorage
 import net.ntworld.mergeRequestIntegration.ProviderStorage
+import net.ntworld.mergeRequestIntegration.make
 import net.ntworld.mergeRequestIntegration.provider.MemoryCache
+import net.ntworld.mergeRequestIntegration.provider.ProviderException
 import net.ntworld.mergeRequestIntegration.provider.github.Github
 import net.ntworld.mergeRequestIntegration.provider.gitlab.Gitlab
 import net.ntworld.mergeRequestIntegrationIde.ComponentFactory
@@ -231,6 +235,17 @@ abstract class AbstractProjectServiceProvider(
     override fun stopCodeReview() {
         val reviewContext = reviewContextManager.findDoingCodeReviewContext()
         if (null !== reviewContext) {
+            infrastructure.serviceBus() process PublishAllCommentsRequest.make(
+                providerId = reviewContext.providerData.id,
+                mergeRequestId = reviewContext.mergeRequestInfo.id
+            ) ifError {
+                notify(
+                    "There was an error from server. \n\n ${it.message}",
+                    NotificationType.ERROR
+                )
+                throw ProviderException(it)
+            }
+
             projectNotifierTopic.stopCodeReview(reviewContext)
             reviewContext.closeAllChanges()
             hideSingleMRToolWindow {

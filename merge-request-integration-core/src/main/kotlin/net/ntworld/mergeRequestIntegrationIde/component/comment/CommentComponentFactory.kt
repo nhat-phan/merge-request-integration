@@ -30,6 +30,7 @@ interface CommentComponentFactory {
         type: EditorComponent.Type,
         indent: Int,
         borderLeftRight: Int,
-        showCancelAction: Boolean
+        showCancelAction: Boolean,
+        isDoingCodeReview: Boolean
     ): EditorComponent
 }
