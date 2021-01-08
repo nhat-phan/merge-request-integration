@@ -17,7 +17,11 @@ open class CommentNode(
         presentation.setIcon(if (comment.resolved) Icons.TreeNode.ResolvedComment else Icons.TreeNode.UnresolvedComment)
         presentation.addText("${comment.author.name} ", SimpleTextAttributes.REGULAR_ATTRIBUTES)
         presentation.addText("@${comment.author.username} · ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
-        presentation.addText(DateTimeUtil.toPretty(comment.createdAt), SimpleTextAttributes.REGULAR_ATTRIBUTES)
+        if (comment.isDraft) {
+            presentation.addText("draft", SimpleTextAttributes.REGULAR_ATTRIBUTES)
+        } else {
+            presentation.addText(DateTimeUtil.toPretty(comment.createdAt), SimpleTextAttributes.REGULAR_ATTRIBUTES)
+        }
     }
 
 }

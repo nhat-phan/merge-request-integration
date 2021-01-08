@@ -12,6 +12,7 @@ import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.PublishCommentsRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
@@ -65,6 +66,8 @@ class ReworkWatcherImpl(
     override var comments: MutableList<Comment> = mutableListOf()
         private set
 
+    override var onlyShowDraftComments: Boolean = false
+        private set
     override var displayResolvedComments: Boolean = false
         private set
 
@@ -216,6 +219,13 @@ class ReworkWatcherImpl(
         }
     }
 
+    override fun changeOnlyShowDraftComments(providerData: ProviderData, value: Boolean) = assertHasSameProvider(providerData) {
+        if (value != onlyShowDraftComments) {
+            onlyShowDraftComments = value
+            buildCommentsAndSendCommentsUpdatedSignal()
+        }
+    }
+
     override fun commentTreeNodeSelected(
         providerData: ProviderData,
         node: Node,
@@ -302,6 +312,21 @@ class ReworkWatcherImpl(
             mergeRequestId = mergeRequestInfo.id,
             comment = comment,
             body = content
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchComments()
+    }
+
+    override fun requestPublishComment(providerData: ProviderData, comment: Comment) {
+        projectServiceProvider.infrastructure.serviceBus() process PublishCommentsRequest.make(
+            providerId = providerData.id,
+            mergeRequestId = mergeRequestInfo.id,
+            draftCommentIds = listOf(comment.id)
         ) ifError {
             projectServiceProvider.notify(
                 "There was an error from server. \n\n ${it.message}",
@@ -523,10 +548,14 @@ class ReworkWatcherImpl(
 
     private fun buildCommentsAndSendCommentsUpdatedSignal() {
         comments.clear()
-        if (displayResolvedComments) {
-            comments.addAll(myComments)
+        if (onlyShowDraftComments) {
+            comments.addAll(myComments.filter { it.isDraft })
         } else {
-            comments.addAll(myComments.filter { !it.resolved })
+            if (displayResolvedComments) {
+                comments.addAll(myComments)
+            } else {
+                comments.addAll(myComments.filter { !it.resolved })
+            }
         }
         buildCommentsMap()
 

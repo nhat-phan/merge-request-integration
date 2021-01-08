@@ -24,6 +24,8 @@ interface ReworkWatcher : Watcher {
 
     val comments: List<Comment>
 
+    val onlyShowDraftComments: Boolean
+
     val displayResolvedComments: Boolean
 
     fun isChangesBuilt(): Boolean

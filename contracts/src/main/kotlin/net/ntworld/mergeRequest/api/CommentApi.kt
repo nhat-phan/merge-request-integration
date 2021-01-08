@@ -32,4 +32,6 @@ interface CommentApi {
     fun getDraftCount(project: Project, mergeRequestId: String): Int
 
     fun publishAllDraftComments(project: Project, mergeRequestId: String)
+
+    fun publishDraftComments(project: Project, mergeRequestId: String, commentIds: List<String>)
 }

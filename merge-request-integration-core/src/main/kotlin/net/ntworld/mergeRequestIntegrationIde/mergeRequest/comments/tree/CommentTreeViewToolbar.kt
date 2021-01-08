@@ -17,8 +17,10 @@ internal class CommentTreeViewToolbar(
     private val dispatcher: EventDispatcher<CommentTreeView.ActionListener>
 ) : Component {
     var showResolved: Boolean = false
+    var onlyShowDraftComments: Boolean = false
     private var myMode = CommentTreeView.ToolbarMode.FULL
     private val mySkipResolvedButton = MySkipResolvedButton(this)
+    private val myToggleDraftsButton = MyToggleDraftsButton(this)
     private val myRefreshButton = MyRefreshButton(this)
     private val myAddGeneralComment = MyAddGeneralComment(this)
 
@@ -26,6 +28,8 @@ internal class CommentTreeViewToolbar(
         val panel = JPanel(MigLayout("ins 0, fill", "[left]push[right]", "center"))
         val mainActionGroup = DefaultActionGroup()
         mainActionGroup.add(mySkipResolvedButton)
+        mainActionGroup.addSeparator()
+        mainActionGroup.add(myToggleDraftsButton)
         val mainToolbar = ActionManager.getInstance().createActionToolbar(
             "${this::class.java.canonicalName}/toolbar",
             mainActionGroup,
@@ -59,7 +63,7 @@ internal class CommentTreeViewToolbar(
     }
 
     private class MySkipResolvedButton(private val self: CommentTreeViewToolbar) :
-        ToggleAction("Show resolved comments", "Show resolved comments", null) {
+        ToggleAction("Resolved Comments", "Toggle resolved comments", null) {
         override fun isSelected(e: AnActionEvent): Boolean {
             return self.showResolved
         }
@@ -71,6 +75,7 @@ internal class CommentTreeViewToolbar(
 
         override fun update(e: AnActionEvent) {
             super.update(e)
+            e.presentation.isEnabled = !self.onlyShowDraftComments
             if (self.myMode == CommentTreeView.ToolbarMode.FULL) {
                 e.presentation.icon = null
             } else {
@@ -81,6 +86,21 @@ internal class CommentTreeViewToolbar(
         override fun displayTextInToolbar(): Boolean {
             return self.myMode == CommentTreeView.ToolbarMode.FULL
         }
+        override fun useSmallerFontForTextInToolbar() = true
+    }
+
+    private class MyToggleDraftsButton(private val self: CommentTreeViewToolbar) :
+        ToggleAction("Only Draft", "Only show draft comments", null) {
+        override fun isSelected(e: AnActionEvent): Boolean {
+            return self.onlyShowDraftComments
+        }
+
+        override fun setSelected(e: AnActionEvent, state: Boolean) {
+            self.onlyShowDraftComments = state
+            self.dispatcher.multicaster.onShowDraftCommentsOnlyToggled(self.onlyShowDraftComments)
+        }
+
+        override fun displayTextInToolbar(): Boolean = true
         override fun useSmallerFontForTextInToolbar() = true
     }
 

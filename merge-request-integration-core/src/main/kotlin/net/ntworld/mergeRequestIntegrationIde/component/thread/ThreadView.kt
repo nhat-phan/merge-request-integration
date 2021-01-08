@@ -41,6 +41,8 @@ interface ThreadView : View<ThreadView.ActionListener>, Disposable {
 
         fun onEditCommentRequested(comment: Comment, content: String)
 
+        fun onPublishDraftCommentRequested(comment: Comment)
+
         fun onCreateCommentRequested(
             content: String,
             logicalLine: Int,

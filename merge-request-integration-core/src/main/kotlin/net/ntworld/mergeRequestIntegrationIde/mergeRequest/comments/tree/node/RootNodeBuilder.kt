@@ -29,7 +29,11 @@ class RootNodeBuilder(
     }
 
     private fun buildGeneralComments(root: RootNode) {
-        val generalCommentsNode = NodeFactory.makeGeneralComments(root, generalComments.size)
+        val generalCommentsNode = NodeFactory.makeGeneralComments(
+            root,
+            generalComments.count(),
+            generalComments.filter { it.isDraft }.count()
+        )
         buildThreadComments(generalCommentsNode, generalComments)
     }
 
@@ -40,7 +44,8 @@ class RootNodeBuilder(
                 return@forEach
             }
 
-            val threadNode = NodeFactory.makeThread(parent, id, items.size - 1, items.first())
+            val draftCount = items.filter { it.isDraft }.count() - 1
+            val threadNode = NodeFactory.makeThread(parent, id, items.count() - 1, draftCount, items.first())
             for (i in 1..items.lastIndex) {
                 NodeFactory.makeComment(threadNode, items[i])
             }
@@ -54,12 +59,14 @@ class RootNodeBuilder(
                 return@forEach
             }
 
-            val fileNode = NodeFactory.makeFile(root, path)
+            val draftCountOfFile = items.filter { it.isDraft }.count()
+            val fileNode = NodeFactory.makeFile(root, path, draftCountOfFile)
             val groupedByLine = CommentUtil.groupCommentsByPositionLine(items)
             groupedByLine.forEach { (line, comments) ->
                 if (comments.isNotEmpty()) {
+                    val draftCountOfFileLine = comments.filter { it.isDraft }.count()
                     val fileLine = NodeFactory.makeFileLine(
-                        fileNode, path, line, comments.size, comments.last().position!!, showOpenDiffViewDescription
+                        fileNode, path, line, comments.count(), draftCountOfFileLine, comments.last().position!!, showOpenDiffViewDescription
                     )
                     buildThreadComments(fileLine, comments)
                 }

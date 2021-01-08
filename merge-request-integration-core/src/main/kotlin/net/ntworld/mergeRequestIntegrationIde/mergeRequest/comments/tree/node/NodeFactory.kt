@@ -6,15 +6,15 @@ import net.ntworld.mergeRequest.CommentPosition
 object NodeFactory {
     fun makeRoot(): RootNode = RootNode()
 
-    fun makeGeneralComments(root: RootNode, count: Int): GeneralCommentsNode {
-        val node = GeneralCommentsNode(count)
+    fun makeGeneralComments(root: RootNode, totalCount: Int, draftCount: Int): GeneralCommentsNode {
+        val node = GeneralCommentsNode(totalCount, draftCount)
         root.add(node)
 
         return node
     }
 
-    fun makeThread(parent: Node, threadId: String, repliedCount: Int, comment: Comment): ThreadNode {
-        val node = ThreadNode(threadId, repliedCount, comment, comment.position)
+    fun makeThread(parent: Node, threadId: String, repliedCount: Int, draftCount: Int, comment: Comment): ThreadNode {
+        val node = ThreadNode(threadId, repliedCount, draftCount, comment, comment.position)
         parent.add(node)
         return node
     }
@@ -25,8 +25,8 @@ object NodeFactory {
         return node
     }
 
-    fun makeFile(parent: RootNode, path: String): FileNode {
-        val node = FileNode(path)
+    fun makeFile(parent: RootNode, path: String, draftCount: Int): FileNode {
+        val node = FileNode(path, draftCount)
         parent.add(node)
         return node
     }
@@ -35,11 +35,12 @@ object NodeFactory {
         parent: FileNode,
         path: String,
         line: Int,
-        count: Int,
+        totalCount: Int,
+        draftCount: Int,
         position: CommentPosition,
         showOpenDiffViewDescription: Boolean
     ): FileLineNode {
-        val node = FileLineNode(path, line, position, count, showOpenDiffViewDescription)
+        val node = FileLineNode(path, line, position, totalCount, draftCount, showOpenDiffViewDescription)
         parent.add(node)
         return node
     }

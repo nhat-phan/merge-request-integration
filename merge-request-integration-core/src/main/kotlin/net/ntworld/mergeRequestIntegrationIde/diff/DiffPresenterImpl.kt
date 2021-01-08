@@ -15,6 +15,7 @@ import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.PublishCommentsRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.internal.CommentPositionImpl
@@ -183,6 +184,21 @@ internal class DiffPresenterImpl(
         }
         fetchAndUpdateComments()
         view.resetEditorOnLine(logicalLine, side, null)
+    }
+
+    override fun onPublishDraftCommentRequested(comment: Comment) {
+        projectServiceProvider.infrastructure.serviceBus() process PublishCommentsRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = model.mergeRequestInfo.id,
+            draftCommentIds = listOf(comment.id)
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchAndUpdateComments()
     }
 
     override fun onDeleteCommentRequested(comment: Comment) {

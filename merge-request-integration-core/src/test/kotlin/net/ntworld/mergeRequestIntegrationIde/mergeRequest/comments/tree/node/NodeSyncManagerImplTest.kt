@@ -193,28 +193,28 @@ class NodeSyncManagerImplTest {
     private fun generateFullList(): RootNode {
         val root = RootNode()
 
-        val generalComments = GeneralCommentsNode(3)
+        val generalComments = GeneralCommentsNode(3, 0)
 
-        val threadOne = ThreadNode("thread-one", 1, makeComment("1", "thread-one"), null)
+        val threadOne = ThreadNode("thread-one", 1, 0, makeComment("1", "thread-one"), null)
         threadOne.add(CommentNode(makeComment("2", "thread-one"), null))
         generalComments.add(threadOne)
 
-        val threadTwo = ThreadNode("thread-two", 0, makeComment("3", "thread-two"), null)
+        val threadTwo = ThreadNode("thread-two", 0, 0, makeComment("3", "thread-two"), null)
         generalComments.add(threadTwo)
 
         root.add(generalComments)
 
-        val fileOne = FileNode("/dir/file-1")
-        val line1 = FileLineNode("/dir/file-1", 1, commentPosition, 1, false)
-        val threadThree = ThreadNode("thread-three", 0, makeComment("4", "thread-three"), null)
+        val fileOne = FileNode("/dir/file-1", 0)
+        val line1 = FileLineNode("/dir/file-1", 1, commentPosition, 1, 0, false)
+        val threadThree = ThreadNode("thread-three", 0, 0, makeComment("4", "thread-three"), null)
         line1.add(threadThree)
 
-        val line2 = FileLineNode("/dir/file-1", 2, commentPosition, 0, false)
-        val threadFour = ThreadNode("thread-four", 2, makeComment("5", "thread-four"), null)
+        val line2 = FileLineNode("/dir/file-1", 2, commentPosition, 0, 0, false)
+        val threadFour = ThreadNode("thread-four", 2, 0, makeComment("5", "thread-four"), null)
         threadFour.add(CommentNode(makeComment("6", "thread-four"), null))
         threadFour.add(CommentNode(makeComment("7", "thread-four"), null))
         line2.add(threadFour)
-        val threadFive = ThreadNode("thread-five", 3, makeComment("8", "thread-four"), null)
+        val threadFive = ThreadNode("thread-five", 3, 0, makeComment("8", "thread-four"), null)
         threadFive.add(CommentNode(makeComment("9", "thread-five"), null))
         threadFive.add(CommentNode(makeComment("10", "thread-five"), null))
         threadFive.add(CommentNode(makeComment("11", "thread-five"), null))
@@ -223,9 +223,9 @@ class NodeSyncManagerImplTest {
         fileOne.add(line1)
         fileOne.add(line2)
 
-        val fileTwo = FileNode("/file-2")
-        val line3 = FileLineNode("/file-2", 3, commentPosition, 1, false)
-        val threadSix = ThreadNode("thread-six", 0, makeComment("12", "thread-six"), null)
+        val fileTwo = FileNode("/file-2", 0)
+        val line3 = FileLineNode("/file-2", 3, commentPosition, 1, 0, false)
+        val threadSix = ThreadNode("thread-six", 0, 0, makeComment("12", "thread-six"), null)
         line3.add(threadSix)
         fileTwo.add(line3)
 

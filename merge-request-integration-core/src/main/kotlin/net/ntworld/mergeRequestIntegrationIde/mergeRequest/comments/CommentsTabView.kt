@@ -35,6 +35,8 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
 
         fun onShowResolvedCommentsToggled(displayResolvedComments: Boolean)
 
+        fun onShowDraftCommentsOnlyToggled(onlyShowDraftComments: Boolean)
+
         fun onCreateGeneralCommentClicked()
 
         fun onRefreshButtonClicked()
@@ -42,6 +44,8 @@ interface CommentsTabView : View<CommentsTabView.ActionListener>, Component, Dis
         fun onReplyCommentRequested(repliedComment: Comment, content: String)
 
         fun onEditCommentRequested(comment: Comment, content: String)
+
+        fun onPublishDraftCommentRequested(comment: Comment)
 
         fun onCreateCommentRequested(content: String, position: CommentPosition?, isDraft: Boolean)
     }

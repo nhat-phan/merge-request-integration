@@ -25,12 +25,17 @@ class MemoryDraftCommentStorage(private val currentUser: UserInfo) : DraftCommen
         return getMutableMap(project, mergeRequestId).values.toList()
     }
 
+    override fun findById(project: Project, mergeRequestId: String, commentId: String): Comment? {
+        val mutableMap = getMutableMap(project, mergeRequestId)
+        return mutableMap[commentId]
+    }
+
     override fun create(project: Project, mergeRequestId: String, body: String, position: CommentPosition?): String? {
         val mutableMap = getMutableMap(project, mergeRequestId)
         val id = "tmp:${UUID.randomUUID()}"
         mutableMap[id] = CommentImpl(
             id = id,
-            parentId = "",
+            parentId = UUID.randomUUID().toString(),
             replyId = "",
             body = body,
             position = position,
@@ -53,7 +58,7 @@ class MemoryDraftCommentStorage(private val currentUser: UserInfo) : DraftCommen
         if (mutableMap.contains(comment.id)) {
             mutableMap[comment.id] = CommentImpl(
                 id = comment.id,
-                parentId = "",
+                parentId = comment.parentId,
                 replyId = "",
                 body = body,
                 position = comment.position,

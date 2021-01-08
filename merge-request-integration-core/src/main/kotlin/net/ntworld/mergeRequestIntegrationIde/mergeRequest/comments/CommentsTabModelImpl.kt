@@ -34,6 +34,15 @@ class CommentsTabModelImpl(
             }
         }
 
+    override var onlyShowDraftComments: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                buildComments()
+                dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
+            }
+        }
+
     private val myMessageBusConnection = projectServiceProvider.messageBus.connect()
     private val myMergeRequestDataNotifier = object : MergeRequestDataNotifier {
         override fun fetchCommentsRequested(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo) {
@@ -67,10 +76,14 @@ class CommentsTabModelImpl(
 
     private fun buildComments() {
         comments.clear()
-        if (displayResolvedComments) {
-            comments.addAll(myComments)
+        if (onlyShowDraftComments) {
+            comments.addAll(myComments.filter { it.isDraft })
         } else {
-            comments.addAll(myComments.filter { !it.resolved })
+            if (displayResolvedComments) {
+                comments.addAll(myComments)
+            } else {
+                comments.addAll(myComments.filter { !it.resolved })
+            }
         }
     }
 }

@@ -34,6 +34,10 @@ class CommentsToolWindowTabImpl(
             myPublisher.changeDisplayResolvedComments(providerData, displayResolvedComments)
         }
 
+        override fun onShowDraftCommentsOnlyToggled(onlyShowDraftComments: Boolean) {
+            myPublisher.changeOnlyShowDraftComments(providerData, onlyShowDraftComments)
+        }
+
         override fun onCreateGeneralCommentClicked() {
             myPublisher.openCreateGeneralCommentForm(providerData)
         }

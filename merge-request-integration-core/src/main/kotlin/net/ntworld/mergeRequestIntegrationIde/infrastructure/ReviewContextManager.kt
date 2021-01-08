@@ -21,6 +21,8 @@ interface ReviewContextManager : Watcher {
 
     fun setContextToDoingCodeReview(providerId: String, mergeRequestId: String)
 
+    fun getDraftCommentsCount(providerId: String, mergeRequestId: String): Int
+
     fun updateComments(providerId: String, mergeRequestId: String, comments: List<Comment>)
 
     fun updateCommits(providerId: String, mergeRequestId: String, commits: List<Commit>)

@@ -49,6 +49,10 @@ class CommentsTabViewImpl(
             dispatcher.multicaster.onShowResolvedCommentsToggled(displayResolvedComments)
         }
 
+        override fun onShowDraftCommentsOnlyToggled(onlyShowDraftComments: Boolean) {
+            dispatcher.multicaster.onShowDraftCommentsOnlyToggled(onlyShowDraftComments)
+        }
+
         override fun onCreateGeneralCommentClicked() {
             dispatcher.multicaster.onCreateGeneralCommentClicked()
         }
@@ -117,6 +121,10 @@ class CommentsTabViewImpl(
 
         override fun onEditCommentRequested(comment: Comment, content: String) {
             dispatcher.multicaster.onEditCommentRequested(comment, content)
+        }
+
+        override fun onPublishDraftCommentRequested(comment: Comment) {
+            dispatcher.multicaster.onPublishDraftCommentRequested(comment)
         }
 
         override fun onDeleteCommentRequested(comment: Comment) {

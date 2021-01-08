@@ -24,6 +24,8 @@ interface CommentTreeView : View<CommentTreeView.ActionListener>, Component {
 
         fun onShowResolvedCommentsToggled(displayResolvedComments: Boolean)
 
+        fun onShowDraftCommentsOnlyToggled(onlyShowDraftComments: Boolean)
+
         fun onCreateGeneralCommentClicked()
 
         fun onRefreshButtonClicked()

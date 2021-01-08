@@ -381,8 +381,19 @@ class MergeRequestDetailsToolbar(
 
             val isDoingCodeReview = self.projectServiceProvider.isDoingCodeReview()
             if (isDoingCodeReview) {
-                e.presentation.text = "Stop Reviewing"
-                e.presentation.description = "End reviewing and show other MRs"
+                val draftCount = self.projectServiceProvider.reviewContextManager.getDraftCommentsCount(
+                    self.providerData.id, mr.id
+                )
+                if (draftCount > 0) {
+                    e.presentation.text = if (draftCount < 2)
+                        "Publish $draftCount Comment and Stop Reviewing"
+                    else
+                        "Publish $draftCount Comments and Stop Reviewing"
+                    e.presentation.description = "Publish all draft comments, stop reviewing and show other MRs"
+                } else {
+                    e.presentation.text = "Stop Reviewing"
+                    e.presentation.description = "End reviewing and show other MRs"
+                }
                 e.presentation.isEnabled = self.projectServiceProvider.reviewContextManager.isDoingCodeReview(
                     self.providerData.id, mr.id
                 )

@@ -10,6 +10,7 @@ import net.ntworld.mergeRequest.command.DeleteCommentCommand
 import net.ntworld.mergeRequest.command.ResolveCommentCommand
 import net.ntworld.mergeRequest.command.UnresolveCommentCommand
 import net.ntworld.mergeRequest.request.CreateCommentRequest
+import net.ntworld.mergeRequest.request.PublishCommentsRequest
 import net.ntworld.mergeRequest.request.ReplyCommentRequest
 import net.ntworld.mergeRequest.request.UpdateCommentRequest
 import net.ntworld.mergeRequestIntegration.make
@@ -121,6 +122,10 @@ class CommentsTabPresenterImpl(
         model.displayResolvedComments = displayResolvedComments
     }
 
+    override fun onShowDraftCommentsOnlyToggled(onlyShowDraftComments: Boolean) {
+        model.onlyShowDraftComments = onlyShowDraftComments
+    }
+
     override fun onCreateGeneralCommentClicked() {
         assertMergeRequestInfoIsAvailable {
             if (view.hasGeneralCommentsTreeNode()) {
@@ -190,6 +195,21 @@ class CommentsTabPresenterImpl(
                 NotificationType.ERROR
             )
             throw ProviderException(exception)
+        }
+        requestFetchComments()
+    }
+
+    override fun onPublishDraftCommentRequested(comment: Comment) {
+        projectServiceProvider.infrastructure.serviceBus() process PublishCommentsRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = model.mergeRequestInfo.id,
+            draftCommentIds = listOf(comment.id)
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
         }
         requestFetchComments()
     }

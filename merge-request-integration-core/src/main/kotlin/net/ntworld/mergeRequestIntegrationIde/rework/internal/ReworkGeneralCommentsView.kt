@@ -88,6 +88,10 @@ class ReworkGeneralCommentsView(
             myReworkRequester.requestEditComment(providerData, comment, content)
         }
 
+        override fun onPublishDraftCommentRequested(comment: Comment) {
+            myReworkRequester.requestPublishComment(providerData, comment)
+        }
+
         override fun onDeleteCommentRequested(comment: Comment) {
             myReworkRequester.requestDeleteComment(providerData, comment)
         }

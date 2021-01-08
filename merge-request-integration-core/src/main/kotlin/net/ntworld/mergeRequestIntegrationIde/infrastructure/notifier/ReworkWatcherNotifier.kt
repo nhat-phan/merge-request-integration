@@ -16,6 +16,8 @@ interface ReworkWatcherNotifier {
 
     fun changeDisplayResolvedComments(providerData: ProviderData, value: Boolean)
 
+    fun changeOnlyShowDraftComments(providerData: ProviderData, value: Boolean)
+
     fun commentTreeNodeSelected(providerData: ProviderData, node: Node, type: CommentTreeView.TreeSelectType)
 
     fun openCreateGeneralCommentForm(providerData: ProviderData)
@@ -25,6 +27,8 @@ interface ReworkWatcherNotifier {
     fun requestCreateComment(providerData: ProviderData, content: String, position: GutterPosition?, isDraft: Boolean)
 
     fun requestEditComment(providerData: ProviderData, comment: Comment, content: String)
+
+    fun requestPublishComment(providerData: ProviderData, comment: Comment)
 
     fun requestDeleteComment(providerData: ProviderData, comment: Comment)
 

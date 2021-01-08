@@ -4,9 +4,11 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.SimpleTextAttributes
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.util.TextChoiceUtil
 
 class FileNode(
-    val path: String
+    val path: String,
+    private val draftCount: Int
 ) : AbstractNode() {
     override fun updatePresentation(
         projectServiceProvider: ProjectServiceProvider,
@@ -22,6 +24,10 @@ class FileNode(
     override fun updatePresentation(presentation: PresentationData) {
         val fileName = findFileName(path)
         presentation.addText(fileName, SimpleTextAttributes.REGULAR_ATTRIBUTES)
+
+        if (draftCount > 0) {
+            presentation.addText(" · " + TextChoiceUtil.draftComment(draftCount), SimpleTextAttributes.GRAYED_ATTRIBUTES)
+        }
 
         if (fileName != path) {
             presentation.addText(" · $path", SimpleTextAttributes.GRAYED_ATTRIBUTES)

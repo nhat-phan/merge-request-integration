@@ -72,6 +72,10 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
                 dispatcher.multicaster.onCreateCommentRequested(content, position, logicalLine, side, isDraft)
             }
         }
+
+        override fun onPublishDraftCommentRequested(comment: Comment) {
+            dispatcher.multicaster.onPublishDraftCommentRequested(comment)
+        }
     }
 
     protected val myGutterIconRendererActionListener = object : GutterIconRendererActionListener {
@@ -255,6 +259,9 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
     }
 
     protected fun findChangeType(editor: EditorEx, logicalLine: Int): DiffView.ChangeType {
+        if (editor.isDisposed) {
+            return DiffView.ChangeType.UNKNOWN
+        }
         val guessChangeTypeByColorFunction = makeGuessChangeTypeByColorFunction(editor)
         val highlighters = editor.markupModel.allHighlighters
         var type = DiffView.ChangeType.UNKNOWN

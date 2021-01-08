@@ -29,6 +29,8 @@ interface GroupComponent : Component, Disposable {
 
     fun editEditorDestroyed(comment: Comment, editor: EditorComponent)
 
+    fun publishDraftComment(comment: Comment)
+
     fun addListener(listener: EventListener)
 
     fun hideMoveToDialogButtons()
@@ -47,5 +49,7 @@ interface GroupComponent : Component, Disposable {
         fun onReplyCommentRequested(comment: Comment, content: String)
 
         fun onEditCommentRequested(comment: Comment, content: String)
+
+        fun onPublishDraftCommentRequested(comment: Comment)
     }
 }

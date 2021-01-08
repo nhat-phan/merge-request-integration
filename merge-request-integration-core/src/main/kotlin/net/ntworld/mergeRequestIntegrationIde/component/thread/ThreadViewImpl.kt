@@ -157,6 +157,10 @@ class ThreadViewImpl(
         override fun onEditCommentRequested(comment: Comment, content: String) {
             dispatcher.multicaster.onEditCommentRequested(comment, content)
         }
+
+        override fun onPublishDraftCommentRequested(comment: Comment) {
+            dispatcher.multicaster.onPublishDraftCommentRequested(comment)
+        }
     }
 
     init {

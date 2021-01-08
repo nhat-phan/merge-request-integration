@@ -203,6 +203,10 @@ class GitlabCommentApi(
         throw Exception("Not implemented in GitlabCommentApi, see DraftCommentApi")
     }
 
+    override fun publishDraftComments(project: Project, mergeRequestId: String, commentIds: List<String>) {
+        throw Exception("Not implemented in GitlabCommentApi, see DraftCommentApi")
+    }
+
     private fun findProjectFullPath(project: Project): String {
         val url = project.url.replace(credentials.url, "")
         return if (url.startsWith("/")) url.substring(1) else url

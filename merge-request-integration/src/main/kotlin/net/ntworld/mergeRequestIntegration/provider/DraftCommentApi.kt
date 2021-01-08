@@ -63,6 +63,25 @@ class DraftCommentApi(private val api: CommentApi, private val storage: DraftCom
     }
 
     override fun publishAllDraftComments(project: Project, mergeRequestId: String) {
+        val comments = storage.getAll(project, mergeRequestId)
+        for (comment in comments) {
+            publishDraftComment(project, mergeRequestId, comment)
+        }
+    }
 
+    override fun publishDraftComments(project: Project, mergeRequestId: String, commentIds: List<String>) {
+        for (commentId in commentIds) {
+            val comment = storage.findById(project, mergeRequestId, commentId)
+            if (null !== comment) {
+                publishDraftComment(project, mergeRequestId, comment)
+            }
+        }
+    }
+
+    private fun publishDraftComment(project: Project, mergeRequestId: String, comment: Comment) {
+        if (comment.isDraft) {
+            api.create(project, mergeRequestId, comment.body, comment.position, false)
+            storage.delete(project, mergeRequestId, comment)
+        }
     }
 }

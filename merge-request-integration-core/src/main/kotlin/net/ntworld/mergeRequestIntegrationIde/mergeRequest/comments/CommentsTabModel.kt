@@ -17,6 +17,8 @@ interface CommentsTabModel : Model<CommentsTabModel.DataListener>, Disposable {
 
     var displayResolvedComments: Boolean
 
+    var onlyShowDraftComments: Boolean
+
     interface DataListener : EventListener {
         fun onMergeRequestInfoChanged()
 

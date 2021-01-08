@@ -48,6 +48,7 @@ class CommentComponentImpl(
     private val myNameSeparatorLabel = Label("·")
     private var myUsePrettyTime: Boolean = true
 
+    private var isPublishingDraft: Boolean = false
     private var myEditEditor: EditorComponent? = null
     private val myWebView = TipUIUtil.createBrowser() as TipUIUtil.Browser
     private val myHtmlTemplate = CommentComponentImpl::class.java.getResource(
@@ -266,11 +267,20 @@ class CommentComponentImpl(
         "Draft, click to publish this comment", "This is a draft comment, click to publish", null
     ) {
         override fun actionPerformed(e: AnActionEvent) {
-            // TODO: publish a comment
+            if (self.isPublishingDraft) {
+                return
+            }
+            self.isPublishingDraft = true
+            self.groupComponent.publishDraftComment(self.comment)
         }
 
         override fun update(e: AnActionEvent) {
             e.presentation.isVisible = self.comment.isDraft
+            if (self.comment.isDraft && self.isPublishingDraft) {
+                e.presentation.text = "Publishing..."
+            } else {
+                e.presentation.text = "Draft, click to publish this comment"
+            }
         }
 
         override fun useSmallerFontForTextInToolbar(): Boolean = false

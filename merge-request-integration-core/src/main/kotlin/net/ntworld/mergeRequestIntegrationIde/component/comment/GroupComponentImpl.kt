@@ -173,6 +173,10 @@ class GroupComponentImpl(
         dispatcher.multicaster.onResized()
     }
 
+    override fun publishDraftComment(comment: Comment) {
+        dispatcher.multicaster.onPublishDraftCommentRequested(comment)
+    }
+
     override fun addListener(listener: GroupComponent.EventListener) = dispatcher.addListener(listener)
 
     override fun hideMoveToDialogButtons() {

@@ -268,6 +268,10 @@ class ReworkEditorControllerImpl(
             self.resetEditorOnLine(logicalLine, null)
         }
 
+        override fun onPublishDraftCommentRequested(comment: Comment) {
+            self.myReworkRequester.requestPublishComment(self.providerData, comment)
+        }
+
         override fun onDeleteCommentRequested(comment: Comment) {
             self.myReworkRequester.requestDeleteComment(self.providerData, comment)
         }

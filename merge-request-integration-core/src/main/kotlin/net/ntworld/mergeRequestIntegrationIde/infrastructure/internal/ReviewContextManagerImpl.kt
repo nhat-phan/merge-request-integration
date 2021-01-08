@@ -68,6 +68,15 @@ class ReviewContextManagerImpl(
         myDoingCodeReviewContext = keyOf(providerId, mergeRequestId)
     }
 
+    override fun getDraftCommentsCount(providerId: String, mergeRequestId: String): Int {
+        val key = keyOf(providerId, mergeRequestId)
+        val context = myContexts[key]
+        if (null !== context) {
+            return context.comments.filter { it.isDraft }.count()
+        }
+        return 0
+    }
+
     override fun updateComments(providerId: String, mergeRequestId: String, comments: List<Comment>) {
         val key = keyOf(providerId, mergeRequestId)
         val context = myContexts[key]
