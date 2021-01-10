@@ -19,6 +19,7 @@ class UnifiedDiffView(
     override val viewer: UnifiedDiffViewer,
     private val change: Change
 ) : AbstractDiffView<UnifiedDiffViewer>(projectServiceProvider, viewer) {
+    private var myGutterIconsCreated: Boolean = false
     private val myLeftLineNumberConverter by lazy {
         projectServiceProvider.intellijIdeApi.findLeftLineNumberConverter(viewer.editor)
     }
@@ -63,6 +64,9 @@ class UnifiedDiffView(
     }
 
     override fun createGutterIcons() {
+        if (myGutterIconsCreated) {
+            return
+        }
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             val left = myLeftLineNumberConverter.execute(logicalLine)
             val right = myRightLineNumberConverter.execute(logicalLine)
@@ -82,6 +86,7 @@ class UnifiedDiffView(
                 )
             )
         }
+        myGutterIconsCreated = true
     }
 
     private fun findGutterIconRenderer(visibleLine: Int, side: Side, invoker: ((Int, GutterIconRenderer) -> Unit)) {

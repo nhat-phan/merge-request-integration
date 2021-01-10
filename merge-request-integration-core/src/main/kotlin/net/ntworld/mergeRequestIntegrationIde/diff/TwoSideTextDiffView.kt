@@ -19,6 +19,7 @@ class TwoSideTextDiffView(
     override val viewer: TwosideTextDiffViewer,
     private val change: Change
 ) : AbstractDiffView<TwosideTextDiffViewer>(projectServiceProvider, viewer) {
+    private var myGutterIconsCreated: Boolean = false
 
     override fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int {
         return visibleLine - 1
@@ -58,6 +59,10 @@ class TwoSideTextDiffView(
     }
 
     override fun createGutterIcons() {
+        if (myGutterIconsCreated) {
+            return
+        }
+
         for (logicalLine in 0 until viewer.editor1.document.lineCount) {
             registerGutterIconRenderer(
                 GutterIconRendererFactory.makeGutterIconRenderer(
@@ -84,6 +89,8 @@ class TwoSideTextDiffView(
                 )
             )
         }
+
+        myGutterIconsCreated = true
     }
 
     override fun updateComments(visibleLine: Int, side: Side, comments: List<Comment>) {

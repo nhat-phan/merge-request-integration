@@ -20,6 +20,7 @@ class SimpleOneSideDiffView(
     private val change: Change,
     private val side: Side
 ) : AbstractDiffView<SimpleOnesideDiffViewer>(projectServiceProvider, viewer) {
+    private var myGutterIconsCreated: Boolean = false
 
     override fun convertVisibleLineToLogicalLine(visibleLine: Int, side: Side): Int {
         return visibleLine - 1
@@ -50,6 +51,9 @@ class SimpleOneSideDiffView(
     }
 
     override fun createGutterIcons() {
+        if (myGutterIconsCreated) {
+            return
+        }
         for (logicalLine in 0 until viewer.editor.document.lineCount) {
             registerGutterIconRenderer(GutterIconRendererFactory.makeGutterIconRenderer(
                 viewer.editor.markupModel.addLineHighlighter(logicalLine, HighlighterLayer.LAST, null),
@@ -61,6 +65,7 @@ class SimpleOneSideDiffView(
                 actionListener = myGutterIconRendererActionListener
             ))
         }
+        myGutterIconsCreated = true
     }
 
     override fun updateComments(visibleLine: Int, side: Side, comments: List<Comment>) {

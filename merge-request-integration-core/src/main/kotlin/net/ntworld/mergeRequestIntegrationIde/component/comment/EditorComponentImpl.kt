@@ -8,7 +8,6 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.util.EventDispatcher
 import net.miginfocom.swing.MigLayout
-import net.ntworld.mergeRequestIntegrationIde.ALLOW_DRAFT_COMMENTS
 import net.ntworld.mergeRequestIntegrationIde.ui.util.CustomSimpleToolWindowPanel
 import net.ntworld.mergeRequestIntegrationIde.util.FileTypeUtil
 import java.awt.event.ComponentAdapter
@@ -204,10 +203,8 @@ class EditorComponentImpl(
         val panel = JPanel(MigLayout("ins 0, fill", "15[left]push[right]5", "center"))
 
         val leftActionGroup = DefaultActionGroup()
-        if (ALLOW_DRAFT_COMMENTS) {
-            leftActionGroup.add(myStartAReviewAction)
-            leftActionGroup.addSeparator()
-        }
+        leftActionGroup.add(myStartAReviewAction)
+        leftActionGroup.addSeparator()
         leftActionGroup.add(myAddCommentNowAction)
         if (showCancelAction) {
             leftActionGroup.addSeparator()
