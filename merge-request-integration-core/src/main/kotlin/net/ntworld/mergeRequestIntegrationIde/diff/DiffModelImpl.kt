@@ -17,7 +17,8 @@ class DiffModelImpl(
     private val projectServiceProvider: ProjectServiceProvider,
     override val reviewContext: ReviewContext,
     override val change: Change,
-    override var displayResolvedComments: Boolean
+    override var displayResolvedComments: Boolean,
+    override var onlyShowDraftComments: Boolean
 ) : AbstractModel<DiffModel.DataListener>(), DiffModel {
     override val dispatcher = EventDispatcher.create(DiffModel.DataListener::class.java)
     private val commentFilterOnBeforeSide: ((ContentRevision, Comment) -> Boolean) = { revision, comment ->
@@ -61,6 +62,7 @@ class DiffModelImpl(
             }
             buildCommentsOnBeforeSide(comments)
             buildCommentsOnAfterSide(comments)
+            buildDraftComments(comments)
             dispatcher.multicaster.onCommentsUpdated(DataChangedSource.NOTIFIER)
         }
     }
@@ -71,6 +73,8 @@ class DiffModelImpl(
         get() = reviewContext.diffReference
     override val commits
         get() = reviewContext.commits
+
+    override val draftComments = mutableListOf<Comment>()
 
     override var commentsOnBeforeSide = mutableListOf<CommentPoint>()
         private set
@@ -91,8 +95,15 @@ class DiffModelImpl(
         commentsOnAfterSide.clear()
     }
 
-    override fun rebuildComments(showResolved: Boolean) {
+    override fun rebuildCommentsWhenShowResolvedChanged(showResolved: Boolean) {
         displayResolvedComments = showResolved
+        buildCommentsOnBeforeSide(null)
+        buildCommentsOnAfterSide(null)
+        dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
+    }
+
+    override fun rebuildCommentsWhenOnlyShowDraftChanged(onlyShowDraft: Boolean) {
+        onlyShowDraftComments = onlyShowDraft
         buildCommentsOnBeforeSide(null)
         buildCommentsOnAfterSide(null)
         dispatcher.multicaster.onCommentsUpdated(DataChangedSource.UI)
@@ -114,15 +125,23 @@ class DiffModelImpl(
 
         val list = if (null !== comments) {
             comments.filter {
-                if (!displayResolvedComments && it.resolved) {
-                    false
+                if (onlyShowDraftComments) {
+                    it.isDraft
                 } else {
-                    filter.invoke(revision, it)
+                    if (!displayResolvedComments && it.resolved) {
+                        false
+                    } else {
+                        filter.invoke(revision, it)
+                    }
                 }
             }
         } else {
             reviewContext.getCommentsByPath(revision.file.path).filter {
-                displayResolvedComments || !it.resolved
+                if (onlyShowDraftComments) {
+                    it.isDraft
+                } else {
+                    displayResolvedComments || !it.resolved
+                }
             }
         }
         for (comment in list) {
@@ -135,6 +154,12 @@ class DiffModelImpl(
                 continue
             }
         }
+    }
+
+    private fun buildDraftComments(comments: List<Comment>) {
+        draftComments.clear()
+        val items = comments.filter { it.isDraft }
+        draftComments.addAll(items)
     }
 
     private fun buildCommentsOnBeforeSide(comments: List<Comment>?) = buildCommentPoints(

@@ -321,7 +321,7 @@ class CommentComponentImpl(
     }
 
     private class MyEditAction(private val self: CommentComponentImpl): AnAction(
-        "Edit comment", "Edit comment", Icons.Edit
+        "Edit comment", "Edit comment", AllIcons.Actions.Edit
     ) {
         override fun actionPerformed(e: AnActionEvent) {
             self.hideWebViewAndShowEditEditor()

@@ -186,6 +186,22 @@ internal class DiffPresenterImpl(
         view.resetEditorOnLine(logicalLine, side, null)
     }
 
+    override fun publishAllDraftComments() {
+        val draftCommentIds = model.draftComments.filter { it.isDraft } .map { it.id }
+        projectServiceProvider.infrastructure.serviceBus() process PublishCommentsRequest.make(
+            providerId = model.providerData.id,
+            mergeRequestId = model.mergeRequestInfo.id,
+            draftCommentIds = draftCommentIds
+        ) ifError {
+            projectServiceProvider.notify(
+                "There was an error from server. \n\n ${it.message}",
+                NotificationType.ERROR
+            )
+            throw ProviderException(it)
+        }
+        fetchAndUpdateComments()
+    }
+
     override fun onPublishDraftCommentRequested(comment: Comment) {
         projectServiceProvider.infrastructure.serviceBus() process PublishCommentsRequest.make(
             providerId = model.providerData.id,

@@ -47,6 +47,10 @@ class GutterIconRendererImpl(
                 icon = Icons.Gutter.WritingComment
                 desc = "Toggle comment thread & continue writing your comment"
             }
+            GutterState.HAS_DRAFT -> {
+                icon = Icons.Gutter.HasDraft
+                desc = "Toggle comment thread to see draft comment"
+            }
         }
     }
 

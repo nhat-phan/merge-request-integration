@@ -6,6 +6,7 @@ import com.intellij.diff.FrameDiffTool
 import com.intellij.diff.requests.DiffRequest
 import com.intellij.diff.tools.util.base.DiffViewerBase
 import com.intellij.diff.util.DiffUserDataKeys
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project as IdeaProject
@@ -15,6 +16,7 @@ import net.ntworld.mergeRequestIntegrationIde.infrastructure.ApplicationServiceP
 import net.ntworld.mergeRequestIntegrationIde.component.Icons
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ReviewContext
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
+import net.ntworld.mergeRequestIntegrationIde.util.TextChoiceUtil
 
 open class DiffExtensionBase(
     private val applicationServiceProvider: ApplicationServiceProvider
@@ -34,6 +36,13 @@ open class DiffExtensionBase(
                 MyToggleResolvedCommentsAction(
                     presenter,
                     false
+                ),
+                MyShowDraftCommentsOnlyAction(
+                    presenter,
+                    false
+                ),
+                MyPublishDraftCommentsAction(
+                    presenter
                 )
             )
         )
@@ -104,6 +113,46 @@ open class DiffExtensionBase(
         }
     }
 
+    private class MyPublishDraftCommentsAction(
+        private val presenter: DiffPresenter
+    ) : AnAction("Publish draft comments", "Publish all draft comments in this diff view", null) {
+        override fun actionPerformed(e: AnActionEvent) {
+            presenter.publishAllDraftComments()
+        }
+
+        override fun update(e: AnActionEvent) {
+            if (presenter.model.draftComments.isNotEmpty()) {
+                e.presentation.isVisible = true
+                e.presentation.text = "Publish " + TextChoiceUtil.draftComment(presenter.model.draftComments.count())
+            } else {
+                e.presentation.isVisible = false
+            }
+        }
+
+        override fun displayTextInToolbar() = true
+    }
+
+    private class MyShowDraftCommentsOnlyAction(
+        private val presenter: DiffPresenter,
+        initializedState: Boolean
+    ) : ToggleAction("Draft Comments Only", "Only show draft comments", Icons.Edit) {
+        private var myOnlyDraft = initializedState
+
+        override fun isSelected(e: AnActionEvent): Boolean {
+            return myOnlyDraft
+        }
+
+        override fun setSelected(e: AnActionEvent, state: Boolean) {
+            myOnlyDraft = state
+            presenter.model.rebuildCommentsWhenOnlyShowDraftChanged(myOnlyDraft)
+        }
+
+        override fun update(e: AnActionEvent) {
+            super.update(e)
+            e.presentation.isVisible = presenter.model.draftComments.isNotEmpty()
+        }
+    }
+
     private class MyToggleResolvedCommentsAction(
         private val presenter: DiffPresenter,
         initializedState: Boolean
@@ -116,7 +165,7 @@ open class DiffExtensionBase(
 
         override fun setSelected(e: AnActionEvent, state: Boolean) {
             myShown = state
-            presenter.model.rebuildComments(myShown)
+            presenter.model.rebuildCommentsWhenShowResolvedChanged(myShown)
         }
     }
 }

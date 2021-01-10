@@ -34,6 +34,7 @@ object Icons {
         val Comments = IconLoader.getIcon("/icons/gutter-comments.svg", this::class.java)
         val AddComment = IconLoader.getIcon("/icons/gutter-plus-small.svg", this::class.java)
         val WritingComment = IconLoader.getIcon("/icons/gutter-writing-comment.svg", this::class.java)
+        val HasDraft = IconLoader.getIcon("/icons/edit.svg", this::class.java)
     }
 
     object TreeNode {

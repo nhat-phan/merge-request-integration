@@ -24,13 +24,19 @@ interface DiffModel : Model<DiffModel.DataListener>, Disposable {
 
     val change: Change
 
+    val draftComments: List<Comment>
+
     val commentsOnBeforeSide: List<CommentPoint>
 
     val commentsOnAfterSide: List<CommentPoint>
 
     var displayResolvedComments: Boolean
 
-    fun rebuildComments(showResolved: Boolean)
+    var onlyShowDraftComments: Boolean
+
+    fun rebuildCommentsWhenShowResolvedChanged(showResolved: Boolean)
+
+    fun rebuildCommentsWhenOnlyShowDraftChanged(onlyShowDraft: Boolean)
 
     interface DataListener : EventListener {
         fun onCommentsUpdated(source: DataChangedSource)

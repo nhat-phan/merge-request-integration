@@ -141,7 +141,11 @@ class ReworkEditorControllerImpl(
         val state = if (comments.isEmpty()) {
             GutterState.NO_COMMENT
         } else {
-            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+            if (comments.filter { it.isDraft }.isNotEmpty()) {
+                GutterState.HAS_DRAFT
+            } else {
+                if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+            }
         }
 
         renderer.setState(state)

@@ -6,4 +6,6 @@ import net.ntworld.mergeRequestIntegrationIde.SimplePresenter
 interface DiffPresenter : SimplePresenter, Disposable {
     val model: DiffModel
     val view: DiffView<*>
+
+    fun publishAllDraftComments()
 }

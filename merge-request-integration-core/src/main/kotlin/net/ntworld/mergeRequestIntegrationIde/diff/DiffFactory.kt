@@ -52,6 +52,6 @@ object DiffFactory {
     }
 
     fun makeDiffModel(projectServiceProvider: ProjectServiceProvider, reviewContext: ReviewContext, change: Change): DiffModel? {
-        return DiffModelImpl(projectServiceProvider, reviewContext, change, false)
+        return DiffModelImpl(projectServiceProvider, reviewContext, change, false, onlyShowDraftComments = false)
     }
 }

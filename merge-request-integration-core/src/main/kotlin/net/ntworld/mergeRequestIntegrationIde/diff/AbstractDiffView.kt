@@ -47,12 +47,16 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
                 if (threadPresenter.model.comments.isEmpty()) {
                     renderer.setState(GutterState.NO_COMMENT)
                 } else {
-                    renderer.setState(
-                        if (threadPresenter.model.comments.size == 1)
-                            GutterState.THREAD_HAS_SINGLE_COMMENT
-                        else
-                            GutterState.THREAD_HAS_MULTI_COMMENTS
-                    )
+                    if (threadPresenter.model.comments.filter { it.isDraft }.isNotEmpty()) {
+                        renderer.setState(GutterState.HAS_DRAFT)
+                    } else {
+                        renderer.setState(
+                            if (threadPresenter.model.comments.size == 1)
+                                GutterState.THREAD_HAS_SINGLE_COMMENT
+                            else
+                                GutterState.THREAD_HAS_MULTI_COMMENTS
+                        )
+                    }
                 }
             }
         }
@@ -218,7 +222,11 @@ abstract class AbstractDiffView<V : DiffViewerBase>(
         val state = if (comments.isEmpty()) {
             GutterState.NO_COMMENT
         } else {
-            if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+            if (comments.filter { it.isDraft }.isNotEmpty()) {
+                GutterState.HAS_DRAFT
+            } else {
+                if (comments.size == 1) GutterState.THREAD_HAS_SINGLE_COMMENT else GutterState.THREAD_HAS_MULTI_COMMENTS
+            }
         }
 
         renderer.setState(state)
