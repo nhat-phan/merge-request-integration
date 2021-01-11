@@ -9,6 +9,7 @@ import com.intellij.ui.tabs.JBTabsPosition
 import com.intellij.vcs.log.Hash
 import com.intellij.vcs.log.impl.VcsLogManager
 import com.intellij.vcs.log.util.VcsLogUtil
+import git4idea.changes.GitChangeUtils
 import git4idea.repo.GitRepository
 import net.ntworld.mergeRequest.Commit
 import net.ntworld.mergeRequest.MergeRequest
@@ -107,27 +108,11 @@ object DisplayChangesService {
         log: VcsLogManager,
         commits: List<Commit>
     ) {
-        // TODO: Reduce repetition
-        val details = VcsLogUtil.getDetails(
-            log.dataManager.getLogProvider(repository.root),
-            repository.root,
-            commits.map { it.id }
-        )
-        if (details.isEmpty()) {
-            return
-        }
+        val changes = GitChangeUtils.getDiff(repository, mergeRequest.targetBranch, mergeRequest.sourceBranch, true);
 
-        if (details.size == 1) {
-            return displayChanges(
-                applicationServiceProvider, ideaProject,
-                providerData, mergeRequest, details.first().changes.toList()
-            )
+        if (changes != null) {
+            displayChanges(applicationServiceProvider, ideaProject, providerData, mergeRequest, changes.toList())
         }
-
-        val changes = VcsLogUtil.collectChanges(details) {
-            it.changes
-        }
-        displayChanges(applicationServiceProvider, ideaProject, providerData, mergeRequest, changes)
     }
 
     private fun displayChanges(

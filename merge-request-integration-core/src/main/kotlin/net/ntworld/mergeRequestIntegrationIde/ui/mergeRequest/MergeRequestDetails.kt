@@ -78,6 +78,8 @@ class MergeRequestDetails(
             ApplicationManager.getApplication().invokeLater {
                 setMergeRequest(mergeRequest)
             }
+
+            GetCommitsTask(projectServiceProvider, providerData, mergeRequest, myGetCommitsListener).start()
         }
     }
     private val myGetPipelinesListener = object : GetPipelinesTask.Listener {
@@ -102,12 +104,12 @@ class MergeRequestDetails(
             myCommitsTab.clear()
         }
 
-        override fun dataReceived(mergeRequestInfo: MergeRequestInfo, commits: List<Commit>) {
+        override fun dataReceived(mergeRequest: MergeRequest, commits: List<Commit>) {
             ApplicationManager.getApplication().invokeLater {
                 myToolbars.forEach {
-                    it.setCommits(mergeRequestInfo, commits)
+                    it.setCommits(mergeRequest, commits)
                 }
-                myCommitsTab.setCommits(providerData, mergeRequestInfo, commits)
+                myCommitsTab.setCommits(providerData, mergeRequest, commits)
                 if (commits.isEmpty()) {
                     myCommitsTabInfo.text = "Commits"
                 } else {
@@ -190,7 +192,6 @@ class MergeRequestDetails(
         }
         FindMergeRequestTask(projectServiceProvider, providerData, mergeRequestInfo, myFindMRListener).start()
         GetPipelinesTask(projectServiceProvider, providerData, mergeRequestInfo, myGetPipelinesListener).start()
-        GetCommitsTask(projectServiceProvider, providerData, mergeRequestInfo, myGetCommitsListener).start()
         if (providerData.hasApprovalFeature) {
             FindApprovalTask(projectServiceProvider, providerData, mergeRequestInfo, myFindApprovalListener).start()
         }

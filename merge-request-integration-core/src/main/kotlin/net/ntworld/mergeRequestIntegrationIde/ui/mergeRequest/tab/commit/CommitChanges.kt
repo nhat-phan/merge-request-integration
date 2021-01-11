@@ -76,7 +76,7 @@ class CommitChanges(private val projectServiceProvider: ProjectServiceProvider) 
         myMergeRequestInfo = mergeRequestInfo
         thread {
             myTree.isVisible = false
-            val changes = projectServiceProvider.repositoryFile.findChanges(providerData, commits.map { it.id })
+            val changes = projectServiceProvider.repositoryFile.findChanges(providerData, mergeRequestInfo, commits.map { it.id })
             projectServiceProvider.reviewContextManager.updateChanges(providerData.id, mergeRequestInfo.id, changes)
             projectServiceProvider.reviewContextManager.updateReviewingChanges(providerData.id, mergeRequestInfo.id, changes)
             ApplicationManager.getApplication().invokeLater {
@@ -95,7 +95,7 @@ class CommitChanges(private val projectServiceProvider: ProjectServiceProvider) 
         myMergeRequestInfo = mergeRequestInfo
         thread {
             myTree.isVisible = false
-            val partialChanges = projectServiceProvider.repositoryFile.findChanges(providerData, selectedCommits.map { it.id })
+            val partialChanges = projectServiceProvider.repositoryFile.findChanges(providerData, mergeRequestInfo, selectedCommits.map { it.id })
             projectServiceProvider.reviewContextManager.updateReviewingChanges(
                 providerData.id, mergeRequestInfo.id, partialChanges
             )

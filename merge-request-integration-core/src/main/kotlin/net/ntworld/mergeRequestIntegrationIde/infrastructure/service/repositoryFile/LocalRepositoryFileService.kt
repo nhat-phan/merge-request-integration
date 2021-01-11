@@ -10,9 +10,13 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.vcs.log.impl.VcsLogContentUtil
 import com.intellij.vcs.log.util.VcsLogUtil
+import git4idea.changes.GitChangeUtils
+import net.ntworld.mergeRequest.MergeRequest
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.ProjectServiceProvider
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
+import net.ntworld.mergeRequestIntegrationIde.ui.service.DisplayChangesService
 import net.ntworld.mergeRequestIntegrationIde.util.RepositoryUtil
 import javax.swing.Icon
 
@@ -21,7 +25,7 @@ class LocalRepositoryFileService(
 ) : RepositoryFileService {
     private val myLogger = Logger.getInstance(this.javaClass)
 
-    override fun findChanges(providerData: ProviderData, hashes: List<String>): List<Change> {
+    override fun findChanges(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, hashes: List<String>): List<Change> {
         try {
             val repository = RepositoryUtil.findRepository(projectServiceProvider, providerData)
             if (null === repository) {
@@ -32,12 +36,17 @@ class LocalRepositoryFileService(
                 return listOf()
             }
 
-            val details = VcsLogUtil.getDetails(
-                log.dataManager.getLogProvider(repository.root),
-                repository.root,
-                hashes
-            )
-            return VcsLogUtil.collectChanges(details) { it.changes }
+            if (mergeRequestInfo !is MergeRequest) {
+                return listOf();
+            }
+
+            val changes = GitChangeUtils.getDiff(repository, mergeRequestInfo.targetBranch, mergeRequestInfo.sourceBranch, true);
+
+            if (changes == null) {
+                return listOf();
+            }
+
+            return changes.toList();
         } catch (exception: Exception) {
             myLogger.info("Cannot findChanges for ${providerData.repository}, hashes: ${hashes.joinToString(",")}")
             throw exception

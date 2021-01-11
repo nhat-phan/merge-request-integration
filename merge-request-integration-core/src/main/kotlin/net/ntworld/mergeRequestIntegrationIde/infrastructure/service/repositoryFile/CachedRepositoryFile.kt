@@ -2,6 +2,7 @@ package net.ntworld.mergeRequestIntegrationIde.infrastructure.service.repository
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.vcs.changes.Change
+import net.ntworld.mergeRequest.MergeRequestInfo
 import net.ntworld.mergeRequest.ProviderData
 import net.ntworld.mergeRequest.api.Cache
 import net.ntworld.mergeRequestIntegrationIde.infrastructure.service.RepositoryFileService
@@ -13,11 +14,11 @@ class CachedRepositoryFile(
 ) : RepositoryFileDecorator(service) {
     private val myLogger = Logger.getInstance(this.javaClass)
 
-    override fun findChanges(providerData: ProviderData, hashes: List<String>): List<Change> {
+    override fun findChanges(providerData: ProviderData, mergeRequestInfo: MergeRequestInfo, hashes: List<String>): List<Change> {
         val key = "${providerData.id}:${hashes.joinToString(",")}"
         return cache.getOrRun(key) {
             myLogger.info("Cache $key not found")
-            val result = super.findChanges(providerData, hashes)
+            val result = super.findChanges(providerData, mergeRequestInfo, hashes)
 
             cache.set(key, result, FIND_CHANGES_TTL)
             result
