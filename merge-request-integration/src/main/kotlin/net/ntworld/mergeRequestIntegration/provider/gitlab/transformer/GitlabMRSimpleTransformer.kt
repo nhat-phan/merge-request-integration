@@ -15,7 +15,7 @@ object GitlabMRSimpleTransformer :
         provider = Gitlab.id,
         projectId = input.projectId.toString(),
         title = input.title,
-        description = input.description,
+        description = input.description ?: "",
         url = input.webUrl,
         state = when (input.state) {
             MERGE_REQUEST_STATE_OPENED -> MergeRequestState.OPENED
